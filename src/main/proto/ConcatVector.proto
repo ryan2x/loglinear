@@ -1,0 +1,12 @@
+package io.github.keenon;
+
+option java_package = "io.github.keenon";
+option java_outer_classname = "ConcatVectorProto";
+
+message ConcatVector {
+    message Component {
+        required bool sparse = 1;
+        repeated double data = 2;
+    }
+    repeated Component component = 1;
+}

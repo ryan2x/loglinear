@@ -1,0 +1,11 @@
+package io.github.keenon;
+
+option java_package = "io.github.keenon";
+option java_outer_classname = "ConcatVectorTableProto";
+
+import "ConcatVector.proto";
+
+message ConcatVectorTable {
+    repeated int32 dimensionSize = 1;
+    repeated ConcatVector factorTable = 2;
+}
