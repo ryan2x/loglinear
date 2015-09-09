@@ -1,6 +1,6 @@
 package io.github.keenon;
 
-option java_package = "io.github.keenon";
+option java_package = "io.github.keenon.loglinear";
 option java_outer_classname = "GraphicalModelProto";
 
 import "ConcatVectorTable.proto";
