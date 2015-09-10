@@ -1,4 +1,6 @@
 #loglinear
 by Keenon Werling
 
-To appear in Stanford CoreNLP as the new log-linear model library.
+A standalone version of the Stanford CoreNLP log-linear model library.
+
+For documentation, see the "doc/" folder.
