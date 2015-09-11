@@ -145,14 +145,6 @@ public class CliqueTree {
         // Clean out everything that was in the cachedFactors map that's no longer in the model, so GC can get rid of
         // it.
 
-        Set<GraphicalModel.Factor> toRemove = new HashSet<>();
-        for (GraphicalModel.Factor f : cachedFactors.keySet()) {
-            if (!model.factors.contains(f)) {
-                toRemove.add(f);
-            }
-        }
-        for (GraphicalModel.Factor f : toRemove) cachedFactors.remove(f);
-
         for (GraphicalModel.Factor f : model.factors) {
             boolean allObserved = true;
             for (int n : f.neigborIndices) {

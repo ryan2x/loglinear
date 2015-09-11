@@ -1,10 +1,12 @@
 package com.github.keenon.loglinear;
 
+import com.github.keenon.loglinear.inference.CliqueTree;
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by keenon on 9/11/15.
@@ -80,30 +82,164 @@ public class GamePlayerBenchmark {
             }
         }
 
+        ConcatVector weights = new ConcatVector(numFeatures);
+        for (int i = 0; i < numFeatures; i++) {
+            double[] dense = new double[featureLength];
+            for (int j = 0; j < dense.length; j++) dense[j] = r.nextDouble();
+            weights.setDenseComponent(i, dense);
+        }
+
         //////////////////////////////////////////////////////////////
         // Actually perform gameplay-like random mutations
         //////////////////////////////////////////////////////////////
 
         System.err.println("Warming up the JIT...");
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             System.err.println(i);
-            gameplay(r, trainingSet[i], humanFeatureVectors);
+            gameplay(r, trainingSet[i], weights, humanFeatureVectors);
         }
 
         System.err.println("Timing actual run...");
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             System.err.println(i);
-            gameplay(r, trainingSet[i], humanFeatureVectors);
+            gameplay(r, trainingSet[i], weights, humanFeatureVectors);
         }
         long duration = System.currentTimeMillis() - start;
 
         System.err.println("Duration: "+duration);
     }
 
-    private static void gameplay(Random r, GraphicalModel model, ConcatVector[] humanFeatureVectors) {
-        // TODO: implement something like TD-learning here
+    //////////////////////////////////////////////////////////////
+    // This is an implementation of something like MCTS, trying to take advantage of the general speed gains due to fast
+    // CliqueTree caching of dot products. It doesn't actually do any clever selection, preferring to select observations
+    // at random.
+    //////////////////////////////////////////////////////////////
+
+    private static void gameplay(Random r, GraphicalModel model, ConcatVector weights, ConcatVector[] humanFeatureVectors) {
+        List<Integer> variablesList = new ArrayList<>();
+        List<Integer> variableSizesList = new ArrayList<>();
+        for (GraphicalModel.Factor f : model.factors) {
+            for (int i = 0; i < f.neigborIndices.length; i++) {
+                int j = f.neigborIndices[i];
+                if (!variablesList.contains(j)) {
+                    variablesList.add(j);
+                    variableSizesList.add(f.featuresTable.getDimensions()[i]);
+                }
+            }
+        }
+
+        int[] variables = variablesList.stream().mapToInt(i->i).toArray();
+        int[] variableSizes = variableSizesList.stream().mapToInt(i->i).toArray();
+
+        List<SampleState> childrenOfRoot = new ArrayList<>();
+
+        CliqueTree tree = new CliqueTree(model, weights);
+
+        int initialFactors = model.factors.size();
+
+        // Run some "samples"
+        long start = System.currentTimeMillis();
+        long marginalsTime = 0;
+        for (int i = 0; i < 20; i++) {
+            System.err.println("\tTaking sample "+i);
+            Stack<SampleState> stack = new Stack<>();
+            SampleState state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, childrenOfRoot, humanFeatureVectors);
+            // Each "sample" is 10 moves deep
+            for (int j = 0; j < 10; j++) {
+                System.err.println("\t\tFrame "+j);
+                state.push(model);
+                assert(model.factors.size() == initialFactors+j+1);
+
+                ///////////////////////////////////////////////////////////
+                // This is the thing we're really benchmarking
+                ///////////////////////////////////////////////////////////
+                long s = System.currentTimeMillis();
+                tree.calculateMarginals();
+                marginalsTime += System.currentTimeMillis() - s;
+                System.err.println("\t\t\t"+(System.currentTimeMillis() - s)+" ms");
+
+                stack.push(state);
+                state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, state.children, humanFeatureVectors);
+            }
+
+            while (!stack.empty()) {
+                stack.pop().pop(model);
+            }
+            assert(model.factors.size() == initialFactors);
+        }
+
+        System.err.println("Marginals time: "+marginalsTime+" ms");
+        System.err.println("Avg time per marginal: "+(marginalsTime / 200)+" ms");
+        System.err.println("Total time: "+(System.currentTimeMillis() - start));
+    }
+
+    private static SampleState selectOrCreateChildAtRandom(Random r,
+                                                           GraphicalModel model,
+                                                           int[] variables,
+                                                           int[] variableSizes,
+                                                           List<SampleState> children,
+                                                           ConcatVector[] humanFeatureVectors) {
+        int i = r.nextInt(variables.length);
+        int variable = variables[i];
+        int observation = r.nextInt(variableSizes[i]);
+
+        for (SampleState s : children) {
+            if (s.variable == variable && s.observation == observation) return s;
+        }
+
+        int humanObservationVariable = 0;
+        for (GraphicalModel.Factor f : model.factors) {
+            for (int j : f.neigborIndices) {
+                if (j >= humanObservationVariable) humanObservationVariable = j+1;
+            }
+        }
+
+        GraphicalModel.Factor f = model.addFactor(new int[]{variable, humanObservationVariable}, new int[]{variableSizes[i], variableSizes[i]}, (assn) -> {
+            int j = (assn[0]*variableSizes[i])+assn[1];
+            return humanFeatureVectors[j];
+        });
+
+        SampleState newState = new SampleState(f, variable, observation);
+        children.add(newState);
+        return newState;
+    }
+
+    public static class SampleState {
+        public GraphicalModel.Factor addedFactor;
+        public int variable;
+        public int observation;
+        public List<SampleState> children = new ArrayList<>();
+
+        public SampleState(GraphicalModel.Factor addedFactor, int variable, int observation) {
+            this.addedFactor = addedFactor;
+            this.variable = variable;
+            this.observation = observation;
+        }
+
+        /**
+         * This applies this SampleState to the model. The name comes from an analogy to a stack. If we take a sample
+         * path, involving a number of steps through the model, we push() each SampleState onto the model one at a time,
+         * then when we return from the sample we can pop() each SampleState off the model, and be left with our
+         * original model state.
+         *
+         * @param model the model to push this SampleState onto
+         */
+        public void push(GraphicalModel model) {
+            model.factors.add(addedFactor);
+            model.getVariableMetaDataByReference(variable).put(CliqueTree.VARIABLE_OBSERVED_VALUE, ""+observation);
+        }
+
+        /**
+         * See push() for an explanation.
+         *
+         * @param model the model to pop this SampleState from
+         */
+        public void pop(GraphicalModel model) {
+            model.factors.remove(addedFactor);
+            model.getVariableMetaDataByReference(variable).remove(CliqueTree.VARIABLE_OBSERVED_VALUE);
+        }
     }
 }
