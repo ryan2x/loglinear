@@ -110,7 +110,7 @@ public class CoNLLBenchmark {
     // GENERATING MODELS
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    private GraphicalModel generateSentenceModel(CoNLLSentence sentence, List<String> tags) {
+    public GraphicalModel generateSentenceModel(CoNLLSentence sentence, List<String> tags) {
         GraphicalModel model = new GraphicalModel();
 
         for (int i = 0; i < sentence.token.size(); i++) {
@@ -187,7 +187,7 @@ public class CoNLLBenchmark {
     // LOADING DATA FROM FILES
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static class CoNLLSentence {
+    public static class CoNLLSentence {
         public List<String> token = new ArrayList<>();
         public List<String> ner = new ArrayList<>();
 
@@ -197,7 +197,7 @@ public class CoNLLBenchmark {
         }
     }
 
-    private List<CoNLLSentence> getSentences(String filename) throws IOException {
+    public List<CoNLLSentence> getSentences(String filename) throws IOException {
         List<CoNLLSentence> sentences = new ArrayList<>();
         List<String> tokens = new ArrayList<>();
         List<String> ners = new ArrayList<>();
@@ -222,7 +222,7 @@ public class CoNLLBenchmark {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String,double[]> getEmbeddings(String cacheFilename, List<CoNLLSentence> sentences) throws IOException, ClassNotFoundException {
+    public Map<String,double[]> getEmbeddings(String cacheFilename, List<CoNLLSentence> sentences) throws IOException, ClassNotFoundException {
         File f = new File(cacheFilename);
         Map<String,double[]> trimmedSet;
 
@@ -256,7 +256,7 @@ public class CoNLLBenchmark {
         return trimmedSet;
     }
 
-    private Map<String,double[]> loadEmbeddingsFromFile(String filename) throws IOException {
+    public Map<String,double[]> loadEmbeddingsFromFile(String filename) throws IOException {
         Map<String, double[]> embeddings = new HashMap<>();
 
         BufferedReader br = new BufferedReader(new FileReader(filename));

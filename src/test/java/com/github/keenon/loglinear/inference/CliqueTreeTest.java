@@ -13,6 +13,7 @@ import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -31,6 +32,96 @@ public class CliqueTreeTest {
     public void testCalculateMarginals(@ForAll(sampleSize = 50) @From(GraphicalModelGenerator.class) GraphicalModel model,
                                        @ForAll(sampleSize = 2) @From(WeightsGenerator.class) ConcatVector weights) throws Exception {
         CliqueTree inference = new CliqueTree(model, weights);
+
+        // This is the basic check that inference works when you first construct the model
+        checkMarginalsAgainstBruteForce(model, weights, inference);
+        // Now we go through several random mutations to the model, and check that everything is still consistent
+        Random r = new Random();
+        for (int i = 0; i < 10; i++) {
+            randomlyMutateGraphicalModel(model, r);
+            checkMarginalsAgainstBruteForce(model, weights, inference);
+        }
+    }
+
+    private void randomlyMutateGraphicalModel(GraphicalModel model, Random r) {
+        if (r.nextBoolean() && model.factors.size() > 1) {
+            // Remove one factor at random
+            model.factors.remove(model.factors.toArray(new GraphicalModel.Factor[model.factors.size()])[r.nextInt(model.factors.size())]);
+        }
+        else {
+            // Add a simple binary factor, attaching a variable we haven't touched yet, but do observe, to an
+            // existing variable. This represents the human observation operation in LENSE
+            int maxVar = 0;
+            int attachVar = -1;
+            int attachVarSize = 0;
+            for (GraphicalModel.Factor f : model.factors) {
+                for (int j = 0; j < f.neigborIndices.length; j++) {
+                    int k = f.neigborIndices[j];
+                    if (k > maxVar) {
+                        maxVar = k;
+                    }
+                    if (r.nextDouble() > 0.3 || attachVar == -1) {
+                        attachVar = k;
+                        attachVarSize = f.featuresTable.getDimensions()[j];
+                    }
+                }
+            }
+
+            int newVar = maxVar + 1;
+            int newVarSize = 1 + r.nextInt(2);
+
+            if (maxVar >= 8) {
+                boolean[] seenVariables = new boolean[maxVar + 1];
+                for (GraphicalModel.Factor f : model.factors) {
+                    for (int n : f.neigborIndices) seenVariables[n] = true;
+                }
+                for (int j = 0; j < seenVariables.length; j++) {
+                    if (!seenVariables[j]) {
+                        newVar = j;
+                        break;
+                    }
+                }
+
+                // This means the model is already too gigantic to be tractable, so we don't add anything here
+                if (newVar == maxVar + 1) {
+                    return;
+                }
+            }
+
+            if (model.getVariableMetaDataByReference(newVar).containsKey(CliqueTree.VARIABLE_OBSERVED_VALUE)) {
+                int assignment = Integer.parseInt(model.getVariableMetaDataByReference(newVar).get(CliqueTree.VARIABLE_OBSERVED_VALUE));
+                if (assignment >= newVarSize) {
+                    newVarSize = assignment + 1;
+                }
+            }
+
+            GraphicalModel.Factor binary = model.addFactor(new int[]{newVar, attachVar}, new int[]{newVarSize, attachVarSize}, (assignment) -> {
+                ConcatVector v = new ConcatVector(CONCAT_VEC_COMPONENTS);
+                for (int j = 0; j < v.getNumberOfComponents(); j++) {
+                    if (r.nextBoolean()) {
+                        v.setSparseComponent(j, r.nextInt(CONCAT_VEC_COMPONENT_LENGTH), r.nextDouble());
+                    }
+                    else {
+                        double[] d = new double[CONCAT_VEC_COMPONENT_LENGTH];
+                        for (int k = 0; k < d.length; k++) {
+                            d[k] = r.nextDouble();
+                        }
+                        v.setDenseComponent(j, d);
+                    }
+                }
+                return v;
+            });
+
+            // "Cook" the randomly generated feature vector thunks, so they don't change as we run the system
+
+            for (int[] assignment : binary.featuresTable) {
+                ConcatVector randomlyGenerated = binary.featuresTable.getAssignmentValue(assignment).get();
+                binary.featuresTable.setAssignmentValue(assignment, () -> randomlyGenerated);
+            }
+        }
+    }
+
+    private void checkMarginalsAgainstBruteForce(GraphicalModel model, ConcatVector weights, CliqueTree inference) {
         CliqueTree.MarginalResult result = inference.calculateMarginals();
 
         double[][] marginals = result.marginals;
@@ -193,6 +284,17 @@ public class CliqueTreeTest {
                                  @ForAll(sampleSize = 2) @From(WeightsGenerator.class) ConcatVector weights) throws Exception {
         if (model.factors.size() == 0) return;
         CliqueTree inference = new CliqueTree(model, weights);
+        // This is the basic check that inference works when you first construct the model
+        checkMAPAgainstBruteForce(model, weights, inference);
+        // Now we go through several random mutations to the model, and check that everything is still consistent
+        Random r = new Random();
+        for (int i = 0; i < 10; i++) {
+            randomlyMutateGraphicalModel(model, r);
+            checkMAPAgainstBruteForce(model, weights, inference);
+        }
+    }
+
+    public void checkMAPAgainstBruteForce(GraphicalModel model, ConcatVector weights, CliqueTree inference) {
         int[] map = inference.calculateMAP();
 
         Set<TableFactor> tableFactors = model.factors.stream().map(factor -> new TableFactor(weights, factor)).collect(Collectors.toSet());
@@ -239,17 +341,21 @@ public class CliqueTreeTest {
             }
         }
 
+        int[] forcedAssignments = new int[largestVariableNum + 1];
         for (int i = 0; i < mapValueAssignment.length; i++) {
             if (model.getVariableMetaDataByReference(i).containsKey(CliqueTree.VARIABLE_OBSERVED_VALUE)) {
                 mapValueAssignment[i] = Integer.parseInt(model.getVariableMetaDataByReference(i).get(CliqueTree.VARIABLE_OBSERVED_VALUE));
+                forcedAssignments[i] = mapValueAssignment[i];
             }
         }
 
         if (!Arrays.equals(mapValueAssignment, map)) {
-            System.err.println("Vars: "+Arrays.toString(bruteForce.neighborIndices));
+            System.err.println("---");
+            System.err.println("Relevant variables: "+Arrays.toString(bruteForce.neighborIndices));
             System.err.println("Var Sizes: "+Arrays.toString(bruteForce.getDimensions()));
             System.err.println("MAP: "+Arrays.toString(map));
-            System.err.println("True map: "+Arrays.toString(mapValueAssignment));
+            System.err.println("Brute force map: "+Arrays.toString(mapValueAssignment));
+            System.err.println("Forced assignments: "+Arrays.toString(forcedAssignments));
         }
 
         for (int i : bruteForce.neighborIndices) {

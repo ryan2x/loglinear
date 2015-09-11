@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.util.Random;
 
 public class ConcatVectorBenchmark {
-    @Test
-    public void createAddDotSerialize() throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         long randomSeed = 10101L;
 
         // Create the templates we'll use for our truly random dense vectors benchmarks

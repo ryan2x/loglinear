@@ -26,11 +26,13 @@ public class CliqueTree {
      * and inference is required several times. Work is done lazily, so is left until actual inference is requested.
      *
      * @param model   the model to be computed over, subject to change in the future
-     * @param weights the weights to dot product with model features to get log-linear factors
+     * @param weights the weights to dot product with model features to get log-linear factors, is cloned internally so
+     *                that no changes to the weights vector will be reflected by the CliqueTree. If you want to change
+     *                the weights, you must create a new CliqueTree.
      */
     public CliqueTree(GraphicalModel model, ConcatVector weights) {
         this.model = model;
-        this.weights = weights;
+        this.weights = weights.deepClone();
     }
 
     /**
@@ -73,6 +75,11 @@ public class CliqueTree {
                     }
                 }
             }
+            // If there is no factor touching an observed variable, the resulting MAP won't reference the variable
+            // observation since message passing won't touch the variable index
+            if (model.getVariableMetaDataByReference(i).containsKey(VARIABLE_OBSERVED_VALUE)) {
+                result[i] = Integer.parseInt(model.getVariableMetaDataByReference(i).get(VARIABLE_OBSERVED_VALUE));
+            }
         }
         return result;
     }
@@ -86,6 +93,8 @@ public class CliqueTree {
         MAX
     }
 
+    private IdentityHashMap<GraphicalModel.Factor, TableFactor> cachedFactors = new IdentityHashMap<>();
+
     /**
      * Does tree shaped message passing. The algorithm calls for first passing down to the leaves, then passing back up
      * to the root.
@@ -98,7 +107,7 @@ public class CliqueTree {
         // Using the behavior of brute force factor multiplication as ground truth, the desired
         // outcome of marginal calculation with an impossible factor is a uniform probability dist.,
         // since we have a resulting factor of all 0s. That is of course assuming that normalizing
-        // all 0s gives you uniform, but that's a useful tolerance to include, so we do.
+        // all 0s gives you uniform, which is not real math, but that's a useful tolerance to include, so we do.
 
         boolean impossibleObservationMade = false;
 
@@ -133,6 +142,17 @@ public class CliqueTree {
         List<TableFactor> cliquesList = new ArrayList<>();
         Map<Integer, GraphicalModel.Factor> cliqueToFactor = new HashMap<>();
 
+        // Clean out everything that was in the cachedFactors map that's no longer in the model, so GC can get rid of
+        // it.
+
+        Set<GraphicalModel.Factor> toRemove = new HashSet<>();
+        for (GraphicalModel.Factor f : cachedFactors.keySet()) {
+            if (!model.factors.contains(f)) {
+                toRemove.add(f);
+            }
+        }
+        for (GraphicalModel.Factor f : toRemove) cachedFactors.remove(f);
+
         for (GraphicalModel.Factor f : model.factors) {
             boolean allObserved = true;
             for (int n : f.neigborIndices) {
@@ -140,7 +160,14 @@ public class CliqueTree {
             }
             if (allObserved) continue;
 
-            TableFactor clique = new TableFactor(weights, f);
+            TableFactor clique;
+            if (cachedFactors.containsKey(f)) {
+                clique = cachedFactors.get(f);
+            }
+            else {
+                clique = new TableFactor(weights, f);
+                cachedFactors.put(f, clique);
+            }
             cliqueToFactor.put(cliquesList.size(), f);
             cliquesList.add(clique);
         }
@@ -324,7 +351,11 @@ public class CliqueTree {
                 int n = fac.neigborIndices[i];
                 if (model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE)) {
                     double[] deterministic = new double[fac.featuresTable.getDimensions()[i]];
-                    deterministic[Integer.parseInt(model.getVariableMetaDataByReference(n).get(VARIABLE_OBSERVED_VALUE))] = 1.0;
+                    int assignment = Integer.parseInt(model.getVariableMetaDataByReference(n).get(VARIABLE_OBSERVED_VALUE));
+                    if (assignment > deterministic.length) {
+                        throw new IllegalStateException("Variable "+n+": Can't have as assignment ("+assignment+") that is out of bounds for dimension size ("+deterministic.length+")");
+                    }
+                    deterministic[assignment] = 1.0;
                     marginals[n] = deterministic;
                 }
             }
