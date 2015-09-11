@@ -142,9 +142,6 @@ public class CliqueTree {
         List<TableFactor> cliquesList = new ArrayList<>();
         Map<Integer, GraphicalModel.Factor> cliqueToFactor = new HashMap<>();
 
-        // Clean out everything that was in the cachedFactors map that's no longer in the model, so GC can get rid of
-        // it.
-
         for (GraphicalModel.Factor f : model.factors) {
             boolean allObserved = true;
             for (int n : f.neigborIndices) {

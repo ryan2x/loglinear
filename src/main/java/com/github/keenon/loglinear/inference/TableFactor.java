@@ -3,7 +3,9 @@ package com.github.keenon.loglinear.inference;
 import com.github.keenon.loglinear.model.NDArray;
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
+import cz.adamh.utils.NativeUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -452,4 +454,25 @@ public class TableFactor extends NDArray<Double> {
      * FOR PRIVATE USE AND TESTING ONLY
      */
     TableFactor(int[] neighborIndices, int[] dimensions) { super(dimensions); this.neighborIndices = neighborIndices; }
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // CUDA section
+    //
+    // This is (attempted) CUDA acceleration of factor operations. It should follow the usual
+    // policy of auto-copying to and from the CUDA memory space as necessary. The sad part here
+    // is that we're basically disabling the JIT for the rest of the program when we pass through
+    // this, so we have to make all of this code as fast as possible to try to compensate.
+    ////////////////////////////////////////////////////////////////////////////////////////
+
+    static {
+        try {
+            System.loadLibrary("crypt"); // used for tests. This library in classpath only
+        } catch (UnsatisfiedLinkError e) {
+            try {
+                NativeUtils.loadLibraryFromJar("/natives/crypt.dll"); // during runtime. .DLL within .JAR
+            } catch (IOException e1) {
+                System.err.println("Unable to load CUDA acceleration");
+            }
+        }
+    }
 }
