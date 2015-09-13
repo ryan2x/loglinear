@@ -3,6 +3,7 @@ package com.github.keenon.loglinear.inference;
 import com.github.keenon.loglinear.model.NDArray;
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
+import com.github.keenon.loglinear.model.NDArrayDoubles;
 import cz.adamh.utils.NativeUtils;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ import java.util.function.BiFunction;
  * Everything is represented as log-linear, because the primary use for TableFactor is in CliqueTree, and that is
  * intended for use with log-linear models.
  */
-public class TableFactor extends NDArray<Double> {
+public class TableFactor extends NDArrayDoubles {
     public int[] neighborIndices;
 
     /**
@@ -191,84 +192,6 @@ public class TableFactor extends NDArray<Double> {
      * @return a factor containing the union of both variable sets
      */
     public TableFactor multiply(TableFactor other) {
-        return product(other, (a, b) -> a + b);
-    }
-
-    /**
-     * This is useful for calculating the partition function, and is exposed here because when implemented internally
-     * we can do a much more numerically stable summation.
-     *
-     * @return the sum of all values for all assignments to the TableFactor
-     */
-    public double valueSum() {
-
-        // We want the exp(log-sum-exp), for stability
-        // This rearranges to exp(a)*(sum-exp)
-
-        double max = 0.0;
-        for (int[] assignment : this) {
-            double v = getAssignmentLogValue(assignment);
-            if (v > max) {
-                max = v;
-            }
-        }
-
-        double sumExp = 0.0;
-        for (int[] assignment : this) {
-            sumExp += Math.exp(getAssignmentLogValue(assignment) - max);
-        }
-
-        return sumExp * Math.exp(max);
-    }
-
-    /**
-     * Just a pass through to the NDArray version, plus a Math.exp to ensure that to the outside world the TableFactor
-     * doesn't look like it's in log-space
-     *
-     * @param assignment a list of variable settings, in the same order as the neighbors array of the factor
-     * @return the value of the assignment
-     */
-    @Override
-    public Double getAssignmentValue(int[] assignment) {
-        Double d = super.getAssignmentValue(assignment);
-        if (d == null) d = Double.NEGATIVE_INFINITY;
-        return Math.exp(d);
-    }
-
-    /**
-     * Just a pass through to the NDArray version, plus a Math.log to ensure that to the outside world the TableFactor
-     * doesn't look like it's in log-space
-     *
-     * @param assignment a list of variable settings, in the same order as the neighbors array of the factor
-     * @param value the value to put into the factor table
-     */
-    @Override
-    public void setAssignmentValue(int[] assignment, Double value) {
-        super.setAssignmentValue(assignment, Math.log(value));
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-    // PRIVATE IMPLEMENTATION
-    ////////////////////////////////////////////////////////////////////////////
-
-    private double getAssignmentLogValue(int[] assignment) {
-        return super.getAssignmentValue(assignment);
-    }
-
-    private void setAssignmentLogValue(int[] assignment, double value) {
-        super.setAssignmentValue(assignment, value);
-    }
-
-    /**
-     * Performs a factor-product using a configurable join operation. This way we can use the same operation for sum
-     * and product factor-products, since we're really just debugging a data-flow system.
-     *
-     * @param other the TableFactor to take the product with. The elements of 'other' are always the second argument
-     *              to the join function.
-     * @param join the operation to use when combining elements in an outer product.
-     * @return the TableFactor that is the outer product of this and 'other'
-     */
-    private TableFactor product(TableFactor other, BiFunction<Double, Double, Double> join) {
 
         // Calculate the result domain
 
@@ -325,13 +248,78 @@ public class TableFactor extends NDArray<Double> {
                 if (mapping[i] != -1) assignment[mapping[i]] = resultAssignment[i];
                 if (otherMapping[i] != -1) otherAssignment[otherMapping[i]] = resultAssignment[i];
             }
-            result.setAssignmentLogValue(resultAssignment, join.apply(getAssignmentLogValue(assignment), other.getAssignmentLogValue(otherAssignment)));
+            result.setAssignmentLogValue(resultAssignment, getAssignmentLogValue(assignment) + other.getAssignmentLogValue(otherAssignment));
             // This mutates the resultAssignment[] array, rather than creating a new one
             if (fastPassByReferenceIterator.hasNext()) fastPassByReferenceIterator.next();
             else break;
         }
 
         return result;
+    }
+
+    /**
+     * This is useful for calculating the partition function, and is exposed here because when implemented internally
+     * we can do a much more numerically stable summation.
+     *
+     * @return the sum of all values for all assignments to the TableFactor
+     */
+    public double valueSum() {
+
+        // We want the exp(log-sum-exp), for stability
+        // This rearranges to exp(a)*(sum-exp)
+
+        double max = 0.0;
+        for (int[] assignment : this) {
+            double v = getAssignmentLogValue(assignment);
+            if (v > max) {
+                max = v;
+            }
+        }
+
+        double sumExp = 0.0;
+        for (int[] assignment : this) {
+            sumExp += Math.exp(getAssignmentLogValue(assignment) - max);
+        }
+
+        return sumExp * Math.exp(max);
+    }
+
+    /**
+     * Just a pass through to the NDArray version, plus a Math.exp to ensure that to the outside world the TableFactor
+     * doesn't look like it's in log-space
+     *
+     * @param assignment a list of variable settings, in the same order as the neighbors array of the factor
+     * @return the value of the assignment
+     */
+    @Override
+    public double getAssignmentValue(int[] assignment) {
+        double d = super.getAssignmentValue(assignment);
+        // if (d == null) d = Double.NEGATIVE_INFINITY;
+        return Math.exp(d);
+    }
+
+    /**
+     * Just a pass through to the NDArray version, plus a Math.log to ensure that to the outside world the TableFactor
+     * doesn't look like it's in log-space
+     *
+     * @param assignment a list of variable settings, in the same order as the neighbors array of the factor
+     * @param value the value to put into the factor table
+     */
+    @Override
+    public void setAssignmentValue(int[] assignment, double value) {
+        super.setAssignmentValue(assignment, Math.log(value));
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // PRIVATE IMPLEMENTATION
+    ////////////////////////////////////////////////////////////////////////////
+
+    private double getAssignmentLogValue(int[] assignment) {
+        return super.getAssignmentValue(assignment);
+    }
+
+    private void setAssignmentLogValue(int[] assignment, double value) {
+        super.setAssignmentValue(assignment, value);
     }
 
     /**
