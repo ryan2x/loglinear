@@ -143,13 +143,13 @@ public class GamePlayerBenchmark {
         // Run some "samples"
         long start = System.currentTimeMillis();
         long marginalsTime = 0;
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 1000; i++) {
             System.err.println("\tTaking sample "+i);
             Stack<SampleState> stack = new Stack<>();
             SampleState state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, childrenOfRoot, humanFeatureVectors);
             // Each "sample" is 10 moves deep
             for (int j = 0; j < 10; j++) {
-                System.err.println("\t\tFrame "+j);
+                // System.err.println("\t\tFrame "+j);
                 state.push(model);
                 assert(model.factors.size() == initialFactors+j+1);
 
@@ -157,9 +157,9 @@ public class GamePlayerBenchmark {
                 // This is the thing we're really benchmarking
                 ///////////////////////////////////////////////////////////
                 long s = System.currentTimeMillis();
-                tree.calculateMarginals();
+                tree.calculateMarginalsJustSingletons();
                 marginalsTime += System.currentTimeMillis() - s;
-                System.err.println("\t\t\t"+(System.currentTimeMillis() - s)+" ms");
+                // System.err.println("\t\t\t"+(System.currentTimeMillis() - s)+" ms");
 
                 stack.push(state);
                 state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, state.children, humanFeatureVectors);

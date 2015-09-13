@@ -53,10 +53,22 @@ public class CliqueTree {
     /**
      * This assumes that factors represent joint probabilities.
      *
-     * @return an array, indexed first by variable, then by variable assignment, of global probability
+     * @return global marginals
      */
     public MarginalResult calculateMarginals() {
-        return messagePassing(MarginalizationMethod.SUM);
+        return messagePassing(MarginalizationMethod.SUM, true);
+    }
+
+    /**
+     * This will calculate marginals, but skip the stuff that is created for gradient descent: joint marginals and
+     * partition functions. This makes it much faster. It is thus appropriate for gameplayer style work, where many
+     * samples need to be drawn with the same marginals.
+     *
+     * @return an array, indexed first by variable, then by variable assignment, of global probability
+     */
+    public double[][] calculateMarginalsJustSingletons() {
+        MarginalResult result = messagePassing(MarginalizationMethod.SUM, false);
+        return result.marginals;
     }
 
     /**
@@ -65,7 +77,7 @@ public class CliqueTree {
      * @return an array, indexed by variable, of maximum likelihood assignments
      */
     public int[] calculateMAP() {
-        double[][] mapMarginals = messagePassing(MarginalizationMethod.MAX).marginals;
+        double[][] mapMarginals = messagePassing(MarginalizationMethod.MAX, false).marginals;
         int[] result = new int[mapMarginals.length];
         for (int i = 0; i < result.length; i++) {
             if (mapMarginals[i] != null) {
@@ -102,7 +114,7 @@ public class CliqueTree {
      * @param marginalize the method for marginalization, controls MAP or marginals
      * @return the marginal messages
      */
-    private MarginalResult messagePassing(MarginalizationMethod marginalize) {
+    private MarginalResult messagePassing(MarginalizationMethod marginalize, boolean includeJointMarginalsAndPartition) {
 
         // Using the behavior of brute force factor multiplication as ground truth, the desired
         // outcome of marginal calculation with an impossible factor is a uniform probability dist.,
@@ -212,14 +224,16 @@ public class CliqueTree {
             // with them
 
             Map<GraphicalModel.Factor, TableFactor> jointMarginals = new IdentityHashMap<>();
-            for (GraphicalModel.Factor f : model.factors) {
-                TableFactor uniformZero = new TableFactor(f.neigborIndices, f.featuresTable.getDimensions());
+            if (includeJointMarginalsAndPartition) {
+                for (GraphicalModel.Factor f : model.factors) {
+                    TableFactor uniformZero = new TableFactor(f.neigborIndices, f.featuresTable.getDimensions());
 
-                for (int[] assignment : uniformZero) {
-                    uniformZero.setAssignmentValue(assignment, 0.0);
+                    for (int[] assignment : uniformZero) {
+                        uniformZero.setAssignmentValue(assignment, 0.0);
+                    }
+
+                    jointMarginals.put(f, uniformZero);
                 }
-
-                jointMarginals.put(f, uniformZero);
             }
 
             return new MarginalResult(result, 1.0, jointMarginals);
@@ -231,7 +245,10 @@ public class CliqueTree {
 
         // Create the data structures to hold the tree pattern
 
-        List<Integer> visited = new ArrayList<>();
+        boolean[] visited = new boolean[cliques.length];
+        int numVisited = 0;
+        int[] visitedOrder = new int[cliques.length];
+
         int[] parent = new int[cliques.length];
         for (int i = 0; i < parent.length; i++) parent[i] = -1;
         // Figure out which cliques are connected to which trees. This is important for calculating the partition
@@ -242,14 +259,14 @@ public class CliqueTree {
         // Forward pass, record a BFS forest pattern that we can use for message passing
 
         int treeIndex = -1;
-        while (visited.size() < cliques.length) {
+        while (numVisited < cliques.length) {
             treeIndex++;
 
             // Pick the largest connected graph remaining as the root for message passing
 
             int root = -1;
             for (int i = 0; i < cliques.length; i++) {
-                if (!visited.contains(i) &&
+                if (!visited[i] &&
                         (root == -1 || cliques[i].neighborIndices.length > cliques[root].neighborIndices.length)) {
                     root = i;
                 }
@@ -258,25 +275,30 @@ public class CliqueTree {
 
             Queue<Integer> toVisit = new ArrayDeque<>();
             toVisit.add(root);
+            boolean[] toVisitArray = new boolean[cliques.length];
 
             while (toVisit.size() > 0) {
                 int cursor = toVisit.poll();
+                toVisitArray[cursor] = false;
                 trees[cursor] = treeIndex;
-                if (visited.contains(cursor)) {
+                if (visited[cursor]) {
                     System.err.println("Visited contains: " + cursor);
                     System.err.println("Visited: " + visited);
                     System.err.println("To visit: " + toVisit);
                 }
-                assert (!visited.contains(cursor));
-                visited.add(cursor);
+                assert (!visited[cursor]);
+                visited[cursor] = true;
+                visitedOrder[numVisited] = cursor;
+                numVisited++;
 
                 for (int i = 0; i < cliques.length; i++) {
                     if (i == cursor) continue;
                     if (i == parent[cursor]) continue;
                     if (domainsOverlap(cliques[cursor], cliques[i])) {
                         if (parent[i] == -1) {
-                            if (!toVisit.contains(i)) {
+                            if (!toVisitArray[i]) {
                                 toVisit.add(i);
+                                toVisitArray[i] = true;
                             }
                             parent[i] = cursor;
                         }
@@ -285,12 +307,12 @@ public class CliqueTree {
             }
         }
 
-        assert (visited.size() == cliques.length);
+        assert (numVisited == cliques.length);
 
         // Backward pass, run the visited list in reverse
 
-        for (int i = visited.size() - 1; i >= 0; i--) {
-            int cursor = visited.get(i);
+        for (int i = numVisited - 1; i >= 0; i--) {
+            int cursor = visitedOrder[i];
             if (parent[cursor] == -1) continue;
 
             // Calculate the message to the clique's parent, given all incoming messages so far
@@ -308,7 +330,8 @@ public class CliqueTree {
 
         // Forward pass, run the visited list forward
 
-        for (int cursor : visited) {
+        for (int i = 0; i < numVisited; i++) {
+            int cursor = visitedOrder[i];
             for (int j = 0; j < cliques.length; j++) {
                 if (parent[j] != cursor) continue;
 
@@ -364,7 +387,7 @@ public class CliqueTree {
                 convergedClique = convergedClique.multiply(messages[j][i]);
             }
 
-            if (marginalize == MarginalizationMethod.SUM) {
+            if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {
 
                 // Calculate the partition function when we're calculating marginals
                 // We need one contribution per tree in our forest graph
@@ -443,6 +466,7 @@ public class CliqueTree {
             }
 
             for (int j : convergedClique.neighborIndices) {
+                // TODO:OPT do this on a single pass over the data
                 if (marginals[j] == null) {
                     switch (marginalize) {
                         case SUM:
@@ -457,7 +481,7 @@ public class CliqueTree {
         }
 
         // Add any factors to the joint marginal map that were fully observed and so didn't get cliques
-        if (marginalize == MarginalizationMethod.SUM) {
+        if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {
             for (GraphicalModel.Factor f : model.factors) {
                 if (!jointMarginals.containsKey(f)) {
                     // This implies that every variable in the factor is observed. If that's the case, we need to construct
@@ -497,6 +521,7 @@ public class CliqueTree {
     private TableFactor marginalizeMessage(TableFactor message, int[] relevant, MarginalizationMethod marginalize) {
         TableFactor result = message;
 
+        //TODO:OPT:minor do this in a single pass over the data
         for (int i : message.neighborIndices) {
             boolean contains = false;
             for (int j : relevant) {
