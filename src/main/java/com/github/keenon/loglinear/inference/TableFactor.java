@@ -396,7 +396,7 @@ public class TableFactor extends NDArrayDoubles {
         else if (domain.size() == 1 && (resultDomain.size() == otherDomain.size()) && resultDomain.size() == 2) {
             return other.multiply(this);
         }
-        // Otherwise we follow the big comprehensive, slow general purpose one
+        // Otherwise we follow the big comprehensive, slow general purpose algorithm
         else {
 
             // Calculate back-pointers from the result domain indices to original indices

@@ -378,16 +378,15 @@ public class CliqueTree {
 
         Map<GraphicalModel.Factor, TableFactor> jointMarginals = new IdentityHashMap<>();
 
-        for (int i = 0; i < cliques.length; i++) {
-            TableFactor convergedClique = cliques[i];
+        if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {
+            for (int i = 0; i < cliques.length; i++) {
+                TableFactor convergedClique = cliques[i];
 
-            for (int j = 0; j < cliques.length; j++) {
-                if (i == j) continue;
-                if (messages[j][i] == null) continue;
-                convergedClique = convergedClique.multiply(messages[j][i]);
-            }
-
-            if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {
+                for (int j = 0; j < cliques.length; j++) {
+                    if (i == j) continue;
+                    if (messages[j][i] == null) continue;
+                    convergedClique = convergedClique.multiply(messages[j][i]);
+                }
 
                 // Calculate the partition function when we're calculating marginals
                 // We need one contribution per tree in our forest graph
@@ -463,23 +462,108 @@ public class CliqueTree {
 
                     jointMarginals.put(f, jointMarginal);
                 }
-            }
 
-            for (int j = 0; j < convergedClique.neighborIndices.length; j++) {
-                int k = convergedClique.neighborIndices[j];
-                // TODO:OPT do this on a single pass over the data
-                if (marginals[k] == null) {
+                boolean anyNull = false;
+                for (int j = 0; j < convergedClique.neighborIndices.length; j++) {
+                    int k = convergedClique.neighborIndices[j];
+                    if (marginals[k] == null) {
+                        anyNull = true;
+                    }
+                }
+
+                if (anyNull) {
+                    double[][] cliqueMarginals = null;
                     switch (marginalize) {
                         case SUM:
-                            marginals[k] = convergedClique.getSummedMarginals()[j];
+                            cliqueMarginals = convergedClique.getSummedMarginals();
                             break;
                         case MAX:
-                            marginals[k] = convergedClique.getMaxedMarginals()[j];
+                            cliqueMarginals = convergedClique.getMaxedMarginals();
                             break;
+                    }
+                    for (int j = 0; j < convergedClique.neighborIndices.length; j++) {
+                        int k = convergedClique.neighborIndices[j];
+                        if (marginals[k] == null) {
+                            marginals[k] = cliqueMarginals[j];
+                        }
                     }
                 }
             }
         }
+        // If we don't care about joint marginals, we can be careful about not calculating more cliques than we need to,
+        // by explicitly sorting by which cliques are most profitable to calculate over. In this way we can avoid, in
+        // the case of a chain CRF, calculating half the joint factors.
+        else {
+            // First do a pass where we only calculate all-null neighbors
+            for (int i = 0; i < cliques.length; i++) {
+                boolean allNull = true;
+                for (int k : cliques[i].neighborIndices) {
+                    if (marginals[k] != null) allNull = false;
+                }
+                if (allNull) {
+                    TableFactor convergedClique = cliques[i];
+
+                    for (int j = 0; j < cliques.length; j++) {
+                        if (i == j) continue;
+                        if (messages[j][i] == null) continue;
+                        convergedClique = convergedClique.multiply(messages[j][i]);
+                    }
+
+                    double[][] cliqueMarginals = null;
+                    switch (marginalize) {
+                        case SUM:
+                            cliqueMarginals = convergedClique.getSummedMarginals();
+                            break;
+                        case MAX:
+                            cliqueMarginals = convergedClique.getMaxedMarginals();
+                            break;
+                    }
+                    for (int j = 0; j < convergedClique.neighborIndices.length; j++) {
+                        int k = convergedClique.neighborIndices[j];
+                        if (marginals[k] == null) {
+                            marginals[k] = cliqueMarginals[j];
+                        }
+                    }
+                }
+            }
+            // Now only
+            for (int i = 0; i < cliques.length; i++) {
+                boolean anyNull = false;
+                for (int j = 0; j < cliques[i].neighborIndices.length; j++) {
+                    int k = cliques[i].neighborIndices[j];
+                    if (marginals[k] == null) {
+                        anyNull = true;
+                    }
+                }
+
+                if (anyNull) {
+                    TableFactor convergedClique = cliques[i];
+
+                    for (int j = 0; j < cliques.length; j++) {
+                        if (i == j) continue;
+                        if (messages[j][i] == null) continue;
+                        convergedClique = convergedClique.multiply(messages[j][i]);
+                    }
+
+                    double[][] cliqueMarginals = null;
+                    switch (marginalize) {
+                        case SUM:
+                            cliqueMarginals = convergedClique.getSummedMarginals();
+                            break;
+                        case MAX:
+                            cliqueMarginals = convergedClique.getMaxedMarginals();
+                            break;
+                    }
+                    for (int j = 0; j < convergedClique.neighborIndices.length; j++) {
+                        int k = convergedClique.neighborIndices[j];
+                        if (marginals[k] == null) {
+                            marginals[k] = cliqueMarginals[j];
+                        }
+                    }
+                }
+            }
+        }
+
 
         // Add any factors to the joint marginal map that were fully observed and so didn't get cliques
         if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {
@@ -522,7 +606,6 @@ public class CliqueTree {
     private TableFactor marginalizeMessage(TableFactor message, int[] relevant, MarginalizationMethod marginalize) {
         TableFactor result = message;
 
-        //TODO:OPT:minor do this in a single pass over the data
         for (int i : message.neighborIndices) {
             boolean contains = false;
             for (int j : relevant) {
