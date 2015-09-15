@@ -45,7 +45,7 @@ public class TableFactorTest {
     }
 
     @Theory
-    public void testGetMaxedMarginal(@ForAll(sampleSize = 50) @From(TableFactorGenerator.class) TableFactor factor,
+    public void testGetMaxedMarginals(@ForAll(sampleSize = 50) @From(TableFactorGenerator.class) TableFactor factor,
                                       @ForAll(sampleSize = 10) @InRange(minInt = 0, maxInt = 3) int marginalizeTo) throws Exception {
         if (!Arrays.stream(factor.neighborIndices).boxed().collect(Collectors.toSet()).contains(marginalizeTo)) return;
 
@@ -68,11 +68,11 @@ public class TableFactorTest {
 
         normalize(gold);
 
-        assertArrayEquals(gold, factor.getMaxedMarginal(marginalizeTo), 1.0e-5);
+        assertArrayEquals(gold, factor.getMaxedMarginals()[indexOfVariable], 1.0e-5);
     }
 
     @Theory
-    public void testGetSummedMarginal(@ForAll(sampleSize = 50) @From(TableFactorGenerator.class) TableFactor factor,
+    public void testGetSummedMarginals(@ForAll(sampleSize = 50) @From(TableFactorGenerator.class) TableFactor factor,
                                       @ForAll(sampleSize = 10) @InRange(minInt = 0, maxInt = 3) int marginalizeTo) throws Exception {
         if (!Arrays.stream(factor.neighborIndices).boxed().collect(Collectors.toSet()).contains(marginalizeTo)) return;
 
@@ -92,7 +92,7 @@ public class TableFactorTest {
 
         normalize(gold);
 
-        assertArrayEquals(gold, factor.getSummedMarginal(marginalizeTo), 1.0e-5);
+        assertArrayEquals(gold, factor.getSummedMarginals()[indexOfVariable], 1.0e-5);
     }
 
     private void normalize(double[] arr) {

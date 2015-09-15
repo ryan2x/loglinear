@@ -147,6 +147,7 @@ public class GamePlayerBenchmark {
             System.err.println("\tTaking sample "+i);
             Stack<SampleState> stack = new Stack<>();
             SampleState state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, childrenOfRoot, humanFeatureVectors);
+            long localMarginalsTime = 0;
             // Each "sample" is 10 moves deep
             for (int j = 0; j < 10; j++) {
                 // System.err.println("\t\tFrame "+j);
@@ -158,12 +159,13 @@ public class GamePlayerBenchmark {
                 ///////////////////////////////////////////////////////////
                 long s = System.currentTimeMillis();
                 tree.calculateMarginalsJustSingletons();
-                marginalsTime += System.currentTimeMillis() - s;
-                // System.err.println("\t\t\t"+(System.currentTimeMillis() - s)+" ms");
+                localMarginalsTime += System.currentTimeMillis() - s;
 
                 stack.push(state);
                 state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, state.children, humanFeatureVectors);
             }
+            System.err.println("\t\t"+localMarginalsTime+" ms");
+            marginalsTime += localMarginalsTime;
 
             while (!stack.empty()) {
                 stack.pop().pop(model);
@@ -201,6 +203,7 @@ public class GamePlayerBenchmark {
             int j = (assn[0]*variableSizes[i])+assn[1];
             return humanFeatureVectors[j];
         });
+        model.factors.remove(f);
 
         SampleState newState = new SampleState(f, variable, observation);
         children.add(newState);
@@ -228,6 +231,7 @@ public class GamePlayerBenchmark {
          * @param model the model to push this SampleState onto
          */
         public void push(GraphicalModel model) {
+            assert(!model.factors.contains(addedFactor));
             model.factors.add(addedFactor);
             model.getVariableMetaDataByReference(variable).put(CliqueTree.VARIABLE_OBSERVED_VALUE, ""+observation);
         }
@@ -238,6 +242,7 @@ public class GamePlayerBenchmark {
          * @param model the model to pop this SampleState from
          */
         public void pop(GraphicalModel model) {
+            assert(model.factors.contains(addedFactor));
             model.factors.remove(addedFactor);
             model.getVariableMetaDataByReference(variable).remove(CliqueTree.VARIABLE_OBSERVED_VALUE);
         }

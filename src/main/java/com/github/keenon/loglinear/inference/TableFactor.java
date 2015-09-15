@@ -7,10 +7,7 @@ import com.github.keenon.loglinear.model.NDArrayDoubles;
 import cz.adamh.utils.NativeUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 
 /**
@@ -84,77 +81,112 @@ public class TableFactor extends NDArrayDoubles {
     }
 
     /**
-     * Convenience function to sum out all but one variable, and return the marginal array.
+     * Returns the summed marginals for each element in the factor. These are represented in log space, and are summed
+     * using the numerically stable variant, even though it's slightly slower.
      *
-     * @param variable the variable whose marginal we're interested in
-     * @return an array of doubles one-to-one with variable states
+     * @return an array of doubles one-to-one with variable states for each variable
      */
-    public double[] getSummedMarginal(int variable) {
-        // Safety check
-        boolean containsVariable = false;
-        for (int i : neighborIndices) {
-            if (i == variable) {
-                if (containsVariable) {
-                    System.out.println("Duplicate!"+Arrays.toString(neighborIndices));
-                }
-                assert(!containsVariable);
-                containsVariable = true;
-            }
+    public double[][] getSummedMarginals() {
+        double[][] results = new double[neighborIndices.length][];
+        for (int i = 0; i < neighborIndices.length; i++) {
+            results[i] = new double[getDimensions()[i]];
         }
-        assert(containsVariable);
 
-        TableFactor result = this;
-        for (int i : neighborIndices) {
-            if (i != variable) result = result.sumOut(i);
+        double[][] maxValues = new double[neighborIndices.length][];
+        for (int i = 0; i < neighborIndices.length; i++) {
+            maxValues[i] = new double[getDimensions()[i]];
+            for (int j = 0; j < maxValues[i].length; j++) maxValues[i][j] = Double.NEGATIVE_INFINITY;
         }
-        assert(result.neighborIndices.length == 1);
-        assert(result.neighborIndices[0] == variable);
-        double[] marginal = new double[getVariableSize(variable)];
+
+        // Get max values
 
         // OPTIMIZATION:
         // Rather than use the standard iterator, which creates lots of int[] arrays on the heap, which need to be GC'd,
-        // we trivially iterate ourselves:
+        // we use the fast version that just mutates one array. Since this is read once for us here, this is ideal.
 
-        int[] assn = new int[]{0};
-        for (; assn[0] < marginal.length; assn[0]++) {
-            marginal[assn[0]] = result.getAssignmentLogValue(assn);
+        Iterator<int[]> fastPassByReferenceIterator = fastPassByReferenceIterator();
+        int[] assignment = fastPassByReferenceIterator.next();
+        while (true) {
+            double v = getAssignmentLogValue(assignment);
+            for (int i = 0; i < neighborIndices.length; i++) {
+                if (maxValues[i][assignment[i]] < v) maxValues[i][assignment[i]] = v;
+            }
+            // This mutates the resultAssignment[] array, rather than creating a new one
+            if (fastPassByReferenceIterator.hasNext()) {
+                fastPassByReferenceIterator.next();
+            }
+            else break;
         }
 
-        normalizeLogArr(marginal);
+        // Do the summation
 
-        return marginal;
+        // OPTIMIZATION:
+        // Rather than use the standard iterator, which creates lots of int[] arrays on the heap, which need to be GC'd,
+        // we use the fast version that just mutates one array. Since this is read once for us here, this is ideal.
+
+        Iterator<int[]> secondFastPassByReferenceIterator = fastPassByReferenceIterator();
+        assignment = secondFastPassByReferenceIterator.next();
+        while (true) {
+            double v = getAssignmentLogValue(assignment);
+            for (int i = 0; i < neighborIndices.length; i++) {
+                results[i][assignment[i]] += Math.exp(v - maxValues[i][assignment[i]]);
+            }
+            // This mutates the resultAssignment[] array, rather than creating a new one
+            if (secondFastPassByReferenceIterator.hasNext()) {
+                secondFastPassByReferenceIterator.next();
+            }
+            else break;
+        }
+
+        // Log and rescale results
+
+        for (int i = 0; i < neighborIndices.length; i++) {
+            for (int j = 0; j < results[i].length; j++) {
+                results[i][j] = maxValues[i][j] + Math.log(results[i][j]);
+            }
+            normalizeLogArr(results[i]);
+        }
+
+        return results;
     }
 
     /**
      * Convenience function to max out all but one variable, and return the marginal array.
      *
-     * @param variable the variable whose marginal we're interested in
-     * @return an array of doubles one-to-one with variable states
+     * @return an array of doubles one-to-one with variable states for each variable
      */
-    public double[] getMaxedMarginal(int variable) {
-        TableFactor result = this;
-        for (int i : neighborIndices) {
-            if (i != variable) result = result.maxOut(i);
+    public double[][] getMaxedMarginals() {
+        double[][] maxValues = new double[neighborIndices.length][];
+        for (int i = 0; i < neighborIndices.length; i++) {
+            maxValues[i] = new double[getDimensions()[i]];
+            for (int j = 0; j < maxValues[i].length; j++) maxValues[i][j] = Double.NEGATIVE_INFINITY;
         }
-        double[] marginal = new double[getVariableSize(variable)];
+
+        // Get max values
 
         // OPTIMIZATION:
         // Rather than use the standard iterator, which creates lots of int[] arrays on the heap, which need to be GC'd,
-        // we trivially iterate ourselves:
+        // we use the fast version that just mutates one array. Since this is read once for us here, this is ideal.
 
-        int[] assn = new int[]{0};
-        for (; assn[0] < marginal.length; assn[0]++) {
-            marginal[assn[0]] = result.getAssignmentLogValue(assn);
+        Iterator<int[]> fastPassByReferenceIterator = fastPassByReferenceIterator();
+        int[] assignment = fastPassByReferenceIterator.next();
+        while (true) {
+            double v = getAssignmentLogValue(assignment);
+            for (int i = 0; i < neighborIndices.length; i++) {
+                if (maxValues[i][assignment[i]] < v) maxValues[i][assignment[i]] = v;
+            }
+            // This mutates the resultAssignment[] array, rather than creating a new one
+            if (fastPassByReferenceIterator.hasNext()) {
+                fastPassByReferenceIterator.next();
+            }
+            else break;
         }
 
-        normalizeLogArr(marginal);
+        for (int i = 0; i < neighborIndices.length; i++) {
+            normalizeLogArr(maxValues[i]);
+        }
 
-        return marginal;
-    }
-
-    private enum MarginalizationMethod {
-        MULTIPLY,
-        MAX
+        return maxValues;
     }
 
     /**
@@ -183,6 +215,8 @@ public class TableFactor extends NDArrayDoubles {
             if (neighborIndices[0] == variable) {
                 TableFactor marginalized = new TableFactor(new int[]{neighborIndices[1]}, new int[]{getDimensions()[1]});
 
+                for (int i = 0; i < marginalized.values.length; i++) marginalized.values[i] = 0;
+
                 // We use the stable log-sum-exp trick here, so first we calculate the max
 
                 double[] max = new double[getDimensions()[1]];
@@ -206,14 +240,21 @@ public class TableFactor extends NDArrayDoubles {
                     int k = i * getDimensions()[1];
                     for (int j = 0; j < getDimensions()[1]; j++) {
                         int index = k + j;
-                        marginalized.values[j] += Math.exp(values[index] - max[j]);
+                        if (Double.isFinite(max[j])) {
+                            marginalized.values[j] += Math.exp(values[index] - max[j]);
+                        }
                     }
                 }
 
                 // And now we exponentiate, and add back in the values
 
                 for (int j = 0; j < getDimensions()[1]; j++) {
-                    marginalized.values[j] = max[j] + Math.log(marginalized.values[j]);
+                    if (Double.isFinite(max[j])) {
+                        marginalized.values[j] = max[j] + Math.log(marginalized.values[j]);
+                    }
+                    else {
+                        marginalized.values[j] = max[j];
+                    }
                 }
 
                 return marginalized;
@@ -221,6 +262,8 @@ public class TableFactor extends NDArrayDoubles {
             else {
                 assert(neighborIndices[1] == variable);
                 TableFactor marginalized = new TableFactor(new int[]{neighborIndices[0]}, new int[]{getDimensions()[0]});
+
+                for (int i = 0; i < marginalized.values.length; i++) marginalized.values[i] = 0;
 
                 // We use the stable log-sum-exp trick here, so first we calculate the max
 
@@ -245,14 +288,21 @@ public class TableFactor extends NDArrayDoubles {
                     int k = i * getDimensions()[1];
                     for (int j = 0; j < getDimensions()[1]; j++) {
                         int index = k + j;
-                        marginalized.values[i] += Math.exp(values[index] - max[i]);
+                        if (Double.isFinite(max[i])) {
+                            marginalized.values[i] += Math.exp(values[index] - max[i]);
+                        }
                     }
                 }
 
                 // And now we exponentiate, and add back in the values
 
                 for (int i = 0; i < getDimensions()[0]; i++) {
-                    marginalized.values[i] = max[i] + Math.log(marginalized.values[i]);
+                    if (Double.isFinite(max[i])) {
+                        marginalized.values[i] = max[i] + Math.log(marginalized.values[i]);
+                    }
+                    else {
+                        marginalized.values[i] = max[i];
+                    }
                 }
 
                 return marginalized;
@@ -568,26 +618,18 @@ public class TableFactor extends NDArrayDoubles {
     /**
      * FOR PRIVATE USE AND TESTING ONLY
      */
-    TableFactor(int[] neighborIndices, int[] dimensions) { super(dimensions); this.neighborIndices = neighborIndices; }
-
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // CUDA section
-    //
-    // This is (attempted) CUDA acceleration of factor operations. It should follow the usual
-    // policy of auto-copying to and from the CUDA memory space as necessary. The sad part here
-    // is that we're basically disabling the JIT for the rest of the program when we pass through
-    // this, so we have to make all of this code as fast as possible to try to compensate.
-    ////////////////////////////////////////////////////////////////////////////////////////
-
-    static {
-        try {
-            System.loadLibrary("crypt"); // used for tests. This library in classpath only
-        } catch (UnsatisfiedLinkError e) {
-            try {
-                NativeUtils.loadLibraryFromJar("/natives/crypt.dll"); // during runtime. .DLL within .JAR
-            } catch (IOException e1) {
-                System.err.println("Unable to load CUDA acceleration");
-            }
+    TableFactor(int[] neighborIndices, int[] dimensions) {
+        super(dimensions);
+        this.neighborIndices = neighborIndices;
+        for (int i = 0; i < values.length; i++) {
+            values[i] = Double.NEGATIVE_INFINITY;
         }
+    }
+
+    @SuppressWarnings("*")
+    private boolean assertsEnabled() {
+        boolean assertsEnabled = false;
+        assert(assertsEnabled = true); // intentional side effect
+        return assertsEnabled;
     }
 }

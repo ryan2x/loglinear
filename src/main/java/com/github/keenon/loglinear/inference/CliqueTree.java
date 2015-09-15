@@ -465,15 +465,16 @@ public class CliqueTree {
                 }
             }
 
-            for (int j : convergedClique.neighborIndices) {
+            for (int j = 0; j < convergedClique.neighborIndices.length; j++) {
+                int k = convergedClique.neighborIndices[j];
                 // TODO:OPT do this on a single pass over the data
-                if (marginals[j] == null) {
+                if (marginals[k] == null) {
                     switch (marginalize) {
                         case SUM:
-                            marginals[j] = convergedClique.getSummedMarginal(j);
+                            marginals[k] = convergedClique.getSummedMarginals()[j];
                             break;
                         case MAX:
-                            marginals[j] = convergedClique.getMaxedMarginal(j);
+                            marginals[k] = convergedClique.getMaxedMarginals()[j];
                             break;
                     }
                 }

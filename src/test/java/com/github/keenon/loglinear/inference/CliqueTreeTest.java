@@ -159,10 +159,15 @@ public class CliqueTreeTest {
             bruteForce = observed;
 
             // Spot check each of the marginals in the brute force calculation
+            double[][] bruteMarginals = bruteForce.getSummedMarginals();
+            int index = 0;
             for (int i : bruteForce.neighborIndices) {
                 boolean isEqual = true;
 
-                double[] brute = bruteForce.getSummedMarginal(i);
+                double[] brute = bruteMarginals[index];
+                index ++;
+                assert(brute != null);
+                assert(marginals[i] != null);
                 for (int j = 0; j < brute.length; j++) {
                     if (Double.isNaN(brute[j])) {
                         isEqual = false;
@@ -175,10 +180,10 @@ public class CliqueTreeTest {
                 }
                 if (!isEqual) {
                     System.err.println("Arrays not equal! Variable " + i);
-                    System.err.println("\tGold: " + Arrays.toString(bruteForce.getSummedMarginal(i)));
+                    System.err.println("\tGold: " + Arrays.toString(brute));
                     System.err.println("\tResult: " + Arrays.toString(marginals[i]));
                 }
-                assertArrayEquals(bruteForce.getSummedMarginal(i), marginals[i], 3.0e-2);
+                assertArrayEquals(brute, marginals[i], 3.0e-2);
             }
 
             // Spot check the partition function
@@ -209,6 +214,12 @@ public class CliqueTreeTest {
                                 assertEquals(1.0, result.jointMarginals.get(f).getAssignmentValue(assn), 1.0e-7);
                             }
                             else {
+                                if (result.jointMarginals.get(f).getAssignmentValue(assn) != 0) {
+                                    TableFactor j = result.jointMarginals.get(f);
+                                    for (int[] assignment : j) {
+                                        System.err.println(Arrays.toString(assignment)+": "+j.getAssignmentValue(assignment));
+                                    }
+                                }
                                 assertEquals(0.0, result.jointMarginals.get(f).getAssignmentValue(assn), 1.0e-7);
                             }
                         }
