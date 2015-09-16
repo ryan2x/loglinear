@@ -107,6 +107,8 @@ public class CliqueTree {
 
     private IdentityHashMap<GraphicalModel.Factor, TableFactor> cachedFactors = new IdentityHashMap<>();
 
+    private IdentityHashMap<TableFactor, IdentityHashMap<TableFactor, TableFactor>> cachedMessages = new IdentityHashMap<>();
+
     /**
      * Does tree shaped message passing. The algorithm calls for first passing down to the leaves, then passing back up
      * to the root.
@@ -129,22 +131,24 @@ public class CliqueTree {
 
         double partitionFunction = 1.0;
 
-        outer:
-        for (GraphicalModel.Factor f : model.factors) {
-            for (int n : f.neigborIndices) {
-                if (!model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE)) continue outer;
-            }
+        if (includeJointMarginalsAndPartition) {
+            outer:
+            for (GraphicalModel.Factor f : model.factors) {
+                for (int n : f.neigborIndices) {
+                    if (!model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE)) continue outer;
+                }
 
-            int[] assignment = new int[f.neigborIndices.length];
-            for (int i = 0; i < f.neigborIndices.length; i++) {
-                assignment[i] = Integer.parseInt(model.getVariableMetaDataByReference(f.neigborIndices[i]).get(VARIABLE_OBSERVED_VALUE));
-            }
+                int[] assignment = new int[f.neigborIndices.length];
+                for (int i = 0; i < f.neigborIndices.length; i++) {
+                    assignment[i] = Integer.parseInt(model.getVariableMetaDataByReference(f.neigborIndices[i]).get(VARIABLE_OBSERVED_VALUE));
+                }
 
-            double assignmentValue = f.featuresTable.getAssignmentValue(assignment).get().dotProduct(weights);
-            if (Double.isInfinite(assignmentValue)) {
-                impossibleObservationMade = true;
-            } else {
-                partitionFunction *= Math.exp(assignmentValue);
+                double assignmentValue = f.featuresTable.getAssignmentValue(assignment).get().dotProduct(weights);
+                if (Double.isInfinite(assignmentValue)) {
+                    impossibleObservationMade = true;
+                } else {
+                    partitionFunction *= Math.exp(assignmentValue);
+                }
             }
         }
 
