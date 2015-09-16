@@ -105,9 +105,15 @@ public class CliqueTree {
         MAX
     }
 
-    private IdentityHashMap<GraphicalModel.Factor, TableFactor> cachedFactors = new IdentityHashMap<>();
+    // OPTIMIZATION:
+    // cache the creation of TableFactors, to avoid redundant dot products
 
-    private IdentityHashMap<TableFactor, IdentityHashMap<TableFactor, TableFactor>> cachedMessages = new IdentityHashMap<>();
+    private IdentityHashMap<GraphicalModel.Factor, CachedFactorWithObservations> cachedFactors = new IdentityHashMap<>();
+    private static class CachedFactorWithObservations {
+        TableFactor cachedFactor;
+        int[] observations;
+        boolean impossibleObservation;
+    }
 
     /**
      * Does tree shaped message passing. The algorithm calls for first passing down to the leaves, then passing back up
@@ -160,52 +166,83 @@ public class CliqueTree {
 
         for (GraphicalModel.Factor f : model.factors) {
             boolean allObserved = true;
+            int maxVar = 0;
             for (int n : f.neigborIndices) {
                 if (!model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE)) allObserved = false;
+                if (n > maxVar) maxVar = n;
             }
             if (allObserved) continue;
 
-            TableFactor clique;
+            TableFactor clique = null;
+
+            // Retrieve cache if exists and none of the observations have changed
+
             if (cachedFactors.containsKey(f)) {
-                clique = cachedFactors.get(f);
+                CachedFactorWithObservations obs = cachedFactors.get(f);
+                boolean allConsistent = true;
+                for (int n : f.neigborIndices) {
+                    if (model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE) &&
+                            (obs.observations[n] == -1 ||
+                             Integer.parseInt(model.getVariableMetaDataByReference(n).get(VARIABLE_OBSERVED_VALUE)) != obs.observations[n])) {
+                        allConsistent = false;
+                        break;
+                    }
+                }
+                if (allConsistent) {
+                    clique = obs.cachedFactor;
+                    if (obs.impossibleObservation) {
+                        impossibleObservationMade = true;
+                    }
+                }
             }
-            else {
+
+            // Otherwise make a new cache
+
+            if (clique == null) {
                 clique = new TableFactor(weights, f);
-                cachedFactors.put(f, clique);
+
+                int[] observations = new int[maxVar+1];
+
+                // Observe out the clique
+                for (int n : clique.neighborIndices) {
+                    Map<String, String> metadata = model.getVariableMetaDataByReference(n);
+                    if (metadata.containsKey(VARIABLE_OBSERVED_VALUE)) {
+                        int value = Integer.parseInt(metadata.get(VARIABLE_OBSERVED_VALUE));
+                        clique = clique.observe(n, value);
+                        observations[n] = value;
+                    }
+                    else observations[n] = -1;
+                }
+
+                CachedFactorWithObservations cache = new CachedFactorWithObservations();
+                cache.cachedFactor = clique;
+                cache.observations = observations;
+
+                // Check for an impossible observation
+                boolean nonZeroValue = false;
+                for (int[] assignment : clique) {
+                    if (clique.getAssignmentValue(assignment) > 0) {
+                        nonZeroValue = true;
+                        break;
+                    }
+                }
+                if (!nonZeroValue) {
+                    impossibleObservationMade = true;
+                    cache.impossibleObservation = true;
+                }
+
+                cachedFactors.put(f, cache);
             }
+
             cliqueToFactor.put(cliquesList.size(), f);
             cliquesList.add(clique);
         }
 
         TableFactor[] cliques = cliquesList.toArray(new TableFactor[cliquesList.size()]);
 
-        // Observe all variables that need to be observed out
-
-        for (int i = 0; i < cliques.length; i++) {
-            assert (cliqueToFactor.containsKey(i));
-            TableFactor result = cliques[i];
-            for (int n : cliques[i].neighborIndices) {
-                Map<String, String> metadata = model.getVariableMetaDataByReference(n);
-                if (metadata.containsKey(VARIABLE_OBSERVED_VALUE)) {
-                    int value = Integer.parseInt(metadata.get(VARIABLE_OBSERVED_VALUE));
-                    result = result.observe(n, value);
-                }
-            }
-
-            boolean nonZeroValue = false;
-            for (int[] assignment : result) {
-                if (result.getAssignmentValue(assignment) > 0) {
-                    nonZeroValue = true;
-                    break;
-                }
-            }
-            if (!nonZeroValue) impossibleObservationMade = true;
-
-            cliques[i] = result;
-        }
-
         // If we made any impossible observations, we can just return a uniform distribution for all the variables that
-        // weren't observed, since that's the semantically correct thing to do (probability is broken at this point).
+        // weren't observed, since that's the semantically correct thing to do (our 'probability' is broken at this
+        // point).
 
         if (impossibleObservationMade) {
             int maxVar = 0;

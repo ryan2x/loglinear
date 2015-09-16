@@ -138,13 +138,24 @@ public class TableFactor extends NDArrayDoubles {
             else break;
         }
 
-        // Log and rescale results
+        // normalize results, and move to linear space
 
         for (int i = 0; i < neighborIndices.length; i++) {
+            double sum = 0.0;
             for (int j = 0; j < results[i].length; j++) {
-                results[i][j] = maxValues[i][j] + Math.log(results[i][j]);
+                results[i][j] = Math.exp(maxValues[i][j]) * results[i][j];
+                sum += results[i][j];
             }
-            normalizeLogArr(results[i]);
+            if (Double.isInfinite(sum)) {
+                for (int j = 0; j < results[i].length; j++) {
+                    results[i][j] = 1.0 / results[i].length;
+                }
+            }
+            else {
+                for (int j = 0; j < results[i].length; j++) {
+                    results[i][j] /= sum;
+                }
+            }
         }
 
         return results;
