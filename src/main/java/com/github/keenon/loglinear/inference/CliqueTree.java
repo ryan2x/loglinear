@@ -187,6 +187,10 @@ public class CliqueTree {
                         allConsistent = false;
                         break;
                     }
+                    else if (!model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE) && obs.observations[n] != -1) {
+                        allConsistent = false;
+                        break;
+                    }
                 }
                 if (allConsistent) {
                     clique = obs.cachedFactor;
@@ -414,12 +418,12 @@ public class CliqueTree {
             }
         }
 
-        boolean[] partitionIncludesTrees = new boolean[treeIndex + 1];
-        double[] treePartitionFunctions = new double[treeIndex + 1];
-
         Map<GraphicalModel.Factor, TableFactor> jointMarginals = new IdentityHashMap<>();
 
         if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {
+            boolean[] partitionIncludesTrees = new boolean[treeIndex + 1];
+            double[] treePartitionFunctions = new double[treeIndex + 1];
+
             for (int i = 0; i < cliques.length; i++) {
                 TableFactor convergedClique = cliques[i];
 
@@ -533,7 +537,7 @@ public class CliqueTree {
         }
         // If we don't care about joint marginals, we can be careful about not calculating more cliques than we need to,
         // by explicitly sorting by which cliques are most profitable to calculate over. In this way we can avoid, in
-        // the case of a chain CRF, calculating half the joint factors.
+        // the case of a chain CRF, calculating almost half the joint factors.
         else {
             // First do a pass where we only calculate all-null neighbors
             for (int i = 0; i < cliques.length; i++) {
@@ -567,7 +571,7 @@ public class CliqueTree {
                     }
                 }
             }
-            // Now only
+            // Now we calculate any remaining cliques with any non-null variables
             for (int i = 0; i < cliques.length; i++) {
                 boolean anyNull = false;
                 for (int j = 0; j < cliques[i].neighborIndices.length; j++) {
@@ -604,7 +608,6 @@ public class CliqueTree {
                 }
             }
         }
-
 
         // Add any factors to the joint marginal map that were fully observed and so didn't get cliques
         if (marginalize == MarginalizationMethod.SUM && includeJointMarginalsAndPartition) {

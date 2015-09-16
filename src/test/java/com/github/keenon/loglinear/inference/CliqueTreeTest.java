@@ -536,6 +536,7 @@ public class CliqueTreeTest {
 
             List<Integer> cliqueContents = new ArrayList<>();
             cliqueContents.addAll(startSet);
+            alreadyRepresented.addAll(startSet);
             while (true) {
                 if (alreadyRepresented.size() == variableSizes.length) break;
                 if (cliqueContents.size() == 0 || randomness.nextDouble(0,1) < 0.7) {
