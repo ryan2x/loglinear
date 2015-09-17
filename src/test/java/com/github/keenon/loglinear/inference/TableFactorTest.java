@@ -1,5 +1,8 @@
 package com.github.keenon.loglinear.inference;
 
+import com.github.keenon.loglinear.model.ConcatVector;
+import com.github.keenon.loglinear.model.ConcatVectorTable;
+import com.github.keenon.loglinear.model.GraphicalModel;
 import com.pholser.junit.quickcheck.ForAll;
 import com.pholser.junit.quickcheck.From;
 import com.pholser.junit.quickcheck.generator.GenerationStatus;
@@ -23,6 +26,30 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(Theories.class)
 public class TableFactorTest {
+    @Theory
+    public void testConstructWithObservations(@ForAll(sampleSize = 50) @From(PartiallyObservedConstructorDataGenerator.class) PartiallyObservedConstructorData data,
+                                              @ForAll(sampleSize = 2) @From(ConcatVectorGenerator.class) ConcatVector weights) throws Exception {
+        int[] obsArray = new int[9];
+        for (int i = 0; i < obsArray.length; i++) obsArray[i] = -1;
+        for (int i = 0; i < data.observations.length; i++) {
+            obsArray[data.factor.neigborIndices[i]] = data.observations[i];
+        }
+
+        TableFactor normalObservations = new TableFactor(weights, data.factor);
+        for (int i = 0; i < obsArray.length; i++) {
+            if (obsArray[i] != -1) {
+                normalObservations = normalObservations.observe(i, obsArray[i]);
+            }
+        }
+
+        TableFactor constructedObservations = new TableFactor(weights, data.factor, data.observations);
+
+        assertArrayEquals(normalObservations.neighborIndices, constructedObservations.neighborIndices);
+        for (int[] assn : normalObservations) {
+            assertEquals(normalObservations.getAssignmentValue(assn), constructedObservations.getAssignmentValue(assn), 1.0e-9);
+        }
+    }
+
     @Theory
     public void testObserve(@ForAll(sampleSize = 50) @From(TableFactorGenerator.class) TableFactor factor,
                             @ForAll(sampleSize = 2) @InRange(minInt = 0, maxInt = 3) int observe,
@@ -235,6 +262,75 @@ public class TableFactorTest {
             }
 
             return factor;
+        }
+    }
+
+    public static class ConcatVectorGenerator extends Generator<ConcatVector> {
+        public ConcatVectorGenerator(Class<ConcatVector> type) {
+            super(type);
+        }
+
+        @Override
+        public ConcatVector generate(SourceOfRandomness sourceOfRandomness, GenerationStatus generationStatus) {
+            ConcatVector vec = new ConcatVector(1);
+            double[] d = new double[20];
+            for (int i = 0; i < d.length; i++) d[i] = sourceOfRandomness.nextDouble();
+            vec.setDenseComponent(0, d);
+            return vec;
+        }
+    }
+
+    private static class PartiallyObservedConstructorData {
+        public GraphicalModel.Factor factor;
+        public int[] observations;
+    }
+
+    public static class PartiallyObservedConstructorDataGenerator extends Generator<PartiallyObservedConstructorData> {
+        public PartiallyObservedConstructorDataGenerator(Class<PartiallyObservedConstructorData> type) {
+            super(type);
+        }
+
+        @Override
+        public PartiallyObservedConstructorData generate(SourceOfRandomness sourceOfRandomness, GenerationStatus generationStatus) {
+            int len = sourceOfRandomness.nextInt(1,4);
+            Set<Integer> taken = new HashSet<>();
+
+            int[] neighborIndices = new int[len];
+            int[] dimensions = new int[len];
+            int[] observations = new int[len];
+            int numObserved = 0;
+
+            for (int i = 0; i < len; i++) {
+                int j = sourceOfRandomness.nextInt(8);
+                while (taken.contains(j)) {
+                    j = sourceOfRandomness.nextInt(8);
+                }
+                taken.add(j);
+                neighborIndices[i] = j;
+
+                dimensions[i] = sourceOfRandomness.nextInt(1,3);
+
+                if (sourceOfRandomness.nextBoolean() && numObserved + 1 < dimensions.length) {
+                    observations[i] = sourceOfRandomness.nextInt(dimensions[i]);
+                    numObserved++;
+                }
+                else observations[i] = -1;
+            }
+
+            ConcatVectorTable t = new ConcatVectorTable(dimensions);
+
+            ConcatVectorGenerator gen = new ConcatVectorGenerator(ConcatVector.class);
+
+            for (int[] assn : t) {
+                ConcatVector vec = gen.generate(sourceOfRandomness, generationStatus);
+                t.setAssignmentValue(assn, () -> vec);
+            }
+
+            PartiallyObservedConstructorData data = new PartiallyObservedConstructorData();
+            data.factor = new GraphicalModel.Factor(t, neighborIndices);
+            data.observations = observations;
+
+            return data;
         }
     }
 

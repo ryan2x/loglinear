@@ -58,6 +58,50 @@ public class TableFactor extends NDArrayDoubles {
     }
 
     /**
+     * Construct a TableFactor for inference within a model. This is the same as the other constructor, except that the
+     * table is observed out before any unnecessary dot products are done out, so hopefully we dramatically reduce the
+     * number of computations required to calculate the resulting table.
+     *
+     * Each element of the table is given by: t_i = exp(f_i*w)
+     *
+     * @param weights the vector to dot product with every element of the factor table
+     * @param factor the feature factor to be multiplied in
+     */
+    public TableFactor(ConcatVector weights, GraphicalModel.Factor factor, int[] observations) {
+        super();
+        assert(observations.length == factor.neigborIndices.length);
+
+        int size = 0;
+        for (int observation : observations) if (observation == -1) size++;
+
+        neighborIndices = new int[size];
+        dimensions = new int[size];
+        int[] forwardPointers = new int[size];
+        int[] factorAssignment = new int[factor.neigborIndices.length];
+
+        int cursor = 0;
+        for (int i = 0; i < factor.neigborIndices.length; i++) {
+            if (observations[i] == -1) {
+                neighborIndices[cursor] = factor.neigborIndices[i];
+                dimensions[cursor] = factor.featuresTable.getDimensions()[i];
+                forwardPointers[cursor] = i;
+                cursor++;
+            }
+            else factorAssignment[i] = observations[i];
+        }
+        assert(cursor == size);
+
+        values = new double[combinatorialNeighborStatesCount()];
+
+        for (int[] assn : this) {
+            for (int i = 0; i < assn.length; i++) {
+                factorAssignment[forwardPointers[i]] = assn[i];
+            }
+            setAssignmentLogValue(assn, factor.featuresTable.getAssignmentValue(factorAssignment).get().dotProduct(weights));
+        }
+    }
+
+    /**
      * Remove a variable by observing it at a certain value, return a new factor without that variable.
      *
      * @param variable the variable to be observed

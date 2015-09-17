@@ -12,7 +12,7 @@ import java.util.Iterator;
  */
 public class NDArrayDoubles implements Iterable<int[]> {
     // public data
-    private int[] dimensions;
+    protected int[] dimensions;
 
     // OPTIMIZATION:
     // in normal NDArray this is private, but to allow for optimizations we actually leave it as protected
@@ -31,6 +31,12 @@ public class NDArrayDoubles implements Iterable<int[]> {
         this.dimensions = dimensions;
         values = new double[combinatorialNeighborStatesCount()];
     }
+
+    /**
+     * This is to enable the partially observed constructor for TableFactor. It's an ugly break of modularity, but seems
+     * to be necessary if we want to keep the constructor for TableFactor with partial observations relatively simple.
+     */
+    protected NDArrayDoubles() {}
 
     /**
      * Set a single value in the factor table.

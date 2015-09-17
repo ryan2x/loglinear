@@ -157,9 +157,11 @@ public class GamePlayerBenchmark {
                 ///////////////////////////////////////////////////////////
                 // This is the thing we're really benchmarking
                 ///////////////////////////////////////////////////////////
-                long s = System.currentTimeMillis();
-                tree.calculateMarginalsJustSingletons();
-                localMarginalsTime += System.currentTimeMillis() - s;
+                if (state.cachedMarginal == null) {
+                    long s = System.currentTimeMillis();
+                    state.cachedMarginal = tree.calculateMarginalsJustSingletons();
+                    localMarginalsTime += System.currentTimeMillis() - s;
+                }
 
                 stack.push(state);
                 state = selectOrCreateChildAtRandom(r, model, variables, variableSizes, state.children, humanFeatureVectors);
@@ -215,6 +217,8 @@ public class GamePlayerBenchmark {
         public int variable;
         public int observation;
         public List<SampleState> children = new ArrayList<>();
+
+        public double[][] cachedMarginal = null;
 
         public SampleState(GraphicalModel.Factor addedFactor, int variable, int observation) {
             this.addedFactor = addedFactor;

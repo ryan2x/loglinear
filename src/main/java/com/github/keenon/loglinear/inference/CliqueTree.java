@@ -180,14 +180,16 @@ public class CliqueTree {
             if (cachedFactors.containsKey(f)) {
                 CachedFactorWithObservations obs = cachedFactors.get(f);
                 boolean allConsistent = true;
-                for (int n : f.neigborIndices) {
+                for (int i = 0; i < f.neigborIndices.length; i++) {
+                    int n = f.neigborIndices[i];
                     if (model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE) &&
-                            (obs.observations[n] == -1 ||
-                             Integer.parseInt(model.getVariableMetaDataByReference(n).get(VARIABLE_OBSERVED_VALUE)) != obs.observations[n])) {
+                            (obs.observations[i] == -1 ||
+                             Integer.parseInt(model.getVariableMetaDataByReference(n).get(VARIABLE_OBSERVED_VALUE)) != obs.observations[i])) {
                         allConsistent = false;
                         break;
                     }
-                    else if (!model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE) && obs.observations[n] != -1) {
+                    // NOTE: This disqualifies lots of stuff for some reason...
+                    if (!model.getVariableMetaDataByReference(n).containsKey(VARIABLE_OBSERVED_VALUE) && (obs.observations[i] != -1)) {
                         allConsistent = false;
                         break;
                     }
@@ -203,20 +205,19 @@ public class CliqueTree {
             // Otherwise make a new cache
 
             if (clique == null) {
-                clique = new TableFactor(weights, f);
-
-                int[] observations = new int[maxVar+1];
-
-                // Observe out the clique
-                for (int n : clique.neighborIndices) {
-                    Map<String, String> metadata = model.getVariableMetaDataByReference(n);
+                int[] observations = new int[f.neigborIndices.length];
+                for (int i = 0; i < observations.length; i++) {
+                    Map<String, String> metadata = model.getVariableMetaDataByReference(f.neigborIndices[i]);
                     if (metadata.containsKey(VARIABLE_OBSERVED_VALUE)) {
                         int value = Integer.parseInt(metadata.get(VARIABLE_OBSERVED_VALUE));
-                        clique = clique.observe(n, value);
-                        observations[n] = value;
+                        observations[i] = value;
                     }
-                    else observations[n] = -1;
+                    else {
+                        observations[i] = -1;
+                    }
                 }
+
+                clique = new TableFactor(weights, f, observations);
 
                 CachedFactorWithObservations cache = new CachedFactorWithObservations();
                 cache.cachedFactor = clique;
