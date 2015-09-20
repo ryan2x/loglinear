@@ -19,6 +19,8 @@ public class CliqueTree {
     // This is the metadata key for the model to store an observed value for a variable, as an int
     public static final String VARIABLE_OBSERVED_VALUE = "inference.CliqueTree.VARIABLE_OBSERVED_VALUE";
 
+    private static final boolean CACHE_MESSAGES = false;
+
     /**
      * Create an Inference object for a given set of weights, and a model.
      * <p>
@@ -115,6 +117,13 @@ public class CliqueTree {
         boolean impossibleObservation;
     }
 
+    // OPTIMIZATION:
+    // cache the last list of factors, and the last set of messages passed, in case we can recycle some
+
+    private TableFactor[] cachedCliqueList;
+    private TableFactor[][] cachedMessages;
+    private boolean[][] cachedBackwardPassedMessages;
+
     /**
      * Does tree shaped message passing. The algorithm calls for first passing down to the leaves, then passing back up
      * to the root.
@@ -164,6 +173,8 @@ public class CliqueTree {
         List<TableFactor> cliquesList = new ArrayList<>();
         Map<Integer, GraphicalModel.Factor> cliqueToFactor = new HashMap<>();
 
+        int numFactorsCached = 0;
+
         for (GraphicalModel.Factor f : model.factors) {
             boolean allObserved = true;
             int maxVar = 0;
@@ -196,6 +207,7 @@ public class CliqueTree {
                 }
                 if (allConsistent) {
                     clique = obs.cachedFactor;
+                    numFactorsCached++;
                     if (obs.impossibleObservation) {
                         impossibleObservationMade = true;
                     }
@@ -289,6 +301,37 @@ public class CliqueTree {
 
         TableFactor[][] messages = new TableFactor[cliques.length][cliques.length];
 
+        // OPTIMIZATION:
+        // check if we've only added one factor since the last time we ran marginal inference. If that's the case, we
+        // can use the new factor as the root, all the messages passed in from the leaves will not have changed. That
+        // means we can cut message passing computation in half.
+
+        boolean[][] backwardPassedMessages = new boolean[cliques.length][cliques.length];
+
+        int forceRootForCachedMessagePassing = -1;
+        int[] cachedCliquesBackPointers = null;
+        if (CACHE_MESSAGES && (numFactorsCached == cliques.length-1) && (numFactorsCached > 0)) {
+            System.err.println("Using cached messages");
+            cachedCliquesBackPointers = new int[cliques.length];
+
+            // Calculate the correspondence between the old cliques list and the new cliques list
+
+            for (int i = 0; i < cliques.length; i++) {
+                cachedCliquesBackPointers[i] = -1;
+                for (int j = 0; j < cachedCliqueList.length; j++) {
+                    if (cliques[i] == cachedCliqueList[j]) {
+                        cachedCliquesBackPointers[i] = j;
+                        break;
+                    }
+                }
+                if (cachedCliquesBackPointers[i] == -1) {
+                    assert(forceRootForCachedMessagePassing == -1);
+                    forceRootForCachedMessagePassing = i;
+                }
+            }
+            assert(forceRootForCachedMessagePassing != -1);
+        }
+
         // Create the data structures to hold the tree pattern
 
         boolean[] visited = new boolean[cliques.length];
@@ -311,10 +354,15 @@ public class CliqueTree {
             // Pick the largest connected graph remaining as the root for message passing
 
             int root = -1;
-            for (int i = 0; i < cliques.length; i++) {
-                if (!visited[i] &&
-                        (root == -1 || cliques[i].neighborIndices.length > cliques[root].neighborIndices.length)) {
-                    root = i;
+            if (CACHE_MESSAGES && forceRootForCachedMessagePassing != -1 && !visited[forceRootForCachedMessagePassing]) {
+                root = forceRootForCachedMessagePassing;
+            }
+            else {
+                for (int i = 0; i < cliques.length; i++) {
+                    if (!visited[i] &&
+                            (root == -1 || cliques[i].neighborIndices.length > cliques[root].neighborIndices.length)) {
+                        root = i;
+                    }
                 }
             }
             assert (root != -1);
@@ -361,17 +409,43 @@ public class CliqueTree {
             int cursor = visitedOrder[i];
             if (parent[cursor] == -1) continue;
 
-            // Calculate the message to the clique's parent, given all incoming messages so far
+            backwardPassedMessages[cursor][parent[cursor]] = true;
 
-            TableFactor message = cliques[cursor];
-            for (int k = 0; k < cliques.length; k++) {
-                if (k == parent[cursor]) continue;
-                if (messages[k][cursor] != null) {
-                    message = message.multiply(messages[k][cursor]);
+            // OPTIMIZATION:
+            // if these conditions are met we can avoid calculating the message, and instead retrieve from the cache,
+            // since they should be the same
+
+            if (CACHE_MESSAGES
+                    && forceRootForCachedMessagePassing != -1
+                    && cachedCliquesBackPointers[parent[cursor]] != -1
+                    && cachedMessages[cachedCliquesBackPointers[cursor]][cachedCliquesBackPointers[parent[cursor]]] != null
+                    && cachedBackwardPassedMessages[cachedCliquesBackPointers[cursor]][cachedCliquesBackPointers[parent[cursor]]]) {
+                messages[cursor][parent[cursor]] =
+                        cachedMessages[cachedCliquesBackPointers[cursor]][cachedCliquesBackPointers[parent[cursor]]];
+            }
+            else {
+
+                // Calculate the message to the clique's parent, given all incoming messages so far
+
+                TableFactor message = cliques[cursor];
+                for (int k = 0; k < cliques.length; k++) {
+                    if (k == parent[cursor]) continue;
+                    if (messages[k][cursor] != null) {
+                        message = message.multiply(messages[k][cursor]);
+                    }
+                }
+
+                messages[cursor][parent[cursor]] = marginalizeMessage(message, cliques[parent[cursor]].neighborIndices, marginalize);
+
+                // Invalidate any cached outgoing messages
+                if (CACHE_MESSAGES
+                        && forceRootForCachedMessagePassing != -1
+                        && cachedCliquesBackPointers[parent[cursor]] != -1) {
+                    for (int k = 0; k < cachedCliqueList.length; k++) {
+                        cachedMessages[cachedCliquesBackPointers[parent[cursor]]][k] = null;
+                    }
                 }
             }
-
-            messages[cursor][parent[cursor]] = marginalizeMessage(message, cliques[parent[cursor]].neighborIndices, marginalize);
         }
 
         // Forward pass, run the visited list forward
@@ -391,6 +465,15 @@ public class CliqueTree {
 
                 messages[cursor][j] = marginalizeMessage(message, cliques[j].neighborIndices, marginalize);
             }
+        }
+
+        // OPTIMIZATION:
+        // cache the messages, and the current list of cliques
+
+        if (CACHE_MESSAGES) {
+            cachedCliqueList = cliques;
+            cachedMessages = messages;
+            cachedBackwardPassedMessages = backwardPassedMessages;
         }
 
         // Calculate final marginals for each variable

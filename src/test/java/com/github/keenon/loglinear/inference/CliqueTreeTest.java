@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class CliqueTreeTest {
 
     @Theory
-    public void testCalculateMarginals(@ForAll(sampleSize = 100) @From(GraphicalModelGenerator.class) GraphicalModel model,
+    public void testCalculateMarginals(@ForAll(sampleSize = 10000) @From(GraphicalModelGenerator.class) GraphicalModel model,
                                        @ForAll(sampleSize = 2) @From(WeightsGenerator.class) ConcatVector weights) throws Exception {
         CliqueTree inference = new CliqueTree(model, weights);
 
@@ -38,6 +38,7 @@ public class CliqueTreeTest {
         // Now we go through several random mutations to the model, and check that everything is still consistent
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
+            System.err.println("Testing mutation "+i);
             randomlyMutateGraphicalModel(model, r);
             checkMarginalsAgainstBruteForce(model, weights, inference);
         }
@@ -300,6 +301,7 @@ public class CliqueTreeTest {
         // Now we go through several random mutations to the model, and check that everything is still consistent
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
+            System.err.println("Testing mutation "+i);
             randomlyMutateGraphicalModel(model, r);
             checkMAPAgainstBruteForce(model, weights, inference);
         }

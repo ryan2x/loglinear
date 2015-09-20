@@ -243,7 +243,7 @@ public class GraphicalModel {
     public String toString() {
         String s = "{";
         for (Factor f : factors) {
-            s += "\n\t"+Arrays.toString(f.neigborIndices);
+            s += "\n\t"+Arrays.toString(f.neigborIndices)+"@"+f;
         }
         s += "\n}";
         return s;
