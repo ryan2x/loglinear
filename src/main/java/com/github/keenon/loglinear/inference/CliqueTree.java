@@ -19,7 +19,7 @@ public class CliqueTree {
     // This is the metadata key for the model to store an observed value for a variable, as an int
     public static final String VARIABLE_OBSERVED_VALUE = "inference.CliqueTree.VARIABLE_OBSERVED_VALUE";
 
-    private static final boolean CACHE_MESSAGES = false;
+    private static final boolean CACHE_MESSAGES = true;
 
     /**
      * Create an Inference object for a given set of weights, and a model.
@@ -297,6 +297,14 @@ public class CliqueTree {
             return new MarginalResult(result, 1.0, jointMarginals);
         }
 
+        // Find the largest contained variable, so that we can size arrays appropriately
+
+        int maxVar = 0;
+        for (GraphicalModel.Factor fac : model.factors) {
+            for (int i : fac.neigborIndices) if (i > maxVar) maxVar = i;
+        }
+
+
         // Indexed by (start-clique, end-clique), this array will remain mostly null in most graphs
 
         TableFactor[][] messages = new TableFactor[cliques.length][cliques.length];
@@ -311,7 +319,6 @@ public class CliqueTree {
         int forceRootForCachedMessagePassing = -1;
         int[] cachedCliquesBackPointers = null;
         if (CACHE_MESSAGES && (numFactorsCached == cliques.length-1) && (numFactorsCached > 0)) {
-            System.err.println("Using cached messages");
             cachedCliquesBackPointers = new int[cliques.length];
 
             // Calculate the correspondence between the old cliques list and the new cliques list
@@ -348,12 +355,17 @@ public class CliqueTree {
         // Forward pass, record a BFS forest pattern that we can use for message passing
 
         int treeIndex = -1;
+        boolean[] seenVariable = new boolean[maxVar+1];
         while (numVisited < cliques.length) {
             treeIndex++;
 
             // Pick the largest connected graph remaining as the root for message passing
 
             int root = -1;
+
+            // OPTIMIZATION: if there's a forced root for message passing (a node that we just added) then make it the
+            // root
+
             if (CACHE_MESSAGES && forceRootForCachedMessagePassing != -1 && !visited[forceRootForCachedMessagePassing]) {
                 root = forceRootForCachedMessagePassing;
             }
@@ -370,35 +382,58 @@ public class CliqueTree {
             Queue<Integer> toVisit = new ArrayDeque<>();
             toVisit.add(root);
             boolean[] toVisitArray = new boolean[cliques.length];
+            toVisitArray[root] = true;
 
             while (toVisit.size() > 0) {
                 int cursor = toVisit.poll();
-                toVisitArray[cursor] = false;
+                // toVisitArray[cursor] = false;
                 trees[cursor] = treeIndex;
                 if (visited[cursor]) {
                     System.err.println("Visited contains: " + cursor);
-                    System.err.println("Visited: " + visited);
+                    System.err.println("Visited: " + Arrays.toString(visited));
                     System.err.println("To visit: " + toVisit);
                 }
                 assert (!visited[cursor]);
                 visited[cursor] = true;
                 visitedOrder[numVisited] = cursor;
+                for (int i : cliques[cursor].neighborIndices) seenVariable[i] = true;
                 numVisited++;
 
-                for (int i = 0; i < cliques.length; i++) {
+                childLoop: for (int i = 0; i < cliques.length; i++) {
                     if (i == cursor) continue;
                     if (i == parent[cursor]) continue;
                     if (domainsOverlap(cliques[cursor], cliques[i])) {
-                        if (parent[i] == -1) {
+
+                        // Make sure that for every variable that we've already seen somewhere in the graph, if it's
+                        // in the child, it's in the parent. Otherwise we'll break the property of continuous
+                        // transmission of information about variables through messages.
+
+                        childNeighborLoop: for (int child : cliques[i].neighborIndices) {
+                            if (seenVariable[child]) {
+                                for (int j : cliques[cursor].neighborIndices) {
+                                    if (j == child) {
+                                        continue childNeighborLoop;
+                                    }
+                                }
+                                // If we get here it means that this clique is not good as a child, since we can't pass
+                                // it all the information it needs from other elements of the tree
+                                continue childLoop;
+                            }
+                        }
+
+                        if (parent[i] == -1 && !visited[i]) {
                             if (!toVisitArray[i]) {
                                 toVisit.add(i);
                                 toVisitArray[i] = true;
+                                for (int j : cliques[i].neighborIndices) seenVariable[j] = true;
                             }
                             parent[i] = cursor;
                         }
                     }
                 }
             }
+            // No cycles in the tree
+            assert(parent[root] == -1);
         }
 
         assert (numVisited == cliques.length);
@@ -417,6 +452,7 @@ public class CliqueTree {
 
             if (CACHE_MESSAGES
                     && forceRootForCachedMessagePassing != -1
+                    && cachedCliquesBackPointers[cursor] != -1
                     && cachedCliquesBackPointers[parent[cursor]] != -1
                     && cachedMessages[cachedCliquesBackPointers[cursor]][cachedCliquesBackPointers[parent[cursor]]] != null
                     && cachedBackwardPassedMessages[cachedCliquesBackPointers[cursor]][cachedCliquesBackPointers[parent[cursor]]]) {
@@ -478,11 +514,6 @@ public class CliqueTree {
 
         // Calculate final marginals for each variable
 
-        int maxVar = 0;
-        for (GraphicalModel.Factor fac : model.factors) {
-            for (int i : fac.neigborIndices) if (i > maxVar) maxVar = i;
-        }
-
         double[][] marginals = new double[maxVar + 1][];
 
         // Include observed variables as deterministic
@@ -534,7 +565,7 @@ public class CliqueTree {
                         double valueSum = convergedClique.valueSum();
                         if (Double.isFinite(valueSum) && Double.isFinite(treePartitionFunctions[trees[i]])) {
                             if (Math.abs(treePartitionFunctions[trees[i]] - valueSum) >= 1.0e-3 * treePartitionFunctions[trees[i]]) {
-                                System.err.println("Different partition functions for tree " + i + ": ");
+                                System.err.println("Different partition functions for tree " + trees[i] + ": ");
                                 System.err.println("Pre-existing for tree: " + treePartitionFunctions[trees[i]]);
                                 System.err.println("This clique for tree: " + valueSum);
                             }

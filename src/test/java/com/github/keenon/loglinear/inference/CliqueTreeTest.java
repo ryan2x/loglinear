@@ -38,7 +38,6 @@ public class CliqueTreeTest {
         // Now we go through several random mutations to the model, and check that everything is still consistent
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
-            System.err.println("Testing mutation "+i);
             randomlyMutateGraphicalModel(model, r);
             checkMarginalsAgainstBruteForce(model, weights, inference);
         }
@@ -301,7 +300,6 @@ public class CliqueTreeTest {
         // Now we go through several random mutations to the model, and check that everything is still consistent
         Random r = new Random();
         for (int i = 0; i < 10; i++) {
-            System.err.println("Testing mutation "+i);
             randomlyMutateGraphicalModel(model, r);
             checkMAPAgainstBruteForce(model, weights, inference);
         }
