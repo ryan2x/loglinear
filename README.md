@@ -13,7 +13,7 @@ Maven:
 
 For documentation, see the "doc/" folder.
 
-# What's new in v1.1:
+# What's new in v1.1: Inference Speed
 
 This release was all about optimization. I provided another function in CliqueTree, calculateMarginalsJustSingletons(),
 that skips a lot of the processing that's unnecessary if all you're looking for is individual variable marginals.
@@ -26,3 +26,9 @@ worth mentioning by name.
 
 The upshot: a huge boost in speed of inference, which is crucial for MCMC sampling applications like you find in my
 paper, "On The Job Learning with Bayesian Decision Theory", [here](http://arxiv.org/pdf/1506.03140v1.pdf)
+
+# Coming up in v1.2: Distributed Learning
+
+Distributed optimization for learning! Since the raw gradient computation is unlikely to get much faster after all this
+optimization in v1.1, it's time to make sure that learning can be handled by a cluster of machines accessible over the 
+network.
