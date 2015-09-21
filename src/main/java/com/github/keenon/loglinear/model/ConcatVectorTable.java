@@ -29,7 +29,7 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
      * Convenience function to write this factor directly to a stream, encoded as proto. Reversible with readFromStream.
      *
      * @param stream the stream to write to. does not flush automatically
-     * @throws IOException
+     * @throws IOException passed through from the stream
      */
     public void writeToStream(OutputStream stream) throws IOException {
         getProtoBuilder().build().writeTo(stream);
@@ -40,7 +40,7 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
      *
      * @param stream the stream to be read from
      * @return a new in-memory feature factor
-     * @throws IOException
+     * @throws IOException passed through from the stream
      */
     public static ConcatVectorTable readFromStream(InputStream stream) throws IOException {
         return readFromProto(ConcatVectorTableProto.ConcatVectorTable.parseFrom(stream));

@@ -151,7 +151,7 @@ public class GraphicalModel {
      * Writes the protobuf version of this graphical model to a stream. reversible with readFromStream().
      *
      * @param stream the output stream to write to
-     * @throws IOException
+     * @throws IOException passed through from the stream
      */
     public void writeToStream(OutputStream stream) throws IOException {
         getProtoBuilder().build().writeTo(stream);
@@ -162,7 +162,7 @@ public class GraphicalModel {
      *
      * @param stream the stream to read from, assuming protobuf encoding
      * @return a new graphical model
-     * @throws IOException
+     * @throws IOException passed through from the stream
      */
     public static GraphicalModel readFromStream(InputStream stream) throws IOException {
         return readFromProto(GraphicalModelProto.GraphicalModel.parseFrom(stream));

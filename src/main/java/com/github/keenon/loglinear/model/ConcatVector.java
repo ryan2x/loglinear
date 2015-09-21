@@ -424,7 +424,7 @@ public class ConcatVector {
      * Writes the protobuf version of this vector to a stream. reversible with readFromStream().
      *
      * @param stream the output stream to write to
-     * @throws IOException
+     * @throws IOException passed through from the stream
      */
     public void writeToStream(OutputStream stream) throws IOException {
         getProtoBuilder().build().writeDelimitedTo(stream);
@@ -435,7 +435,7 @@ public class ConcatVector {
      *
      * @param stream the stream to read from, assuming protobuf encoding
      * @return a new concat vector
-     * @throws IOException
+     * @throws IOException passed through from the stream
      */
     public static ConcatVector readFromStream(InputStream stream) throws IOException {
         return readFromProto(ConcatVectorProto.ConcatVector.parseDelimitedFrom(stream));
