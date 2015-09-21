@@ -1,11 +1,11 @@
 package com.github.keenon.loglinear.inference;
 
-import com.github.keenon.loglinear.fastmath.FastMath;
 import com.github.keenon.loglinear.model.NDArray;
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
 import com.github.keenon.loglinear.model.NDArrayDoubles;
 import cz.adamh.utils.NativeUtils;
+import org.apache.commons.math3.util.FastMath;
 
 import java.io.IOException;
 import java.util.*;
