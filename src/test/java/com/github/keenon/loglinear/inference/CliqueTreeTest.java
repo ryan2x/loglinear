@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class CliqueTreeTest {
 
     @Theory
-    public void testCalculateMarginals(@ForAll(sampleSize = 10000) @From(GraphicalModelGenerator.class) GraphicalModel model,
+    public void testCalculateMarginals(@ForAll(sampleSize = 100) @From(GraphicalModelGenerator.class) GraphicalModel model,
                                        @ForAll(sampleSize = 2) @From(WeightsGenerator.class) ConcatVector weights) throws Exception {
         CliqueTree inference = new CliqueTree(model, weights);
 
