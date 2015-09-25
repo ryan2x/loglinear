@@ -1,4 +1,4 @@
-package io.github.keenon;
+package com.github.keenon;
 
 option java_package = "com.github.keenon.loglinear";
 option java_outer_classname = "ConcatVectorProto";

@@ -152,11 +152,11 @@ public class CoNLLBenchmark {
                     String thisTag = tags.get(assignment[0]);
                     String nextTag = tags.get(assignment[1]);
 
-                    ConcatVector features = new ConcatVector(2 * tags.size() * tags.size());
+                    ConcatVector features = new ConcatVector(tags.size() + (2 * tags.size() * tags.size()));
 
                     if (embeddings.containsKey(sentence.token.get(iFinal)) || embeddings.containsKey(sentence.token.get(iFinal + 1))) {
 
-                        int index = assignment[0] * tags.size() + assignment[1];
+                        int index = tags.size() + assignment[0] * tags.size() + assignment[1];
                         if (embeddings.get(sentence.token.get(iFinal)) != null) {
                             features.setDenseComponent(index, embeddings.get(sentence.token.get(iFinal)));
                         }

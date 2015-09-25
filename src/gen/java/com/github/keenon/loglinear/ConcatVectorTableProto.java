@@ -16,7 +16,7 @@ public final class ConcatVectorTableProto {
     int getDimensionSizeCount();
     int getDimensionSize(int index);
     
-    // repeated .io.github.keenon.ConcatVector factorTable = 2;
+    // repeated .com.github.keenon.ConcatVector factorTable = 2;
     java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector> 
         getFactorTableList();
     com.github.keenon.loglinear.ConcatVectorProto.ConcatVector getFactorTable(int index);
@@ -46,12 +46,12 @@ public final class ConcatVectorTableProto {
     
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_io_github_keenon_ConcatVectorTable_descriptor;
+      return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_com_github_keenon_ConcatVectorTable_descriptor;
     }
     
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_io_github_keenon_ConcatVectorTable_fieldAccessorTable;
+      return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_com_github_keenon_ConcatVectorTable_fieldAccessorTable;
     }
     
     // repeated int32 dimensionSize = 1;
@@ -68,7 +68,7 @@ public final class ConcatVectorTableProto {
       return dimensionSize_.get(index);
     }
     
-    // repeated .io.github.keenon.ConcatVector factorTable = 2;
+    // repeated .com.github.keenon.ConcatVector factorTable = 2;
     public static final int FACTORTABLE_FIELD_NUMBER = 2;
     private java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector> factorTable_;
     public java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector> getFactorTableList() {
@@ -236,12 +236,12 @@ public final class ConcatVectorTableProto {
        implements com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTableOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_io_github_keenon_ConcatVectorTable_descriptor;
+        return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_com_github_keenon_ConcatVectorTable_descriptor;
       }
       
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_io_github_keenon_ConcatVectorTable_fieldAccessorTable;
+        return com.github.keenon.loglinear.ConcatVectorTableProto.internal_static_com_github_keenon_ConcatVectorTable_fieldAccessorTable;
       }
       
       // Construct using com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.newBuilder()
@@ -482,7 +482,7 @@ public final class ConcatVectorTableProto {
         return this;
       }
       
-      // repeated .io.github.keenon.ConcatVector factorTable = 2;
+      // repeated .com.github.keenon.ConcatVector factorTable = 2;
       private java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector> factorTable_ =
         java.util.Collections.emptyList();
       private void ensureFactorTableIsMutable() {
@@ -668,7 +668,7 @@ public final class ConcatVectorTableProto {
         return factorTableBuilder_;
       }
       
-      // @@protoc_insertion_point(builder_scope:io.github.keenon.ConcatVectorTable)
+      // @@protoc_insertion_point(builder_scope:com.github.keenon.ConcatVectorTable)
     }
     
     static {
@@ -676,14 +676,14 @@ public final class ConcatVectorTableProto {
       defaultInstance.initFields();
     }
     
-    // @@protoc_insertion_point(class_scope:io.github.keenon.ConcatVectorTable)
+    // @@protoc_insertion_point(class_scope:com.github.keenon.ConcatVectorTable)
   }
   
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_github_keenon_ConcatVectorTable_descriptor;
+    internal_static_com_github_keenon_ConcatVectorTable_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_io_github_keenon_ConcatVectorTable_fieldAccessorTable;
+      internal_static_com_github_keenon_ConcatVectorTable_fieldAccessorTable;
   
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -693,23 +693,23 @@ public final class ConcatVectorTableProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\027ConcatVectorTable.proto\022\020io.github.kee" +
-      "non\032\022ConcatVector.proto\"_\n\021ConcatVectorT" +
-      "able\022\025\n\rdimensionSize\030\001 \003(\005\0223\n\013factorTab" +
-      "le\030\002 \003(\0132\036.io.github.keenon.ConcatVector" +
-      "B5\n\033com.github.keenon.loglinearB\026ConcatV" +
-      "ectorTableProto"
+      "\n\027ConcatVectorTable.proto\022\021com.github.ke" +
+      "enon\032\022ConcatVector.proto\"`\n\021ConcatVector" +
+      "Table\022\025\n\rdimensionSize\030\001 \003(\005\0224\n\013factorTa" +
+      "ble\030\002 \003(\0132\037.com.github.keenon.ConcatVect" +
+      "orB5\n\033com.github.keenon.loglinearB\026Conca" +
+      "tVectorTableProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_io_github_keenon_ConcatVectorTable_descriptor =
+          internal_static_com_github_keenon_ConcatVectorTable_descriptor =
             getDescriptor().getMessageTypes().get(0);
-          internal_static_io_github_keenon_ConcatVectorTable_fieldAccessorTable = new
+          internal_static_com_github_keenon_ConcatVectorTable_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_io_github_keenon_ConcatVectorTable_descriptor,
+              internal_static_com_github_keenon_ConcatVectorTable_descriptor,
               new java.lang.String[] { "DimensionSize", "FactorTable", },
               com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.class,
               com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.Builder.class);

@@ -11,7 +11,7 @@ public final class ConcatVectorProto {
   public interface ConcatVectorOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
     
-    // repeated .io.github.keenon.ConcatVector.Component component = 1;
+    // repeated .com.github.keenon.ConcatVector.Component component = 1;
     java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> 
         getComponentList();
     com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component getComponent(int index);
@@ -41,12 +41,12 @@ public final class ConcatVectorProto {
     
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_descriptor;
+      return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_descriptor;
     }
     
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_fieldAccessorTable;
+      return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_fieldAccessorTable;
     }
     
     public interface ComponentOrBuilder
@@ -81,12 +81,12 @@ public final class ConcatVectorProto {
       
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_Component_descriptor;
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_descriptor;
       }
       
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_Component_fieldAccessorTable;
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable;
       }
       
       private int bitField0_;
@@ -256,12 +256,12 @@ public final class ConcatVectorProto {
          implements com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_Component_descriptor;
+          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_descriptor;
         }
         
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_Component_fieldAccessorTable;
+          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable;
         }
         
         // Construct using com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.newBuilder()
@@ -489,7 +489,7 @@ public final class ConcatVectorProto {
           return this;
         }
         
-        // @@protoc_insertion_point(builder_scope:io.github.keenon.ConcatVector.Component)
+        // @@protoc_insertion_point(builder_scope:com.github.keenon.ConcatVector.Component)
       }
       
       static {
@@ -497,10 +497,10 @@ public final class ConcatVectorProto {
         defaultInstance.initFields();
       }
       
-      // @@protoc_insertion_point(class_scope:io.github.keenon.ConcatVector.Component)
+      // @@protoc_insertion_point(class_scope:com.github.keenon.ConcatVector.Component)
     }
     
-    // repeated .io.github.keenon.ConcatVector.Component component = 1;
+    // repeated .com.github.keenon.ConcatVector.Component component = 1;
     public static final int COMPONENT_FIELD_NUMBER = 1;
     private java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> component_;
     public java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> getComponentList() {
@@ -655,12 +655,12 @@ public final class ConcatVectorProto {
        implements com.github.keenon.loglinear.ConcatVectorProto.ConcatVectorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_descriptor;
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_descriptor;
       }
       
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_io_github_keenon_ConcatVector_fieldAccessorTable;
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_fieldAccessorTable;
       }
       
       // Construct using com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.newBuilder()
@@ -825,7 +825,7 @@ public final class ConcatVectorProto {
       
       private int bitField0_;
       
-      // repeated .io.github.keenon.ConcatVector.Component component = 1;
+      // repeated .com.github.keenon.ConcatVector.Component component = 1;
       private java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> component_ =
         java.util.Collections.emptyList();
       private void ensureComponentIsMutable() {
@@ -1011,7 +1011,7 @@ public final class ConcatVectorProto {
         return componentBuilder_;
       }
       
-      // @@protoc_insertion_point(builder_scope:io.github.keenon.ConcatVector)
+      // @@protoc_insertion_point(builder_scope:com.github.keenon.ConcatVector)
     }
     
     static {
@@ -1019,19 +1019,19 @@ public final class ConcatVectorProto {
       defaultInstance.initFields();
     }
     
-    // @@protoc_insertion_point(class_scope:io.github.keenon.ConcatVector)
+    // @@protoc_insertion_point(class_scope:com.github.keenon.ConcatVector)
   }
   
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_github_keenon_ConcatVector_descriptor;
+    internal_static_com_github_keenon_ConcatVector_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_io_github_keenon_ConcatVector_fieldAccessorTable;
+      internal_static_com_github_keenon_ConcatVector_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_io_github_keenon_ConcatVector_Component_descriptor;
+    internal_static_com_github_keenon_ConcatVector_Component_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_io_github_keenon_ConcatVector_Component_fieldAccessorTable;
+      internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable;
   
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1041,31 +1041,31 @@ public final class ConcatVectorProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\022ConcatVector.proto\022\020io.github.keenon\"v" +
-      "\n\014ConcatVector\022;\n\tcomponent\030\001 \003(\0132(.io.g" +
-      "ithub.keenon.ConcatVector.Component\032)\n\tC" +
-      "omponent\022\016\n\006sparse\030\001 \002(\010\022\014\n\004data\030\002 \003(\001B0" +
-      "\n\033com.github.keenon.loglinearB\021ConcatVec" +
-      "torProto"
+      "\n\022ConcatVector.proto\022\021com.github.keenon\"" +
+      "w\n\014ConcatVector\022<\n\tcomponent\030\001 \003(\0132).com" +
+      ".github.keenon.ConcatVector.Component\032)\n" +
+      "\tComponent\022\016\n\006sparse\030\001 \002(\010\022\014\n\004data\030\002 \003(\001" +
+      "B0\n\033com.github.keenon.loglinearB\021ConcatV" +
+      "ectorProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_io_github_keenon_ConcatVector_descriptor =
+          internal_static_com_github_keenon_ConcatVector_descriptor =
             getDescriptor().getMessageTypes().get(0);
-          internal_static_io_github_keenon_ConcatVector_fieldAccessorTable = new
+          internal_static_com_github_keenon_ConcatVector_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_io_github_keenon_ConcatVector_descriptor,
+              internal_static_com_github_keenon_ConcatVector_descriptor,
               new java.lang.String[] { "Component", },
               com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.class,
               com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Builder.class);
-          internal_static_io_github_keenon_ConcatVector_Component_descriptor =
-            internal_static_io_github_keenon_ConcatVector_descriptor.getNestedTypes().get(0);
-          internal_static_io_github_keenon_ConcatVector_Component_fieldAccessorTable = new
+          internal_static_com_github_keenon_ConcatVector_Component_descriptor =
+            internal_static_com_github_keenon_ConcatVector_descriptor.getNestedTypes().get(0);
+          internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_io_github_keenon_ConcatVector_Component_descriptor,
+              internal_static_com_github_keenon_ConcatVector_Component_descriptor,
               new java.lang.String[] { "Sparse", "Data", },
               com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.class,
               com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder.class);
