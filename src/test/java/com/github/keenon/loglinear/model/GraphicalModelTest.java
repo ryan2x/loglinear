@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -38,6 +39,17 @@ public class GraphicalModelTest {
         GraphicalModel recovered = GraphicalModel.readFromStream(byteArrayInputStream);
 
         assertTrue(graphicalModel.valueEquals(recovered, 1.0e-5));
+    }
+
+    @Theory
+    public void testGetVariableSizes(@ForAll(sampleSize = 50) @From(GraphicalModelGenerator.class) GraphicalModel graphicalModel) throws IOException {
+        int[] sizes = graphicalModel.getVariableSizes();
+
+        for (GraphicalModel.Factor f : graphicalModel.factors) {
+            for (int i = 0; i < f.neigborIndices.length; i++) {
+                assertEquals(f.featuresTable.getDimensions()[i], sizes[f.neigborIndices[i]]);
+            }
+        }
     }
 
     public static class GraphicalModelGenerator extends Generator<GraphicalModel> {

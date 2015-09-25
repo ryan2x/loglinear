@@ -148,6 +148,35 @@ public class GraphicalModel {
     }
 
     /**
+     * @return an array of integers, indicating variable sizes given by each of the factors in the model
+     */
+    public int[] getVariableSizes() {
+        if (factors.size() == 0) {
+            return new int[0];
+        }
+
+        int maxVar = 0;
+        for (Factor f : factors) {
+            for (int n : f.neigborIndices) {
+                if (n > maxVar) maxVar = n;
+            }
+        }
+
+        int[] sizes = new int[maxVar+1];
+        for (int i = 0; i < sizes.length; i++) {
+            sizes[i] = -1;
+        }
+
+        for (Factor f : factors) {
+            for (int i = 0; i < f.neigborIndices.length; i++) {
+                sizes[f.neigborIndices[i]] = f.featuresTable.getDimensions()[i];
+            }
+        }
+
+        return sizes;
+    }
+
+    /**
      * Writes the protobuf version of this graphical model to a stream. reversible with readFromStream().
      *
      * @param stream the output stream to write to
