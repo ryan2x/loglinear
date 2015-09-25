@@ -8,7 +8,7 @@ Maven:
     <dependency>
         <groupId>com.github.keenon</groupId>
         <artifactId>loglinear</artifactId>
-        <version>1.1</version>
+        <version>1.1.1</version>
     </dependency>
 
 For documentation, see the "doc/" folder.
@@ -26,6 +26,11 @@ worth mentioning by name.
 
 The upshot: a huge boost in speed of inference, which is crucial for MCMC sampling applications like you find in my
 paper, "On The Job Learning with Bayesian Decision Theory", [here](http://arxiv.org/pdf/1506.03140v1.pdf)
+
+# What's new in v1.1.1: model.getVariableSizes()
+
+I added a quick convenience function to get an int[] array, as a snapshot of the sizes of the variables given by the
+factors of the model.
 
 # Coming up in v1.2: Distributed Learning
 
