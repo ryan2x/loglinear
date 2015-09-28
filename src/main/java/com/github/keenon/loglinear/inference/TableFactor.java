@@ -58,6 +58,18 @@ public class TableFactor extends NDArrayDoubles {
     }
 
     /**
+     * Fast approximation of the exp() function
+     * @param val the value to be exponentiated
+     * @return the value we want
+     */
+    public static double exp(double val) {
+        final long tmp = (long) (1512775 * val + 1072632447);
+        return Double.longBitsToDouble(tmp << 32);
+    }
+
+    public static final boolean USE_EXP_APPROX = false;
+
+    /**
      * Construct a TableFactor for inference within a model. This is the same as the other constructor, except that the
      * table is observed out before any unnecessary dot products are done out, so hopefully we dramatically reduce the
      * number of computations required to calculate the resulting table.
@@ -173,7 +185,12 @@ public class TableFactor extends NDArrayDoubles {
         while (true) {
             double v = getAssignmentLogValue(assignment);
             for (int i = 0; i < neighborIndices.length; i++) {
-                results[i][assignment[i]] += FastMath.exp(v - maxValues[i][assignment[i]]);
+                if (USE_EXP_APPROX) {
+                    results[i][assignment[i]] += exp(v - maxValues[i][assignment[i]]);
+                }
+                else {
+                    results[i][assignment[i]] += FastMath.exp(v - maxValues[i][assignment[i]]);
+                }
             }
             // This mutates the resultAssignment[] array, rather than creating a new one
             if (secondFastPassByReferenceIterator.hasNext()) {
@@ -187,7 +204,12 @@ public class TableFactor extends NDArrayDoubles {
         for (int i = 0; i < neighborIndices.length; i++) {
             double sum = 0.0;
             for (int j = 0; j < results[i].length; j++) {
-                results[i][j] = FastMath.exp(maxValues[i][j]) * results[i][j];
+                if (USE_EXP_APPROX) {
+                    results[i][j] = exp(maxValues[i][j]) * results[i][j];
+                }
+                else {
+                    results[i][j] = FastMath.exp(maxValues[i][j]) * results[i][j];
+                }
                 sum += results[i][j];
             }
             if (Double.isInfinite(sum)) {
@@ -296,7 +318,12 @@ public class TableFactor extends NDArrayDoubles {
                     for (int j = 0; j < getDimensions()[1]; j++) {
                         int index = k + j;
                         if (Double.isFinite(max[j])) {
-                            marginalized.values[j] += FastMath.exp(values[index] - max[j]);
+                            if (USE_EXP_APPROX) {
+                                marginalized.values[j] += exp(values[index] - max[j]);
+                            }
+                            else {
+                                marginalized.values[j] += FastMath.exp(values[index] - max[j]);
+                            }
                         }
                     }
                 }
@@ -344,7 +371,12 @@ public class TableFactor extends NDArrayDoubles {
                     for (int j = 0; j < getDimensions()[1]; j++) {
                         int index = k + j;
                         if (Double.isFinite(max[i])) {
-                            marginalized.values[i] += FastMath.exp(values[index] - max[i]);
+                            if (USE_EXP_APPROX) {
+                                marginalized.values[i] += exp(values[index] - max[i]);
+                            }
+                            else {
+                                marginalized.values[i] += FastMath.exp(values[index] - max[i]);
+                            }
                         }
                     }
                 }
@@ -371,7 +403,7 @@ public class TableFactor extends NDArrayDoubles {
             TableFactor maxValues = maxOut(variable);
 
             // Then we do the sum against an offset from the pivots
-            TableFactor marginalized = marginalize(variable, 0, (marginalizedVariableValue, assignment) -> (a, b) -> a + FastMath.exp(b - maxValues.getAssignmentLogValue(assignment)));
+            TableFactor marginalized = marginalize(variable, 0, (marginalizedVariableValue, assignment) -> (a, b) -> a + (USE_EXP_APPROX ? exp(b - maxValues.getAssignmentLogValue(assignment)) : FastMath.exp(b - maxValues.getAssignmentLogValue(assignment))));
 
             // Then we factor the max values back in, and
             for (int[] assignment : marginalized) {

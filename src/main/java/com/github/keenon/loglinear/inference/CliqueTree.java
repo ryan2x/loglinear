@@ -561,7 +561,7 @@ public class CliqueTree {
                     // Check that our partition function is the same as the trees we're attached to, or with %.1, for numerical reasons.
                     // Sometimes the partition function will explode in value, which can make a non-%-based assert worthless here
 
-                    if (assertsEnabled()) {
+                    if (assertsEnabled() && !TableFactor.USE_EXP_APPROX) {
                         double valueSum = convergedClique.valueSum();
                         if (Double.isFinite(valueSum) && Double.isFinite(treePartitionFunctions[trees[i]])) {
                             if (Math.abs(treePartitionFunctions[trees[i]] - valueSum) >= 1.0e-3 * treePartitionFunctions[trees[i]]) {
