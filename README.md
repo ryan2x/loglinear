@@ -8,7 +8,7 @@ Maven:
     <dependency>
         <groupId>com.github.keenon</groupId>
         <artifactId>loglinear</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2</version>
     </dependency>
 
 For documentation, see the "doc/" folder.
@@ -31,6 +31,11 @@ paper, "On The Job Learning with Bayesian Decision Theory", [here](http://arxiv.
 
 I added a quick convenience function to get an int[] array, as a snapshot of the sizes of the variables given by the
 factors of the model.
+
+# What's new in v1.1.2: CliqueTree cacheing bugfix
+
+There were some dangerous assumptions in the cacheing of messages in CliqueTree, and if you ran with asserts enabled,
+some aggressive modifications of the model could cause your CliqueTree to crash with an assert. This is now fixed.
 
 # Coming up in v1.2: Distributed Learning
 
