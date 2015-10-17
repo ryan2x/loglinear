@@ -183,7 +183,7 @@ public class GraphicalModel {
      * @throws IOException passed through from the stream
      */
     public void writeToStream(OutputStream stream) throws IOException {
-        getProtoBuilder().build().writeTo(stream);
+        getProtoBuilder().build().writeDelimitedTo(stream);
     }
 
     /**
@@ -194,7 +194,7 @@ public class GraphicalModel {
      * @throws IOException passed through from the stream
      */
     public static GraphicalModel readFromStream(InputStream stream) throws IOException {
-        return readFromProto(GraphicalModelProto.GraphicalModel.parseFrom(stream));
+        return readFromProto(GraphicalModelProto.GraphicalModel.parseDelimitedFrom(stream));
     }
 
     /**
@@ -220,6 +220,7 @@ public class GraphicalModel {
      * @return an in-memory GraphicalModel
      */
     public static GraphicalModel readFromProto(GraphicalModelProto.GraphicalModel proto) {
+        if (proto == null) return null;
         GraphicalModel model = new GraphicalModel();
         model.modelMetaData = readMetaDataFromProto(proto.getMetaData());
         model.variableMetaData = new ArrayList<>();
