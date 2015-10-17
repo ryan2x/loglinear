@@ -8,7 +8,7 @@ Maven:
     <dependency>
         <groupId>com.github.keenon</groupId>
         <artifactId>loglinear</artifactId>
-        <version>1.1.2</version>
+        <version>1.1.3</version>
     </dependency>
 
 For documentation, see the "doc/" folder.
@@ -36,6 +36,11 @@ factors of the model.
 
 There were some dangerous assumptions in the cacheing of messages in CliqueTree, and if you ran with asserts enabled,
 some aggressive modifications of the model could cause your CliqueTree to crash with an assert. This is now fixed.
+
+# What's new in v1.1.3: ModelBatch
+
+Being able to store and retrieve large numbers of proto'd GraphicalModels is a really useful feature for a number of
+applications. While it's not hard to write, it's nice to have a simple, convenient, trustworthy way to do it.
 
 # Coming up in v1.2: Distributed Learning
 
