@@ -8,121 +8,330 @@ public final class ConcatVectorProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface ConcatVectorOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // repeated .com.github.keenon.ConcatVector.Component component = 1;
+  public interface ConcatVectorOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:com.github.keenon.ConcatVector)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> 
         getComponentList();
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component getComponent(int index);
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     int getComponentCount();
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     java.util.List<? extends com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder> 
         getComponentOrBuilderList();
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder getComponentOrBuilder(
         int index);
   }
+  /**
+   * Protobuf type {@code com.github.keenon.ConcatVector}
+   */
   public static final class ConcatVector extends
-      com.google.protobuf.GeneratedMessage
-      implements ConcatVectorOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:com.github.keenon.ConcatVector)
+      ConcatVectorOrBuilder {
     // Use ConcatVector.newBuilder() to construct.
-    private ConcatVector(Builder builder) {
+    private ConcatVector(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
+      this.unknownFields = builder.getUnknownFields();
     }
-    private ConcatVector(boolean noInit) {}
-    
+    private ConcatVector(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
     private static final ConcatVector defaultInstance;
     public static ConcatVector getDefaultInstance() {
       return defaultInstance;
     }
-    
+
     public ConcatVector getDefaultInstanceForType() {
       return defaultInstance;
     }
-    
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ConcatVector(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                component_ = new java.util.ArrayList<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              component_.add(input.readMessage(com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          component_ = java.util.Collections.unmodifiableList(component_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
       return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_descriptor;
     }
-    
+
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_fieldAccessorTable;
+      return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.class, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Builder.class);
     }
-    
-    public interface ComponentOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required bool sparse = 1;
+
+    public static com.google.protobuf.Parser<ConcatVector> PARSER =
+        new com.google.protobuf.AbstractParser<ConcatVector>() {
+      public ConcatVector parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ConcatVector(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ConcatVector> getParserForType() {
+      return PARSER;
+    }
+
+    public interface ComponentOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:com.github.keenon.ConcatVector.Component)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>required bool sparse = 1;</code>
+       */
       boolean hasSparse();
+      /**
+       * <code>required bool sparse = 1;</code>
+       */
       boolean getSparse();
-      
-      // repeated double data = 2;
+
+      /**
+       * <code>repeated double data = 2;</code>
+       */
       java.util.List<java.lang.Double> getDataList();
+      /**
+       * <code>repeated double data = 2;</code>
+       */
       int getDataCount();
+      /**
+       * <code>repeated double data = 2;</code>
+       */
       double getData(int index);
     }
+    /**
+     * Protobuf type {@code com.github.keenon.ConcatVector.Component}
+     */
     public static final class Component extends
-        com.google.protobuf.GeneratedMessage
-        implements ComponentOrBuilder {
+        com.google.protobuf.GeneratedMessage implements
+        // @@protoc_insertion_point(message_implements:com.github.keenon.ConcatVector.Component)
+        ComponentOrBuilder {
       // Use Component.newBuilder() to construct.
-      private Component(Builder builder) {
+      private Component(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
         super(builder);
+        this.unknownFields = builder.getUnknownFields();
       }
-      private Component(boolean noInit) {}
-      
+      private Component(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
       private static final Component defaultInstance;
       public static Component getDefaultInstance() {
         return defaultInstance;
       }
-      
+
       public Component getDefaultInstanceForType() {
         return defaultInstance;
       }
-      
+
+      private final com.google.protobuf.UnknownFieldSet unknownFields;
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+          getUnknownFields() {
+        return this.unknownFields;
+      }
+      private Component(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input, unknownFields,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                sparse_ = input.readBool();
+                break;
+              }
+              case 17: {
+                if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                  data_ = new java.util.ArrayList<java.lang.Double>();
+                  mutable_bitField0_ |= 0x00000002;
+                }
+                data_.add(input.readDouble());
+                break;
+              }
+              case 18: {
+                int length = input.readRawVarint32();
+                int limit = input.pushLimit(length);
+                if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
+                  data_ = new java.util.ArrayList<java.lang.Double>();
+                  mutable_bitField0_ |= 0x00000002;
+                }
+                while (input.getBytesUntilLimit() > 0) {
+                  data_.add(input.readDouble());
+                }
+                input.popLimit(limit);
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+            data_ = java.util.Collections.unmodifiableList(data_);
+          }
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable;
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.class, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder.class);
       }
-      
+
+      public static com.google.protobuf.Parser<Component> PARSER =
+          new com.google.protobuf.AbstractParser<Component>() {
+        public Component parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new Component(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<Component> getParserForType() {
+        return PARSER;
+      }
+
       private int bitField0_;
-      // required bool sparse = 1;
       public static final int SPARSE_FIELD_NUMBER = 1;
       private boolean sparse_;
+      /**
+       * <code>required bool sparse = 1;</code>
+       */
       public boolean hasSparse() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
+      /**
+       * <code>required bool sparse = 1;</code>
+       */
       public boolean getSparse() {
         return sparse_;
       }
-      
-      // repeated double data = 2;
+
       public static final int DATA_FIELD_NUMBER = 2;
       private java.util.List<java.lang.Double> data_;
+      /**
+       * <code>repeated double data = 2;</code>
+       */
       public java.util.List<java.lang.Double>
           getDataList() {
         return data_;
       }
+      /**
+       * <code>repeated double data = 2;</code>
+       */
       public int getDataCount() {
         return data_.size();
       }
+      /**
+       * <code>repeated double data = 2;</code>
+       */
       public double getData(int index) {
         return data_.get(index);
       }
-      
+
       private void initFields() {
         sparse_ = false;
-        data_ = java.util.Collections.emptyList();;
+        data_ = java.util.Collections.emptyList();
       }
       private byte memoizedIsInitialized = -1;
       public final boolean isInitialized() {
         byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
         if (!hasSparse()) {
           memoizedIsInitialized = 0;
           return false;
@@ -130,7 +339,7 @@ public final class ConcatVectorProto {
         memoizedIsInitialized = 1;
         return true;
       }
-      
+
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
         getSerializedSize();
@@ -142,12 +351,12 @@ public final class ConcatVectorProto {
         }
         getUnknownFields().writeTo(output);
       }
-      
+
       private int memoizedSerializedSize = -1;
       public int getSerializedSize() {
         int size = memoizedSerializedSize;
         if (size != -1) return size;
-      
+
         size = 0;
         if (((bitField0_ & 0x00000001) == 0x00000001)) {
           size += com.google.protobuf.CodedOutputStream
@@ -163,113 +372,106 @@ public final class ConcatVectorProto {
         memoizedSerializedSize = size;
         return size;
       }
-      
+
       private static final long serialVersionUID = 0L;
       @java.lang.Override
       protected java.lang.Object writeReplace()
           throws java.io.ObjectStreamException {
         return super.writeReplace();
       }
-      
+
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.ByteString data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.ByteString data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(byte[] data)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
+        return PARSER.parseFrom(data);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(
           byte[] data,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(data, extensionRegistry);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(java.io.InputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseDelimitedFrom(java.io.InputStream input)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseDelimitedFrom(
           java.io.InputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.CodedInputStream input)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
+        return PARSER.parseFrom(input);
       }
       public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parseFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
+        return PARSER.parseFrom(input, extensionRegistry);
       }
-      
+
       public static Builder newBuilder() { return Builder.create(); }
       public Builder newBuilderForType() { return newBuilder(); }
       public static Builder newBuilder(com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component prototype) {
         return newBuilder().mergeFrom(prototype);
       }
       public Builder toBuilder() { return newBuilder(this); }
-      
+
       @java.lang.Override
       protected Builder newBuilderForType(
           com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
       }
+      /**
+       * Protobuf type {@code com.github.keenon.ConcatVector.Component}
+       */
       public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder {
+          com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:com.github.keenon.ConcatVector.Component)
+          com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
           return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_descriptor;
         }
-        
+
         protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
             internalGetFieldAccessorTable() {
-          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable;
+          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.class, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder.class);
         }
-        
+
         // Construct using com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.newBuilder()
         private Builder() {
           maybeForceBuilderInitialization();
         }
-        
-        private Builder(BuilderParent parent) {
+
+        private Builder(
+            com.google.protobuf.GeneratedMessage.BuilderParent parent) {
           super(parent);
           maybeForceBuilderInitialization();
         }
@@ -280,29 +482,29 @@ public final class ConcatVectorProto {
         private static Builder create() {
           return new Builder();
         }
-        
+
         public Builder clear() {
           super.clear();
           sparse_ = false;
           bitField0_ = (bitField0_ & ~0x00000001);
-          data_ = java.util.Collections.emptyList();;
+          data_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           return this;
         }
-        
+
         public Builder clone() {
           return create().mergeFrom(buildPartial());
         }
-        
+
         public com.google.protobuf.Descriptors.Descriptor
             getDescriptorForType() {
-          return com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.getDescriptor();
+          return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_Component_descriptor;
         }
-        
+
         public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component getDefaultInstanceForType() {
           return com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.getDefaultInstance();
         }
-        
+
         public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component build() {
           com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component result = buildPartial();
           if (!result.isInitialized()) {
@@ -310,17 +512,7 @@ public final class ConcatVectorProto {
           }
           return result;
         }
-        
-        private com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
+
         public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component buildPartial() {
           com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component result = new com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component(this);
           int from_bitField0_ = bitField0_;
@@ -338,7 +530,7 @@ public final class ConcatVectorProto {
           onBuilt();
           return result;
         }
-        
+
         public Builder mergeFrom(com.google.protobuf.Message other) {
           if (other instanceof com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component) {
             return mergeFrom((com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component)other);
@@ -347,7 +539,7 @@ public final class ConcatVectorProto {
             return this;
           }
         }
-        
+
         public Builder mergeFrom(com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component other) {
           if (other == com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.getDefaultInstance()) return this;
           if (other.hasSparse()) {
@@ -366,7 +558,7 @@ public final class ConcatVectorProto {
           this.mergeUnknownFields(other.getUnknownFields());
           return this;
         }
-        
+
         public final boolean isInitialized() {
           if (!hasSparse()) {
             
@@ -374,94 +566,87 @@ public final class ConcatVectorProto {
           }
           return true;
         }
-        
+
         public Builder mergeFrom(
             com.google.protobuf.CodedInputStream input,
             com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
-                }
-                break;
-              }
-              case 8: {
-                bitField0_ |= 0x00000001;
-                sparse_ = input.readBool();
-                break;
-              }
-              case 17: {
-                ensureDataIsMutable();
-                data_.add(input.readDouble());
-                break;
-              }
-              case 18: {
-                int length = input.readRawVarint32();
-                int limit = input.pushLimit(length);
-                while (input.getBytesUntilLimit() > 0) {
-                  addData(input.readDouble());
-                }
-                input.popLimit(limit);
-                break;
-              }
+          com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
             }
           }
+          return this;
         }
-        
         private int bitField0_;
-        
-        // required bool sparse = 1;
+
         private boolean sparse_ ;
+        /**
+         * <code>required bool sparse = 1;</code>
+         */
         public boolean hasSparse() {
           return ((bitField0_ & 0x00000001) == 0x00000001);
         }
+        /**
+         * <code>required bool sparse = 1;</code>
+         */
         public boolean getSparse() {
           return sparse_;
         }
+        /**
+         * <code>required bool sparse = 1;</code>
+         */
         public Builder setSparse(boolean value) {
           bitField0_ |= 0x00000001;
           sparse_ = value;
           onChanged();
           return this;
         }
+        /**
+         * <code>required bool sparse = 1;</code>
+         */
         public Builder clearSparse() {
           bitField0_ = (bitField0_ & ~0x00000001);
           sparse_ = false;
           onChanged();
           return this;
         }
-        
-        // repeated double data = 2;
-        private java.util.List<java.lang.Double> data_ = java.util.Collections.emptyList();;
+
+        private java.util.List<java.lang.Double> data_ = java.util.Collections.emptyList();
         private void ensureDataIsMutable() {
           if (!((bitField0_ & 0x00000002) == 0x00000002)) {
             data_ = new java.util.ArrayList<java.lang.Double>(data_);
             bitField0_ |= 0x00000002;
            }
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public java.util.List<java.lang.Double>
             getDataList() {
           return java.util.Collections.unmodifiableList(data_);
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public int getDataCount() {
           return data_.size();
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public double getData(int index) {
           return data_.get(index);
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public Builder setData(
             int index, double value) {
           ensureDataIsMutable();
@@ -469,66 +654,91 @@ public final class ConcatVectorProto {
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public Builder addData(double value) {
           ensureDataIsMutable();
           data_.add(value);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public Builder addAllData(
             java.lang.Iterable<? extends java.lang.Double> values) {
           ensureDataIsMutable();
-          super.addAll(values, data_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, data_);
           onChanged();
           return this;
         }
+        /**
+         * <code>repeated double data = 2;</code>
+         */
         public Builder clearData() {
-          data_ = java.util.Collections.emptyList();;
+          data_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
           return this;
         }
-        
+
         // @@protoc_insertion_point(builder_scope:com.github.keenon.ConcatVector.Component)
       }
-      
+
       static {
         defaultInstance = new Component(true);
         defaultInstance.initFields();
       }
-      
+
       // @@protoc_insertion_point(class_scope:com.github.keenon.ConcatVector.Component)
     }
-    
-    // repeated .com.github.keenon.ConcatVector.Component component = 1;
+
     public static final int COMPONENT_FIELD_NUMBER = 1;
     private java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> component_;
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     public java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> getComponentList() {
       return component_;
     }
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     public java.util.List<? extends com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder> 
         getComponentOrBuilderList() {
       return component_;
     }
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     public int getComponentCount() {
       return component_.size();
     }
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component getComponent(int index) {
       return component_.get(index);
     }
+    /**
+     * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+     */
     public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder getComponentOrBuilder(
         int index) {
       return component_.get(index);
     }
-    
+
     private void initFields() {
       component_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
       for (int i = 0; i < getComponentCount(); i++) {
         if (!getComponent(i).isInitialized()) {
           memoizedIsInitialized = 0;
@@ -538,7 +748,7 @@ public final class ConcatVectorProto {
       memoizedIsInitialized = 1;
       return true;
     }
-    
+
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -547,12 +757,12 @@ public final class ConcatVectorProto {
       }
       getUnknownFields().writeTo(output);
     }
-    
+
     private int memoizedSerializedSize = -1;
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
-    
+
       size = 0;
       for (int i = 0; i < component_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -562,113 +772,106 @@ public final class ConcatVectorProto {
       memoizedSerializedSize = size;
       return size;
     }
-    
+
     private static final long serialVersionUID = 0L;
     @java.lang.Override
     protected java.lang.Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
-    
+
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
+      return PARSER.parseFrom(data);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(data, extensionRegistry);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(java.io.InputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
+      return PARSER.parseFrom(input);
     }
     public static com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
+      return PARSER.parseFrom(input, extensionRegistry);
     }
-    
+
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.github.keenon.loglinear.ConcatVectorProto.ConcatVector prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
-    
+
     @java.lang.Override
     protected Builder newBuilderForType(
         com.google.protobuf.GeneratedMessage.BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
+    /**
+     * Protobuf type {@code com.github.keenon.ConcatVector}
+     */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.github.keenon.loglinear.ConcatVectorProto.ConcatVectorOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:com.github.keenon.ConcatVector)
+        com.github.keenon.loglinear.ConcatVectorProto.ConcatVectorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_descriptor;
       }
-      
+
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_fieldAccessorTable;
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.class, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Builder.class);
       }
-      
+
       // Construct using com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
-      
-      private Builder(BuilderParent parent) {
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -680,7 +883,7 @@ public final class ConcatVectorProto {
       private static Builder create() {
         return new Builder();
       }
-      
+
       public Builder clear() {
         super.clear();
         if (componentBuilder_ == null) {
@@ -691,20 +894,20 @@ public final class ConcatVectorProto {
         }
         return this;
       }
-      
+
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
-      
+
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.getDescriptor();
+        return com.github.keenon.loglinear.ConcatVectorProto.internal_static_com_github_keenon_ConcatVector_descriptor;
       }
-      
+
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector getDefaultInstanceForType() {
         return com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.getDefaultInstance();
       }
-      
+
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector build() {
         com.github.keenon.loglinear.ConcatVectorProto.ConcatVector result = buildPartial();
         if (!result.isInitialized()) {
@@ -712,17 +915,7 @@ public final class ConcatVectorProto {
         }
         return result;
       }
-      
-      private com.github.keenon.loglinear.ConcatVectorProto.ConcatVector buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        com.github.keenon.loglinear.ConcatVectorProto.ConcatVector result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
+
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector buildPartial() {
         com.github.keenon.loglinear.ConcatVectorProto.ConcatVector result = new com.github.keenon.loglinear.ConcatVectorProto.ConcatVector(this);
         int from_bitField0_ = bitField0_;
@@ -738,7 +931,7 @@ public final class ConcatVectorProto {
         onBuilt();
         return result;
       }
-      
+
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.github.keenon.loglinear.ConcatVectorProto.ConcatVector) {
           return mergeFrom((com.github.keenon.loglinear.ConcatVectorProto.ConcatVector)other);
@@ -747,7 +940,7 @@ public final class ConcatVectorProto {
           return this;
         }
       }
-      
+
       public Builder mergeFrom(com.github.keenon.loglinear.ConcatVectorProto.ConcatVector other) {
         if (other == com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.getDefaultInstance()) return this;
         if (componentBuilder_ == null) {
@@ -779,7 +972,7 @@ public final class ConcatVectorProto {
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
-      
+
       public final boolean isInitialized() {
         for (int i = 0; i < getComponentCount(); i++) {
           if (!getComponent(i).isInitialized()) {
@@ -789,43 +982,26 @@ public final class ConcatVectorProto {
         }
         return true;
       }
-      
+
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              }
-              break;
-            }
-            case 10: {
-              com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder subBuilder = com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addComponent(subBuilder.buildPartial());
-              break;
-            }
+        com.github.keenon.loglinear.ConcatVectorProto.ConcatVector parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.github.keenon.loglinear.ConcatVectorProto.ConcatVector) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
           }
         }
+        return this;
       }
-      
       private int bitField0_;
-      
-      // repeated .com.github.keenon.ConcatVector.Component component = 1;
+
       private java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> component_ =
         java.util.Collections.emptyList();
       private void ensureComponentIsMutable() {
@@ -834,10 +1010,13 @@ public final class ConcatVectorProto {
           bitField0_ |= 0x00000001;
          }
       }
-      
+
       private com.google.protobuf.RepeatedFieldBuilder<
           com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder> componentBuilder_;
-      
+
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> getComponentList() {
         if (componentBuilder_ == null) {
           return java.util.Collections.unmodifiableList(component_);
@@ -845,6 +1024,9 @@ public final class ConcatVectorProto {
           return componentBuilder_.getMessageList();
         }
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public int getComponentCount() {
         if (componentBuilder_ == null) {
           return component_.size();
@@ -852,6 +1034,9 @@ public final class ConcatVectorProto {
           return componentBuilder_.getCount();
         }
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component getComponent(int index) {
         if (componentBuilder_ == null) {
           return component_.get(index);
@@ -859,6 +1044,9 @@ public final class ConcatVectorProto {
           return componentBuilder_.getMessage(index);
         }
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder setComponent(
           int index, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component value) {
         if (componentBuilder_ == null) {
@@ -873,6 +1061,9 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder setComponent(
           int index, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder builderForValue) {
         if (componentBuilder_ == null) {
@@ -884,6 +1075,9 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder addComponent(com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component value) {
         if (componentBuilder_ == null) {
           if (value == null) {
@@ -897,6 +1091,9 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder addComponent(
           int index, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component value) {
         if (componentBuilder_ == null) {
@@ -911,6 +1108,9 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder addComponent(
           com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder builderForValue) {
         if (componentBuilder_ == null) {
@@ -922,6 +1122,9 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder addComponent(
           int index, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder builderForValue) {
         if (componentBuilder_ == null) {
@@ -933,17 +1136,24 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder addAllComponent(
           java.lang.Iterable<? extends com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component> values) {
         if (componentBuilder_ == null) {
           ensureComponentIsMutable();
-          super.addAll(values, component_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, component_);
           onChanged();
         } else {
           componentBuilder_.addAllMessages(values);
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder clearComponent() {
         if (componentBuilder_ == null) {
           component_ = java.util.Collections.emptyList();
@@ -954,6 +1164,9 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public Builder removeComponent(int index) {
         if (componentBuilder_ == null) {
           ensureComponentIsMutable();
@@ -964,10 +1177,16 @@ public final class ConcatVectorProto {
         }
         return this;
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder getComponentBuilder(
           int index) {
         return getComponentFieldBuilder().getBuilder(index);
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder getComponentOrBuilder(
           int index) {
         if (componentBuilder_ == null) {
@@ -975,6 +1194,9 @@ public final class ConcatVectorProto {
           return componentBuilder_.getMessageOrBuilder(index);
         }
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public java.util.List<? extends com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.ComponentOrBuilder> 
            getComponentOrBuilderList() {
         if (componentBuilder_ != null) {
@@ -983,15 +1205,24 @@ public final class ConcatVectorProto {
           return java.util.Collections.unmodifiableList(component_);
         }
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder addComponentBuilder() {
         return getComponentFieldBuilder().addBuilder(
             com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.getDefaultInstance());
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder addComponentBuilder(
           int index) {
         return getComponentFieldBuilder().addBuilder(
             index, com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.getDefaultInstance());
       }
+      /**
+       * <code>repeated .com.github.keenon.ConcatVector.Component component = 1;</code>
+       */
       public java.util.List<com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder> 
            getComponentBuilderList() {
         return getComponentFieldBuilder().getBuilderList();
@@ -1010,29 +1241,29 @@ public final class ConcatVectorProto {
         }
         return componentBuilder_;
       }
-      
+
       // @@protoc_insertion_point(builder_scope:com.github.keenon.ConcatVector)
     }
-    
+
     static {
       defaultInstance = new ConcatVector(true);
       defaultInstance.initFields();
     }
-    
+
     // @@protoc_insertion_point(class_scope:com.github.keenon.ConcatVector)
   }
-  
-  private static com.google.protobuf.Descriptors.Descriptor
+
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_github_keenon_ConcatVector_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_github_keenon_ConcatVector_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_com_github_keenon_ConcatVector_Component_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable;
-  
+
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
     return descriptor;
@@ -1049,34 +1280,30 @@ public final class ConcatVectorProto {
       "ectorProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_com_github_keenon_ConcatVector_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_com_github_keenon_ConcatVector_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_com_github_keenon_ConcatVector_descriptor,
-              new java.lang.String[] { "Component", },
-              com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.class,
-              com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Builder.class);
-          internal_static_com_github_keenon_ConcatVector_Component_descriptor =
-            internal_static_com_github_keenon_ConcatVector_descriptor.getNestedTypes().get(0);
-          internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_com_github_keenon_ConcatVector_Component_descriptor,
-              new java.lang.String[] { "Sparse", "Data", },
-              com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.class,
-              com.github.keenon.loglinear.ConcatVectorProto.ConcatVector.Component.Builder.class);
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_com_github_keenon_ConcatVector_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_com_github_keenon_ConcatVector_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_com_github_keenon_ConcatVector_descriptor,
+        new java.lang.String[] { "Component", });
+    internal_static_com_github_keenon_ConcatVector_Component_descriptor =
+      internal_static_com_github_keenon_ConcatVector_descriptor.getNestedTypes().get(0);
+    internal_static_com_github_keenon_ConcatVector_Component_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_com_github_keenon_ConcatVector_Component_descriptor,
+        new java.lang.String[] { "Sparse", "Data", });
   }
-  
+
   // @@protoc_insertion_point(outer_class_scope)
 }
