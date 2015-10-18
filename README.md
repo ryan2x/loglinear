@@ -8,7 +8,7 @@ Maven:
     <dependency>
         <groupId>com.github.keenon</groupId>
         <artifactId>loglinear</artifactId>
-        <version>1.1.3</version>
+        <version>1.1.4</version>
     </dependency>
 
 For documentation, see the "doc/" folder.
@@ -41,6 +41,10 @@ some aggressive modifications of the model could cause your CliqueTree to crash 
 
 Being able to store and retrieve large numbers of proto'd GraphicalModels is a really useful feature for a number of
 applications. While it's not hard to write, it's nice to have a simple, convenient, trustworthy way to do it.
+
+# What's new in v1.1.4: Moving to proto v2.6.1
+
+Nuff said.
 
 # Coming up in v1.2: Distributed Learning
 
