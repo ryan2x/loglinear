@@ -46,8 +46,15 @@ applications. While it's not hard to write, it's nice to have a simple, convenie
 
 Nuff said.
 
-# Coming up in v1.2: Distributed Learning
+# What's new in v1.2: ConcatVectorNamespace, and tons of performance improvements
+
+Check out the CoNLLBenchmark for details, but I've dramatically improved the way large sparse feature sets are
+constructed, and doing that showed up optimizations that needed to happen about not creating redundant vectors, even
+small ones, during gradient computations, so that's all been cleaned up. We now have a means of really using loglinear
+in practice for real modelling challenges.
+
+# Coming up in v1.3: Distributed Learning
 
 Distributed optimization for learning! Since the raw gradient computation is unlikely to get much faster after all this
-optimization in v1.1, it's time to make sure that learning can be handled by a cluster of machines accessible over the 
+optimization in v1.1 & v1.2, it's time to make sure that learning can be handled by a cluster of machines accessible over the
 network.
