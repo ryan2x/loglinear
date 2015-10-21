@@ -199,12 +199,6 @@ public abstract class AbstractBatchOptimizer {
                 }
             }
 
-            for (int i = 0; i < weights.getNumberOfComponents(); i++) {
-                if (!weights.isComponentSparse(i)) {
-                    System.err.println(i+":"+weights.getDenseComponent(i).length);
-                }
-            }
-
             while (!isFinished) {
 
                 // Collect log-likelihood and derivatives

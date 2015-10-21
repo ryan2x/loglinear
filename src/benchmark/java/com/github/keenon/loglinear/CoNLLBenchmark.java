@@ -124,6 +124,14 @@ public class CoNLLBenchmark {
 
             final int iFinal = i;
 
+            // Ensure the unary factors
+
+            for (String tag : tags) {
+                namespace.ensureFeature("BIAS" + tag);
+                namespace.ensureFeature("word" + tag);
+                namespace.ensureSparseFeature("word" + tag, sentence.token.get(i));
+            }
+
             // Add the unary factor
 
             GraphicalModel.Factor f = model.addFactor(new int[]{iFinal}, new int[]{tags.size()}, (assignment) -> {
@@ -135,7 +143,7 @@ public class CoNLLBenchmark {
 
                 ConcatVector features = namespace.newVector();
 
-                namespace.setSparseFeature(features, "BIAS" + tag, "BIAS", 1.0);
+                namespace.setDenseFeature(features, "BIAS" + tag, new double[]{1.0});
                 namespace.setSparseFeature(features, "word" + tag, sentence.token.get(iFinal), 1.0);
                 if (embeddings.get(sentence.token.get(iFinal)) != null) {
                     namespace.setDenseFeature(features, "dense"+tag, embeddings.get(sentence.token.get(iFinal)));
@@ -150,6 +158,14 @@ public class CoNLLBenchmark {
             // If this is not the last variable, add a binary factor
 
             if (i < sentence.token.size() - 1) {
+                for (String tag1 : tags) {
+                    for (String tag2 : tags) {
+                        namespace.ensureFeature("BIAS" + tag1 + tag2);
+                        namespace.ensureFeature("words" + tag1 + tag2);
+                        namespace.ensureSparseFeature("words" + tag1 + tag2, sentence.token.get(iFinal) + sentence.token.get(iFinal + 1));
+                    }
+                }
+
                 GraphicalModel.Factor jf = model.addFactor(new int[]{iFinal, iFinal + 1}, new int[]{tags.size(), tags.size()}, (assignment) -> {
 
                     // This is the anonymous function that generates a feature vector for every joint assignment to the
@@ -162,7 +178,7 @@ public class CoNLLBenchmark {
 
                     namespace.setSparseFeature(features, "words" + thisTag + nextTag, sentence.token.get(iFinal)+sentence.token.get(iFinal+1), 1.0);
                     if (!thisTag.equals("O") || !nextTag.equals("O")) {
-                        namespace.setSparseFeature(features, "BIAS" + thisTag + nextTag, "BIAS", 1.0);
+                        namespace.setDenseFeature(features, "BIAS" + thisTag + nextTag, new double[]{1.0});
                     }
 
                     return features;

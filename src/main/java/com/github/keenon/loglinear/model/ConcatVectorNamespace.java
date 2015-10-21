@@ -58,6 +58,7 @@ public class ConcatVectorNamespace {
      * @param index the sparse value to ensure is available
      */
     public int ensureSparseFeature(String featureName, String index) {
+        ensureFeature(featureName);
         synchronized (sparseFeatureIndex) {
             if (!sparseFeatureIndex.containsKey(featureName)) {
                 sparseFeatureIndex.put(featureName, new HashMap<>());
