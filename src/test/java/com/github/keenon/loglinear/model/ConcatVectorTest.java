@@ -21,6 +21,12 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(Theories.class)
 public class ConcatVectorTest {
     @Theory
+    public void testResizeOnSetComponent(@ForAll(sampleSize = 50) @From(DenseTestVectorGenerator.class) DenseTestVector d1) {
+        d1.vector.setSparseComponent(d1.values.length, 1, 0.0);
+        d1.vector.setDenseComponent(d1.values.length+1, new double[]{0.0});
+    }
+
+    @Theory
     public void testCopyOnWrite(@ForAll(sampleSize = 50) @From(DenseTestVectorGenerator.class) DenseTestVector d1) {
         ConcatVector v2 = d1.vector.deepClone();
         v2.addVectorInPlace(v2, 1.0);

@@ -66,6 +66,9 @@ public class ConcatVector {
      * @param values the array of dense values to put into the component
      */
     public void setDenseComponent(int component, double[] values) {
+        if (component >= pointers.length) {
+            increaseSizeTo(component+1);
+        }
         pointers[component] = values;
         sparse[component] = false;
         copyOnWrite[component] = true;
@@ -79,6 +82,9 @@ public class ConcatVector {
      * @param value the value of that index
      */
     public void setSparseComponent(int component, int index, double value) {
+        if (component >= pointers.length) {
+            increaseSizeTo(component+1);
+        }
         double[] sparseInfo = new double[2];
         sparseInfo[0] = index;
         sparseInfo[1] = value;
@@ -151,15 +157,7 @@ public class ConcatVector {
             sparse = new boolean[other.pointers.length];
             copyOnWrite = new boolean[other.pointers.length];
         } else if (pointers.length < other.pointers.length) {
-            double[][] pointersBuf = new double[other.pointers.length][];
-            boolean[] sparseBuf = new boolean[other.pointers.length];
-            boolean[] copyOnWriteBuf = new boolean[other.pointers.length];
-            System.arraycopy(pointers, 0, pointersBuf, 0, pointers.length);
-            System.arraycopy(sparse, 0, sparseBuf, 0, pointers.length);
-            System.arraycopy(copyOnWrite, 0, copyOnWriteBuf, 0, pointers.length);
-            pointers = pointersBuf;
-            sparse = sparseBuf;
-            copyOnWrite = copyOnWriteBuf;
+            increaseSizeTo(other.pointers.length);
         }
 
         // Do the addition piece by piece
@@ -563,6 +561,23 @@ public class ConcatVector {
     ////////////////////////////////////////////////////////////////////////////
     // PRIVATE IMPLEMENTATION
     ////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * This increases the length of the vector, while preserving its contents
+     * @param newSize the new size to increase to. Must be larger than the current size
+     */
+    private void increaseSizeTo(int newSize) {
+        assert(newSize > pointers.length);
+        double[][] pointersBuf = new double[newSize][];
+        boolean[] sparseBuf = new boolean[newSize];
+        boolean[] copyOnWriteBuf = new boolean[newSize];
+        System.arraycopy(pointers, 0, pointersBuf, 0, pointers.length);
+        System.arraycopy(sparse, 0, sparseBuf, 0, pointers.length);
+        System.arraycopy(copyOnWrite, 0, copyOnWriteBuf, 0, pointers.length);
+        pointers = pointersBuf;
+        sparse = sparseBuf;
+        copyOnWrite = copyOnWriteBuf;
+    }
 
     static boolean loadedNative = false;
 
