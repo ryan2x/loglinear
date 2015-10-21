@@ -21,9 +21,17 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(Theories.class)
 public class ConcatVectorTest {
     @Theory
+    public void testNewEmptyClone(@ForAll(sampleSize = 50) @From(DenseTestVectorGenerator.class) DenseTestVector d1) {
+        ConcatVector empty = new ConcatVector(d1.vector.getNumberOfComponents());
+        ConcatVector emptyClone = d1.vector.newEmptyClone();
+
+        assertTrue(empty.valueEquals(emptyClone, 1.0e-5));
+    }
+
+    @Theory
     public void testResizeOnSetComponent(@ForAll(sampleSize = 50) @From(DenseTestVectorGenerator.class) DenseTestVector d1) {
         d1.vector.setSparseComponent(d1.values.length, 1, 0.0);
-        d1.vector.setDenseComponent(d1.values.length+1, new double[]{0.0});
+        d1.vector.setDenseComponent(d1.values.length + 1, new double[]{0.0});
     }
 
     @Theory

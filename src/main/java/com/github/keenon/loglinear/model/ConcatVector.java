@@ -59,6 +59,24 @@ public class ConcatVector {
     }
 
     /**
+     * Creates a ConcatVector whose dimensions are the same as this one for all dense components, but is otherwise
+     * completely empty. This is useful to prevent resizing during optimizations where we're adding lots of sparse
+     * vectors.
+     *
+     * @return an empty vector suitable for use as a gradient
+     */
+    public ConcatVector newEmptyClone() {
+        ConcatVector clone = new ConcatVector(getNumberOfComponents());
+        for (int i = 0; i < pointers.length; i++) {
+            if (pointers[i] != null && !sparse[i]) {
+                clone.pointers[i] = new double[pointers[i].length];
+                clone.sparse[i] = false;
+            }
+        }
+        return clone;
+    }
+
+    /**
      * Sets a single component of the concat vector value as a dense vector. This will make a copy of you values array,
      * so you're free to continue mutating it.
      *
@@ -227,7 +245,9 @@ public class ConcatVector {
             } else if (!sparse[i] && other.sparse[i]) {
                 int sparseIndex = (int) other.pointers[i][0];
                 if (sparseIndex >= pointers[i].length) {
-                    double[] denseBuf = new double[sparseIndex + 1];
+                    int newSize = pointers[i].length;
+                    while (newSize <= sparseIndex) newSize *= 2;
+                    double[] denseBuf = new double[newSize];
                     System.arraycopy(pointers[i], 0, denseBuf, 0, pointers[i].length);
                     copyOnWrite[i] = false;
                     pointers[i] = denseBuf;

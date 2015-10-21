@@ -12,15 +12,15 @@ import java.util.Iterator;
  * Generates (potentially noisy, no promises about exactness) gradients from a batch of examples that were provided to
  * the system.
  */
-public class LogLikelihoodFunction extends AbstractFunction<GraphicalModel> {
+public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableFunction<GraphicalModel> {
     // This sets a gold observation for a model to use as training gold data
-    public static final String VARIABLE_TRAINING_VALUE = "learning.LogLikelihoodFunction.VARIABLE_TRAINING_VALUE";
+    public static final String VARIABLE_TRAINING_VALUE = "learning.LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE";
 
     /**
      * Gets a summary of the log-likelihood of a singe model at a point
      *
      * It assumes that the models have observations for training set as metadata in
-     * LogLikelihoodFunction.OBSERVATION_FOR_TRAINING. The models can also have observations fixed in
+     * LogLikelihoodDifferentiableFunction.OBSERVATION_FOR_TRAINING. The models can also have observations fixed in
      * CliqueTree.VARIABLE_OBSERVED_VALUE, but these will be considered fixed and will not be learned against.
      *
      * @param model the model to find the log-likelihood of
@@ -31,7 +31,7 @@ public class LogLikelihoodFunction extends AbstractFunction<GraphicalModel> {
     public FunctionSummaryAtPoint getSummaryForInstance(GraphicalModel model, ConcatVector weights) {
         double logLikelihood = 0.0;
         // This will grow segments as necessary
-        ConcatVector gradient = new ConcatVector(weights.getNumberOfComponents());
+        ConcatVector gradient = weights.newEmptyClone();
 
         CliqueTree.MarginalResult result = new CliqueTree(model, weights).calculateMarginals();
 
@@ -52,7 +52,7 @@ public class LogLikelihoodFunction extends AbstractFunction<GraphicalModel> {
                     assignment[i] = deterministicValue;
                 }
                 else {
-                    int trainingObservation = Integer.parseInt(model.getVariableMetaDataByReference(factor.neigborIndices[i]).get(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE));
+                    int trainingObservation = Integer.parseInt(model.getVariableMetaDataByReference(factor.neigborIndices[i]).get(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE));
                     assignment[i] = trainingObservation;
                 }
             }

@@ -2,6 +2,7 @@ package com.github.keenon.loglinear;
 
 import com.github.keenon.loglinear.inference.CliqueTree;
 import com.github.keenon.loglinear.model.ConcatVector;
+import com.github.keenon.loglinear.model.ConcatVectorNamespace;
 import com.github.keenon.loglinear.model.GraphicalModel;
 
 import java.io.IOException;
@@ -49,13 +50,15 @@ public class GamePlayerBenchmark {
 
         System.err.println("Making the training set...");
 
+        ConcatVectorNamespace namespace = new ConcatVectorNamespace();
+
         int trainSize = train.size();
         GraphicalModel[] trainingSet = new GraphicalModel[trainSize];
         for (int i = 0; i < trainSize; i++) {
             if (i % 10 == 0) {
                 System.err.println(i+"/"+trainSize);
             }
-            trainingSet[i] = coNLL.generateSentenceModel(train.get(i), tags);
+            trainingSet[i] = coNLL.generateSentenceModel(namespace, train.get(i), tags);
         }
 
         //////////////////////////////////////////////////////////////

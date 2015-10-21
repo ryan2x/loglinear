@@ -9,7 +9,7 @@ import com.github.keenon.loglinear.model.ConcatVector;
  * generating convex functions that are solvable in closed form, then checking the optimizer arrives at the same
  * solution.
  */
-public abstract class AbstractFunction<T> {
+public abstract class AbstractDifferentiableFunction<T> {
     /**
      * A little struct for passing back the important results of a gradient/value calculation
      */

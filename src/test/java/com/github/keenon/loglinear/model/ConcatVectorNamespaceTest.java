@@ -57,7 +57,7 @@ public class ConcatVectorNamespaceTest {
         ConcatVector newVector = namespace.newVector();
         for (int i : featureMap.keySet()) {
             String feature = "feat"+i;
-            int sparse = featureMap.get(i);
+            String sparse = "index"+featureMap.get(i);
             namespace.setSparseFeature(newVector, feature, sparse, 1.0);
         }
         return newVector;

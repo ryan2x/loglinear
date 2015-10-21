@@ -29,12 +29,12 @@ public class LogLikelihoodFunctionTest {
     @Theory
     public void testGetSummaryForInstance(@ForAll(sampleSize = 50) @From(GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
                                           @ForAll(sampleSize = 2) @From(WeightsGenerator.class) ConcatVector weights) throws Exception {
-        LogLikelihoodFunction fn = new LogLikelihoodFunction();
+        LogLikelihoodDifferentiableFunction fn = new LogLikelihoodDifferentiableFunction();
         for (GraphicalModel model : dataset) {
             double goldLogLikelihood = logLikelihood(model, weights);
             ConcatVector goldGradient = definitionOfDerivative(model, weights);
 
-            LogLikelihoodFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(model, weights);
+            LogLikelihoodDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(model, weights);
 
             assertEquals(goldLogLikelihood, summary.value, Math.max(1.0e-3, goldLogLikelihood * 1.0e-2));
 
@@ -103,7 +103,7 @@ public class LogLikelihoodFunctionTest {
         int[] assignment = new int[bruteForce.neighborIndices.length];
         for (int i = 0; i < assignment.length; i++) {
             assert(!model.getVariableMetaDataByReference(bruteForce.neighborIndices[i]).containsKey(CliqueTree.VARIABLE_OBSERVED_VALUE));
-            assignment[i] = Integer.parseInt(model.getVariableMetaDataByReference(bruteForce.neighborIndices[i]).get(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE));
+            assignment[i] = Integer.parseInt(model.getVariableMetaDataByReference(bruteForce.neighborIndices[i]).get(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE));
         }
 
         if (bruteForce.getAssignmentValue(assignment) == 0 || partitionFunction == 0) {
@@ -167,7 +167,7 @@ public class LogLikelihoodFunctionTest {
                     for (int j = 0; j < f.neigborIndices.length; j++) {
                         int n = f.neigborIndices[j];
                         int dim = f.featuresTable.getDimensions()[j];
-                        dataset[i].getVariableMetaDataByReference(n).put(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE, ""+sourceOfRandomness.nextInt(dim));
+                        dataset[i].getVariableMetaDataByReference(n).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+sourceOfRandomness.nextInt(dim));
                     }
                 }
             }

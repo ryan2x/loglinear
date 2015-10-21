@@ -1,10 +1,11 @@
 package com.github.keenon.loglinear;
 
 import com.github.keenon.loglinear.learning.AbstractBatchOptimizer;
-import com.github.keenon.loglinear.learning.LogLikelihoodFunction;
+import com.github.keenon.loglinear.learning.LogLikelihoodDifferentiableFunction;
 import com.github.keenon.loglinear.inference.CliqueTree;
 import com.github.keenon.loglinear.learning.BacktrackingAdaGradOptimizer;
 import com.github.keenon.loglinear.model.ConcatVector;
+import com.github.keenon.loglinear.model.ConcatVectorNamespace;
 import com.github.keenon.loglinear.model.GraphicalModel;
 
 import java.io.*;
@@ -49,13 +50,15 @@ public class CoNLLBenchmark {
 
         System.err.println("Making the training set...");
 
+        ConcatVectorNamespace namespace = new ConcatVectorNamespace();
+
         int trainSize = train.size();
         GraphicalModel[] trainingSet = new GraphicalModel[trainSize];
         for (int i = 0; i < trainSize; i++) {
             if (i % 10 == 0) {
                 System.err.println(i+"/"+trainSize);
             }
-            trainingSet[i] = generateSentenceModel(train.get(i), tags);
+            trainingSet[i] = generateSentenceModel(namespace, train.get(i), tags);
         }
 
         System.err.println("Training system...");
@@ -63,7 +66,7 @@ public class CoNLLBenchmark {
         AbstractBatchOptimizer opt = new BacktrackingAdaGradOptimizer();
 
         // This training call is basically what we want the benchmark for. It should take 99% of the wall clock time
-        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodFunction(), new ConcatVector(0), 0.1);
+        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.1);
 
         System.err.println("Testing system...");
 
@@ -76,7 +79,7 @@ public class CoNLLBenchmark {
         double total = 0.0;
 
         for (CoNLLSentence sentence : testA) {
-            GraphicalModel model = generateSentenceModel(sentence, tags);
+            GraphicalModel model = generateSentenceModel(namespace, sentence, tags);
             int[] guesses = new CliqueTree(model, weights).calculateMAP();
             String[] nerGuesses = new String[guesses.length];
             for (int i = 0; i < guesses.length; i++) {
@@ -98,10 +101,10 @@ public class CoNLLBenchmark {
         for (String tag : tags) {
             double precision = foundGuessed.getOrDefault(tag, 0.0) == 0 ? 0.0 : correctChunk.getOrDefault(tag, 0.0) / foundGuessed.get(tag);
             double recall = foundCorrect.getOrDefault(tag, 0.0) == 0 ? 0.0 : correctChunk.getOrDefault(tag, 0.0) / foundCorrect.get(tag);
-            double f1 = (precision * recall * 2) / (precision + recall);
-            System.err.println(tag);
-            System.err.println("\tP:"+precision);
-            System.err.println("\tR:"+recall);
+            double f1 = (precision + recall == 0.0) ? 0.0 : (precision * recall * 2) / (precision + recall);
+            System.err.println(tag+" ("+foundCorrect.getOrDefault(tag, 0.0).intValue()+")");
+            System.err.println("\tP:"+precision+" ("+correctChunk.getOrDefault(tag, 0.0).intValue()+"/"+foundGuessed.getOrDefault(tag, 0.0).intValue()+")");
+            System.err.println("\tR:"+recall+" ("+correctChunk.getOrDefault(tag, 0.0).intValue()+"/"+foundCorrect.getOrDefault(tag, 0.0).intValue()+")");
             System.err.println("\tF1:"+f1);
         }
     }
@@ -110,14 +113,14 @@ public class CoNLLBenchmark {
     // GENERATING MODELS
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    public GraphicalModel generateSentenceModel(CoNLLSentence sentence, List<String> tags) {
+    public GraphicalModel generateSentenceModel(ConcatVectorNamespace namespace, CoNLLSentence sentence, List<String> tags) {
         GraphicalModel model = new GraphicalModel();
 
         for (int i = 0; i < sentence.token.size(); i++) {
 
             // Add the training label
 
-            model.getVariableMetaDataByReference(i).put(LogLikelihoodFunction.VARIABLE_TRAINING_VALUE, ""+tags.indexOf(sentence.ner.get(i)));
+            model.getVariableMetaDataByReference(i).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+tags.indexOf(sentence.ner.get(i)));
 
             final int iFinal = i;
 
@@ -130,9 +133,12 @@ public class CoNLLBenchmark {
 
                 String tag = tags.get(assignment[0]);
 
-                ConcatVector features = new ConcatVector(tags.size());
+                ConcatVector features = namespace.newVector();
+
+                namespace.setSparseFeature(features, "BIAS" + tag, "BIAS", 1.0);
+                namespace.setSparseFeature(features, "word" + tag, sentence.token.get(iFinal), 1.0);
                 if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                    features.setDenseComponent(assignment[0], embeddings.get(sentence.token.get(iFinal)));
+                    namespace.setDenseFeature(features, "dense"+tag, embeddings.get(sentence.token.get(iFinal)));
                 }
 
                 return features;
@@ -152,18 +158,11 @@ public class CoNLLBenchmark {
                     String thisTag = tags.get(assignment[0]);
                     String nextTag = tags.get(assignment[1]);
 
-                    ConcatVector features = new ConcatVector(tags.size() + (2 * tags.size() * tags.size()));
+                    ConcatVector features = namespace.newVector();
 
-                    if (embeddings.containsKey(sentence.token.get(iFinal)) || embeddings.containsKey(sentence.token.get(iFinal + 1))) {
-
-                        int index = tags.size() + assignment[0] * tags.size() + assignment[1];
-                        if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                            features.setDenseComponent(index, embeddings.get(sentence.token.get(iFinal)));
-                        }
-                        if (embeddings.get(sentence.token.get(iFinal + 1)) != null) {
-                            features.setDenseComponent((tags.size() * tags.size()) + index, embeddings.get(sentence.token.get(iFinal + 1)));
-                        }
-
+                    namespace.setSparseFeature(features, "words" + thisTag + nextTag, sentence.token.get(iFinal)+sentence.token.get(iFinal+1), 1.0);
+                    if (!thisTag.equals("O") || !nextTag.equals("O")) {
+                        namespace.setSparseFeature(features, "BIAS" + thisTag + nextTag, "BIAS", 1.0);
                     }
 
                     return features;
@@ -209,7 +208,13 @@ public class CoNLLBenchmark {
             String[] parts = line.split("\t");
             if (parts.length == 2) {
                 tokens.add(parts[0]);
-                ners.add(parts[1]);
+                String tag = parts[1];
+                if (tag.contains("-")) {
+                    ners.add(tag.split("-")[1]);
+                }
+                else {
+                    ners.add(tag);
+                }
                 if (parts[0].equals(".")) {
                     sentences.add(new CoNLLSentence(tokens, ners));
                     tokens = new ArrayList<>();
