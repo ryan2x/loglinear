@@ -313,12 +313,6 @@ public abstract class AbstractBatchOptimizer {
                 if (converged) {
                     break;
                 }
-
-                for (int i = 0; i < weights.getNumberOfComponents(); i++) {
-                    if (!weights.isComponentSparse(i)) {
-                        System.err.println(i+":"+weights.getDenseComponent(i).length);
-                    }
-                }
             }
 
             isFinished = true;

@@ -32,7 +32,7 @@ public class ConcatVectorNamespace {
         ConcatVector vector = new ConcatVector(featureToIndex.size());
         for (String s : sparseFeatureIndex.keySet()) {
             int size = sparseFeatureIndex.get(s).size();
-            vector.setDenseComponent(featureToIndex.get(s), new double[size]);
+            vector.setDenseComponent(ensureFeature(s), new double[size]);
         }
         return vector;
     }
@@ -42,11 +42,33 @@ public class ConcatVectorNamespace {
      * that we can avoid resizing ConcatVectors.
      * @param featureName the feature to add to our index
      */
-    public void ensureFeature(String featureName) {
+    public int ensureFeature(String featureName) {
         synchronized (featureToIndex) {
             if (!featureToIndex.containsKey(featureName)) {
                 featureToIndex.put(featureName, featureToIndex.size());
             }
+            return featureToIndex.get(featureName);
+        }
+    }
+
+    /**
+     * An optimization, this lets clients inform the ConcatVectorNamespace of how many sparse feature components to
+     * expect, again so that we can avoid resizing ConcatVectors.
+     * @param featureName the feature to use in our index
+     * @param index the sparse value to ensure is available
+     */
+    public int ensureSparseFeature(String featureName, String index) {
+        synchronized (sparseFeatureIndex) {
+            if (!sparseFeatureIndex.containsKey(featureName)) {
+                sparseFeatureIndex.put(featureName, new HashMap<>());
+            }
+        }
+        final Map<String,Integer> sparseIndex = sparseFeatureIndex.get(featureName);
+        synchronized (sparseIndex) {
+            if (!sparseIndex.containsKey(index)) {
+                sparseIndex.put(index, sparseIndex.size());
+            }
+            return sparseIndex.get(index);
         }
     }
 
@@ -58,8 +80,7 @@ public class ConcatVectorNamespace {
      * @param value the value we want to set this vector to
      */
     public void setDenseFeature(ConcatVector vector, String featureName, double[] value) {
-        ensureFeature(featureName);
-        vector.setDenseComponent(featureToIndex.get(featureName), value);
+        vector.setDenseComponent(ensureFeature(featureName), value);
     }
 
     /**
@@ -71,19 +92,7 @@ public class ConcatVectorNamespace {
      * @param value the value we want to set this one-hot index to
      */
     public void setSparseFeature(ConcatVector vector, String featureName, String index, double value) {
-        ensureFeature(featureName);
-        synchronized (sparseFeatureIndex) {
-            if (!sparseFeatureIndex.containsKey(featureName)) {
-                sparseFeatureIndex.put(featureName, new HashMap<>());
-            }
-        }
-        final Map<String,Integer> sparseIndex = sparseFeatureIndex.get(featureName);
-        synchronized (sparseIndex) {
-            if (!sparseIndex.containsKey(index)) {
-                sparseIndex.put(index, sparseIndex.size());
-            }
-            vector.setSparseComponent(featureToIndex.get(featureName), sparseIndex.get(index), value);
-        }
+        vector.setSparseComponent(ensureFeature(featureName), ensureSparseFeature(featureName, index), value);
     }
 
     /**
