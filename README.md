@@ -8,7 +8,7 @@ Maven:
     <dependency>
         <groupId>com.github.keenon</groupId>
         <artifactId>loglinear</artifactId>
-        <version>1.1.4</version>
+        <version>1.2</version>
     </dependency>
 
 For documentation, see the "doc/" folder.
