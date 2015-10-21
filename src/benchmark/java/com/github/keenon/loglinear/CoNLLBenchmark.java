@@ -66,7 +66,7 @@ public class CoNLLBenchmark {
         AbstractBatchOptimizer opt = new BacktrackingAdaGradOptimizer();
 
         // This training call is basically what we want the benchmark for. It should take 99% of the wall clock time
-        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.1);
+        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.01);
 
         System.err.println("Testing system...");
 
@@ -107,11 +107,25 @@ public class CoNLLBenchmark {
             System.err.println("\tR:"+recall+" ("+correctChunk.getOrDefault(tag, 0.0).intValue()+"/"+foundCorrect.getOrDefault(tag, 0.0).intValue()+")");
             System.err.println("\tF1:"+f1);
         }
+
+        System.err.println("\ndumping weights to 'src/benchmark/conll-features.txt'...\n");
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter("src/benchmark/conll-features.txt"));
+        namespace.debugVector(weights, bw);
+        bw.close();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
     // GENERATING MODELS
     ////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static String getWordShape(String string) {
+        if (string.toUpperCase().equals(string) && string.toLowerCase().equals(string)) return "no-case";
+        if (string.toUpperCase().equals(string)) return "upper-case";
+        if (string.toLowerCase().equals(string)) return "lower-case";
+        if (string.length() > 1 && Character.isUpperCase(string.charAt(0)) && string.substring(1).toLowerCase().equals(string.substring(1))) return "capitalized";
+        return "mixed-case";
+    }
 
     public GraphicalModel generateSentenceModel(ConcatVectorNamespace namespace, CoNLLSentence sentence, List<String> tags) {
         GraphicalModel model = new GraphicalModel();
@@ -128,8 +142,26 @@ public class CoNLLBenchmark {
 
             for (String tag : tags) {
                 namespace.ensureFeature("BIAS" + tag);
-                namespace.ensureFeature("word" + tag);
                 namespace.ensureSparseFeature("word" + tag, sentence.token.get(i));
+                if (sentence.token.get(i).length() > 1) {
+                    namespace.ensureSparseFeature("prefix1" + tag, sentence.token.get(i).substring(0, 1));
+                }
+                if (sentence.token.get(i).length() > 2) {
+                    namespace.ensureSparseFeature("prefix2" + tag, sentence.token.get(i).substring(0, 2));
+                }
+                if (sentence.token.get(i).length() > 3) {
+                    namespace.ensureSparseFeature("prefix3" + tag, sentence.token.get(i).substring(0, 3));
+                }
+                if (sentence.token.get(i).length() > 1) {
+                    namespace.ensureSparseFeature("suffix1" + tag, sentence.token.get(i).substring(sentence.token.get(i).length()-1));
+                }
+                if (sentence.token.get(i).length() > 2) {
+                    namespace.ensureSparseFeature("suffix2" + tag, sentence.token.get(i).substring(sentence.token.get(i).length()-2));
+                }
+                if (sentence.token.get(i).length() > 3) {
+                    namespace.ensureSparseFeature("suffix3" + tag, sentence.token.get(i).substring(sentence.token.get(i).length()-3));
+                }
+                namespace.ensureSparseFeature("shape" + tag, getWordShape(sentence.token.get(i)));
             }
 
             // Add the unary factor
@@ -146,8 +178,27 @@ public class CoNLLBenchmark {
                 namespace.setDenseFeature(features, "BIAS" + tag, new double[]{1.0});
                 namespace.setSparseFeature(features, "word" + tag, sentence.token.get(iFinal), 1.0);
                 if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                    namespace.setDenseFeature(features, "dense"+tag, embeddings.get(sentence.token.get(iFinal)));
+                    // namespace.setDenseFeature(features, "dense"+tag, embeddings.get(sentence.token.get(iFinal)));
                 }
+                if (sentence.token.get(iFinal).length() > 1) {
+                    namespace.setSparseFeature(features, "prefix1" + tag, sentence.token.get(iFinal).substring(0, 1), 1.0);
+                }
+                if (sentence.token.get(iFinal).length() > 2) {
+                    namespace.setSparseFeature(features, "prefix2" + tag, sentence.token.get(iFinal).substring(0, 2), 1.0);
+                }
+                if (sentence.token.get(iFinal).length() > 3) {
+                    namespace.setSparseFeature(features, "prefix3" + tag, sentence.token.get(iFinal).substring(0, 3), 1.0);
+                }
+                if (sentence.token.get(iFinal).length() > 1) {
+                    namespace.setSparseFeature(features, "suffix1" + tag, sentence.token.get(iFinal).substring(sentence.token.get(iFinal).length() - 1), 1.0);
+                }
+                if (sentence.token.get(iFinal).length() > 2) {
+                    namespace.setSparseFeature(features, "suffix2" + tag, sentence.token.get(iFinal).substring(sentence.token.get(iFinal).length() - 2), 1.0);
+                }
+                if (sentence.token.get(iFinal).length() > 3) {
+                    namespace.setSparseFeature(features, "suffix3" + tag, sentence.token.get(iFinal).substring(sentence.token.get(iFinal).length() - 3), 1.0);
+                }
+                namespace.setSparseFeature(features, "shape" + tag, getWordShape(sentence.token.get(iFinal)), 1.0);
 
                 return features;
             });
@@ -161,8 +212,6 @@ public class CoNLLBenchmark {
                 for (String tag1 : tags) {
                     for (String tag2 : tags) {
                         namespace.ensureFeature("BIAS" + tag1 + tag2);
-                        namespace.ensureFeature("words" + tag1 + tag2);
-                        namespace.ensureSparseFeature("words" + tag1 + tag2, sentence.token.get(iFinal) + sentence.token.get(iFinal + 1));
                     }
                 }
 
@@ -176,10 +225,7 @@ public class CoNLLBenchmark {
 
                     ConcatVector features = namespace.newVector();
 
-                    namespace.setSparseFeature(features, "words" + thisTag + nextTag, sentence.token.get(iFinal)+sentence.token.get(iFinal+1), 1.0);
-                    if (!thisTag.equals("O") || !nextTag.equals("O")) {
-                        namespace.setDenseFeature(features, "BIAS" + thisTag + nextTag, new double[]{1.0});
-                    }
+                    namespace.setDenseFeature(features, "BIAS" + thisTag + nextTag, new double[]{1.0});
 
                     return features;
                 });

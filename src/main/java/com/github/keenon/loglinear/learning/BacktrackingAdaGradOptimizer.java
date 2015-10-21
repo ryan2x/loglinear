@@ -10,7 +10,7 @@ import com.github.keenon.loglinear.model.ConcatVector;
 public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
 
     // this magic number was arrived at with relation to the CoNLL benchmark, and tinkering
-    final static double alpha = 0.001;
+    final static double alpha = 0.05;
 
     @Override
     public boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState optimizationState) {

@@ -1,5 +1,7 @@
 package com.github.keenon.loglinear.model;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +14,7 @@ import java.util.Map;
 public class ConcatVectorNamespace {
     final Map<String,Integer> featureToIndex = new HashMap<>();
     final Map<String, Map<String,Integer>> sparseFeatureIndex = new HashMap<>();
+    final Map<String, Map<Integer,String>> reverseSparseFeatureIndex = new HashMap<>();
 
     /**
      * Creates a new vector that is appropriately sized to accommodate all the features that have been named so far.
@@ -62,11 +65,14 @@ public class ConcatVectorNamespace {
         synchronized (sparseFeatureIndex) {
             if (!sparseFeatureIndex.containsKey(featureName)) {
                 sparseFeatureIndex.put(featureName, new HashMap<>());
+                reverseSparseFeatureIndex.put(featureName, new HashMap<>());
             }
         }
         final Map<String,Integer> sparseIndex = sparseFeatureIndex.get(featureName);
+        final Map<Integer,String> reverseSparseIndex = reverseSparseFeatureIndex.get(featureName);
         synchronized (sparseIndex) {
             if (!sparseIndex.containsKey(index)) {
+                reverseSparseIndex.put(sparseIndex.size(), index);
                 sparseIndex.put(index, sparseIndex.size());
             }
             return sparseIndex.get(index);
@@ -100,47 +106,40 @@ public class ConcatVectorNamespace {
      * This prints out a ConcatVector by mapping to the namespace, to make debugging learning algorithms easier.
      *
      * @param vector the vector to print
-     * @return a flat string that can be printed to the console or stored in a log
+     * @param bw the output stream to write to
      */
-    public String debugVector(ConcatVector vector) {
-        StringBuilder sb = new StringBuilder();
-
+    public void debugVector(ConcatVector vector, BufferedWriter bw) throws IOException {
         for (String key : featureToIndex.keySet()) {
-            sb.append(key).append(":\n");
+            bw.write(key);
+            bw.write(":\n");
             int i = featureToIndex.get(key);
             if (vector.isComponentSparse(i)) {
-                debugFeatureValue(key, vector.getSparseIndex(i), vector, sb);
+                debugFeatureValue(key, vector.getSparseIndex(i), vector, bw);
             }
             else {
                 double[] arr = vector.getDenseComponent(i);
                 for (int j = 0; j < arr.length; j++) {
-                    debugFeatureValue(key, j, vector, sb);
+                    debugFeatureValue(key, j, vector, bw);
                 }
             }
         }
-        return sb.toString();
     }
 
     /**
      * This writes a feature's individual value, using the human readable name if possible, to a StringBuilder
      */
-    private void debugFeatureValue(String feature, int index, ConcatVector vector, StringBuilder sb) {
-        sb.append("\t");
+    private void debugFeatureValue(String feature, int index, ConcatVector vector, BufferedWriter bw) throws IOException {
+        bw.write("\t");
         if (sparseFeatureIndex.containsKey(feature) && sparseFeatureIndex.get(feature).values().contains(index)) {
             // we can map this index to an interpretable string, so we do
-            for (String s : sparseFeatureIndex.get(feature).keySet()) {
-                if (sparseFeatureIndex.get(feature).get(s) == index) {
-                    sb.append(s);
-                    break;
-                }
-            }
+            bw.write(reverseSparseFeatureIndex.get(feature).get(index));
         }
         else {
             // we can't map this to a useful string, so we default to the number
-            sb.append(Integer.toString(index));
+            bw.write(Integer.toString(index));
         }
-        sb.append(": ");
-        sb.append(Double.toString(vector.getValueAt(featureToIndex.get(feature), index)));
-        sb.append("\n");
+        bw.write(": ");
+        bw.write(Double.toString(vector.getValueAt(featureToIndex.get(feature), index)));
+        bw.write("\n");
     }
 }
