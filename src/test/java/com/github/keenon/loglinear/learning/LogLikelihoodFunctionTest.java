@@ -34,14 +34,15 @@ public class LogLikelihoodFunctionTest {
             double goldLogLikelihood = logLikelihood(model, weights);
             ConcatVector goldGradient = definitionOfDerivative(model, weights);
 
-            LogLikelihoodDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(model, weights);
+            ConcatVector gradient = new ConcatVector(0);
+            double logLikelihood = fn.getSummaryForInstance(model, weights, gradient);
 
-            assertEquals(goldLogLikelihood, summary.value, Math.max(1.0e-3, goldLogLikelihood * 1.0e-2));
+            assertEquals(goldLogLikelihood, logLikelihood, Math.max(1.0e-3, goldLogLikelihood * 1.0e-2));
 
             // Our check for gradient similarity involves distance between endpoints of vectors, instead of elementwise
             // similarity, b/c it can be controlled as a percentage
             ConcatVector difference = goldGradient.deepClone();
-            difference.addVectorInPlace(summary.gradient, -1);
+            difference.addVectorInPlace(gradient, -1);
 
             double distance = Math.sqrt(difference.dotProduct(difference));
 
@@ -50,7 +51,7 @@ public class LogLikelihoodFunctionTest {
             if (distance > 5.0e-2) {
                 System.err.println("Definitional and calculated gradient differ!");
                 System.err.println("Definition approx: "+goldGradient);
-                System.err.println("Calculated: " + summary.gradient);
+                System.err.println("Calculated: " + gradient);
             }
 
             assertEquals(0.0, distance, 5.0e-2);

@@ -70,7 +70,7 @@ public class OptimizerTests {
     private <T> double getValueSum(T[] dataset, ConcatVector weights, AbstractDifferentiableFunction<T> fn, double l2regularization) {
         double value = 0.0;
         for (T t : dataset) {
-            value += fn.getSummaryForInstance(t, weights).value;
+            value += fn.getSummaryForInstance(t, weights, new ConcatVector(0));
         }
         return (value / dataset.length) - (weights.dotProduct(weights) * l2regularization);
     }

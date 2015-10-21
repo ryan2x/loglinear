@@ -28,10 +28,8 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
      * @return the gradient and value of the function at that point
      */
     @Override
-    public FunctionSummaryAtPoint getSummaryForInstance(GraphicalModel model, ConcatVector weights) {
+    public double getSummaryForInstance(GraphicalModel model, ConcatVector weights, ConcatVector gradient) {
         double logLikelihood = 0.0;
-        // This will grow segments as necessary
-        ConcatVector gradient = weights.newEmptyClone();
 
         CliqueTree.MarginalResult result = new CliqueTree(model, weights).calculateMarginals();
 
@@ -40,6 +38,14 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
         for (GraphicalModel.Factor factor : model.factors) {
             factor.featuresTable.cacheVectors();
         }
+
+        // Subtract log partition function
+
+        logLikelihood -= Math.log(result.partitionFunction);
+
+        // Quit if we have an infinite partition function
+
+        if (Double.isInfinite(logLikelihood)) return 0.0;
 
         // Add the determined assignment by training values
 
@@ -57,15 +63,11 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
                 }
             }
             ConcatVector features = factor.featuresTable.getAssignmentValue(assignment).get();
-            // Add the vector from this observation to the gradient
-            gradient.addVectorInPlace(features, 1.0);
             // Add the log-likelihood from this observation to the log-likelihood
             logLikelihood += features.dotProduct(weights);
+            // Add the vector from this observation to the gradient
+            gradient.addVectorInPlace(features, 1.0);
         }
-
-        // Subtract log partition function
-
-        logLikelihood -= Math.log(result.partitionFunction);
 
         // Take expectations over features given marginals
         // NOTE: This is extremely expensive. Not sure what to do about that
@@ -95,7 +97,7 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
             factor.featuresTable.releaseCache();
         }
 
-        return new FunctionSummaryAtPoint(logLikelihood, gradient);
+        return logLikelihood;
     }
 
     /**

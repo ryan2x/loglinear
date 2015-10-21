@@ -112,11 +112,7 @@ public abstract class AbstractBatchOptimizer {
             long startTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(jvmThreadId);
 
             for (T datum : queue) {
-                AbstractDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
-                if (Double.isFinite(summary.value)) {
-                    localDerivative.addVectorInPlace(summary.gradient, 1.0);
-                    localLogLikelihood += summary.value;
-                }
+                localLogLikelihood += fn.getSummaryForInstance(datum, weights, localDerivative);
                 // Check for user interrupt
                 if (mainWorker.isFinished) return;
             }
@@ -274,11 +270,7 @@ public abstract class AbstractBatchOptimizer {
                 else {
                     for (T datum : dataset) {
                         assert(datum != null);
-                        AbstractDifferentiableFunction.FunctionSummaryAtPoint summary = fn.getSummaryForInstance(datum, weights);
-                        if (Double.isFinite(summary.value)) {
-                            derivative.addVectorInPlace(summary.gradient, 1.0);
-                            logLikelihood += summary.value;
-                        }
+                        logLikelihood += fn.getSummaryForInstance(datum, weights, derivative);
                         // Check for user interrupt
                         if (isFinished) return;
                     }
