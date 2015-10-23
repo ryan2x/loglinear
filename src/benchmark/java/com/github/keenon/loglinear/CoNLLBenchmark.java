@@ -134,107 +134,17 @@ public class CoNLLBenchmark {
 
             // Add the training label
 
-            model.getVariableMetaDataByReference(i).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+tags.indexOf(sentence.ner.get(i)));
+            Map<String,String> metadata = model.getVariableMetaDataByReference(i);
 
-            final int iFinal = i;
+            metadata.put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+tags.indexOf(sentence.ner.get(i)));
 
-            // Ensure the unary factors
-
-            for (String tag : tags) {
-                namespace.ensureFeature("BIAS" + tag);
-                namespace.ensureSparseFeature("word" + tag, sentence.token.get(i));
-                if (sentence.token.get(i).length() > 1) {
-                    namespace.ensureSparseFeature("prefix1" + tag, sentence.token.get(i).substring(0, 1));
-                }
-                if (sentence.token.get(i).length() > 2) {
-                    namespace.ensureSparseFeature("prefix2" + tag, sentence.token.get(i).substring(0, 2));
-                }
-                if (sentence.token.get(i).length() > 3) {
-                    namespace.ensureSparseFeature("prefix3" + tag, sentence.token.get(i).substring(0, 3));
-                }
-                if (sentence.token.get(i).length() > 1) {
-                    namespace.ensureSparseFeature("suffix1" + tag, sentence.token.get(i).substring(sentence.token.get(i).length()-1));
-                }
-                if (sentence.token.get(i).length() > 2) {
-                    namespace.ensureSparseFeature("suffix2" + tag, sentence.token.get(i).substring(sentence.token.get(i).length()-2));
-                }
-                if (sentence.token.get(i).length() > 3) {
-                    namespace.ensureSparseFeature("suffix3" + tag, sentence.token.get(i).substring(sentence.token.get(i).length()-3));
-                }
-                namespace.ensureSparseFeature("shape" + tag, getWordShape(sentence.token.get(i)));
-            }
-
-            // Add the unary factor
-
-            GraphicalModel.Factor f = model.addFactor(new int[]{iFinal}, new int[]{tags.size()}, (assignment) -> {
-
-                // This is the anonymous function that generates a feature vector for each assignment to the unary
-                // factor
-
-                String tag = tags.get(assignment[0]);
-
-                ConcatVector features = namespace.newVector();
-
-                namespace.setDenseFeature(features, "BIAS" + tag, new double[]{1.0});
-                namespace.setSparseFeature(features, "word" + tag, sentence.token.get(iFinal), 1.0);
-                if (embeddings.get(sentence.token.get(iFinal)) != null) {
-                    // namespace.setDenseFeature(features, "dense"+tag, embeddings.get(sentence.token.get(iFinal)));
-                }
-                if (sentence.token.get(iFinal).length() > 1) {
-                    namespace.setSparseFeature(features, "prefix1" + tag, sentence.token.get(iFinal).substring(0, 1), 1.0);
-                }
-                if (sentence.token.get(iFinal).length() > 2) {
-                    namespace.setSparseFeature(features, "prefix2" + tag, sentence.token.get(iFinal).substring(0, 2), 1.0);
-                }
-                if (sentence.token.get(iFinal).length() > 3) {
-                    namespace.setSparseFeature(features, "prefix3" + tag, sentence.token.get(iFinal).substring(0, 3), 1.0);
-                }
-                if (sentence.token.get(iFinal).length() > 1) {
-                    namespace.setSparseFeature(features, "suffix1" + tag, sentence.token.get(iFinal).substring(sentence.token.get(iFinal).length() - 1), 1.0);
-                }
-                if (sentence.token.get(iFinal).length() > 2) {
-                    namespace.setSparseFeature(features, "suffix2" + tag, sentence.token.get(iFinal).substring(sentence.token.get(iFinal).length() - 2), 1.0);
-                }
-                if (sentence.token.get(iFinal).length() > 3) {
-                    namespace.setSparseFeature(features, "suffix3" + tag, sentence.token.get(iFinal).substring(sentence.token.get(iFinal).length() - 3), 1.0);
-                }
-                namespace.setSparseFeature(features, "shape" + tag, getWordShape(sentence.token.get(iFinal)), 1.0);
-
-                return features;
-            });
-
-            assert(f.neigborIndices.length == 1);
-            assert(f.neigborIndices[0] == iFinal);
-
-            // If this is not the last variable, add a binary factor
-
-            if (i < sentence.token.size() - 1) {
-                for (String tag1 : tags) {
-                    for (String tag2 : tags) {
-                        namespace.ensureFeature("BIAS" + tag1 + tag2);
-                    }
-                }
-
-                GraphicalModel.Factor jf = model.addFactor(new int[]{iFinal, iFinal + 1}, new int[]{tags.size(), tags.size()}, (assignment) -> {
-
-                    // This is the anonymous function that generates a feature vector for every joint assignment to the
-                    // binary factor
-
-                    String thisTag = tags.get(assignment[0]);
-                    String nextTag = tags.get(assignment[1]);
-
-                    ConcatVector features = namespace.newVector();
-
-                    namespace.setDenseFeature(features, "BIAS" + thisTag + nextTag, new double[]{1.0});
-
-                    return features;
-                });
-
-                assert(jf.neigborIndices.length == 2);
-                assert(jf.neigborIndices[0] == iFinal);
-                assert(jf.neigborIndices[1] == iFinal + 1);
-            }
+            metadata.put("TOKEN", ""+sentence.token.get(i));
+            metadata.put("POS", ""+sentence.pos.get(i));
+            metadata.put("CHUNK", ""+sentence.npchunk.get(i));
+            metadata.put("TAG", ""+sentence.ner.get(i));
         }
+
+        CoNLLFeaturizer.annotate(model, tags, namespace, sentence);
 
         assert(model.factors != null);
         for (GraphicalModel.Factor f : model.factors) {
@@ -251,36 +161,47 @@ public class CoNLLBenchmark {
     public static class CoNLLSentence {
         public List<String> token = new ArrayList<>();
         public List<String> ner = new ArrayList<>();
+        public List<String> pos = new ArrayList<>();
+        public List<String> npchunk = new ArrayList<>();
 
-        public CoNLLSentence(List<String> token, List<String> ner) {
+        public CoNLLSentence(List<String> token, List<String> ner, List<String> pos, List<String> npchunk) {
             this.token = token;
             this.ner = ner;
+            this.pos = pos;
+            this.npchunk = npchunk;
         }
     }
 
     public List<CoNLLSentence> getSentences(String filename) throws IOException {
         List<CoNLLSentence> sentences = new ArrayList<>();
+
         List<String> tokens = new ArrayList<>();
-        List<String> ners = new ArrayList<>();
+        List<String> ner = new ArrayList<>();
+        List<String> pos = new ArrayList<>();
+        List<String> npchunk = new ArrayList<>();
 
         BufferedReader br = new BufferedReader(new FileReader(filename));
 
         String line;
         while ((line = br.readLine()) != null) {
             String[] parts = line.split("\t");
-            if (parts.length == 2) {
+            if (parts.length == 4) {
                 tokens.add(parts[0]);
-                String tag = parts[1];
+                pos.add(parts[1]);
+                npchunk.add(parts[2]);
+                String tag = parts[3];
                 if (tag.contains("-")) {
-                    ners.add(tag.split("-")[1]);
+                    ner.add(tag.split("-")[1]);
                 }
                 else {
-                    ners.add(tag);
+                    ner.add(tag);
                 }
                 if (parts[0].equals(".")) {
-                    sentences.add(new CoNLLSentence(tokens, ners));
+                    sentences.add(new CoNLLSentence(tokens, ner, pos, npchunk));
                     tokens = new ArrayList<>();
-                    ners = new ArrayList<>();
+                    ner = new ArrayList<>();
+                    pos = new ArrayList<>();
+                    npchunk = new ArrayList<>();
                 }
             }
         }
