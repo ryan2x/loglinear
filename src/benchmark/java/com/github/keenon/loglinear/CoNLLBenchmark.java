@@ -144,7 +144,7 @@ public class CoNLLBenchmark {
             metadata.put("TAG", ""+sentence.ner.get(i));
         }
 
-        CoNLLFeaturizer.annotate(model, tags, namespace, sentence);
+        CoNLLFeaturizer.annotate(model, tags, namespace, embeddings);
 
         assert(model.factors != null);
         for (GraphicalModel.Factor f : model.factors) {

@@ -21,13 +21,11 @@ public class CoNLLFeaturizer {
         return "mixed-case";
     }
 
-    public static void annotate(GraphicalModel model, List<String> tags, ConcatVectorNamespace namespace, CoNLLBenchmark.CoNLLSentence sentence) {
-        assert(model.variableMetaData.size() == sentence.token.size());
+    public static void annotate(GraphicalModel model, List<String> tags, ConcatVectorNamespace namespace, Map<String, double[]> embeddings) {
         for (int i = 0; i < model.variableMetaData.size(); i++) {
             Map<String,String> metadata = model.getVariableMetaDataByReference(i);
 
             String token = metadata.get("TOKEN");
-            assert(token.equals(sentence.token.get(i)));
             String pos = metadata.get("POS");
             String chunk = metadata.get("CHUNK");
 
@@ -56,6 +54,9 @@ public class CoNLLFeaturizer {
 
                 namespace.setDenseFeature(features, "BIAS" + tag, new double[]{1.0});
                 namespace.setSparseFeature(features, "word" + tag, token, 1.0);
+                if (embeddings != null && embeddings.containsKey(token)) {
+                    namespace.setDenseFeature(features, "embedding"+tag, embeddings.get(token));
+                }
                 if (token.length() > 1) {
                     namespace.setSparseFeature(features, "prefix1" + tag, token.substring(0, 1), 1.0);
                 }
@@ -78,26 +79,6 @@ public class CoNLLFeaturizer {
 
                 namespace.setSparseFeature(features, "pos" + tag, pos, 1.0);
                 namespace.setSparseFeature(features, "chunk" + tag, chunk, 1.0);
-
-                namespace.setSparseFeature(features, "leftword" + tag, leftToken, 1.0);
-                namespace.setSparseFeature(features, "leftshape" + tag, getWordShape(leftToken), 1.0);
-                namespace.setSparseFeature(features, "leftpos" + tag, leftPos, 1.0);
-                namespace.setSparseFeature(features, "leftchunk" + tag, leftChunk, 1.0);
-
-                namespace.setSparseFeature(features, "rightword" + tag, rightToken, 1.0);
-                namespace.setSparseFeature(features, "rightshape" + tag, getWordShape(rightToken), 1.0);
-                namespace.setSparseFeature(features, "rightpos" + tag, rightPos, 1.0);
-                namespace.setSparseFeature(features, "rightchunk" + tag, rightChunk, 1.0);
-
-                namespace.setSparseFeature(features, "leftwordbigram" + tag, leftToken + token, 1.0);
-                namespace.setSparseFeature(features, "leftshapebigram" + tag, getWordShape(leftToken) + getWordShape(token), 1.0);
-                namespace.setSparseFeature(features, "leftposbigram" + tag, leftPos + pos, 1.0);
-                namespace.setSparseFeature(features, "leftchunkbigram" + tag, leftChunk + chunk, 1.0);
-
-                namespace.setSparseFeature(features, "rightwordbigram" + tag, token + rightToken, 1.0);
-                namespace.setSparseFeature(features, "rightshapebigram" + tag, getWordShape(token) + getWordShape(rightToken), 1.0);
-                namespace.setSparseFeature(features, "rightposbigram" + tag, pos + rightPos, 1.0);
-                namespace.setSparseFeature(features, "rightchunkbigram" + tag, chunk + rightChunk, 1.0);
 
                 return features;
             });
