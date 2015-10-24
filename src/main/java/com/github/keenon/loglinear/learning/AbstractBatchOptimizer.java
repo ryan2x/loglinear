@@ -102,12 +102,21 @@ public abstract class AbstractBatchOptimizer {
             this.arr = arr;
         }
 
-        public void apply(ConcatVector weights) {
+        public void applyToWeights(ConcatVector weights) {
             if (isSparse) {
                 weights.setSparseComponent(component, index, value);
             }
             else {
                 weights.setDenseComponent(component, arr);
+            }
+        }
+
+        public void applyToDerivative(ConcatVector derivative) {
+            if (isSparse) {
+                derivative.setSparseComponent(component, index, 0.0);
+            }
+            else {
+                derivative.setDenseComponent(component, new double[]{0.0});
             }
         }
     }
@@ -344,6 +353,12 @@ public abstract class AbstractBatchOptimizer {
                 logLikelihood = logLikelihood - (l2regularization * weights.dotProduct(weights));
                 derivative.addVectorInPlace(weights, -2 * l2regularization);
 
+                // Zero out the derivative on the components we're holding fixed
+
+                for (Constraint constraint : constraints) {
+                    constraint.applyToDerivative(derivative);
+                }
+
                 // If our derivative is sufficiently small, we've converged
 
                 double derivativeNorm = derivative.dotProduct(derivative);
@@ -352,13 +367,15 @@ public abstract class AbstractBatchOptimizer {
                     break;
                 }
 
+                // Do the actual computation
+
                 System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
                 boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState);
 
                 // Apply constraints to the weights vector
 
                 for (Constraint constraint : constraints) {
-                    constraint.apply(weights);
+                    constraint.applyToWeights(weights);
                 }
 
                 if (converged) {
