@@ -54,6 +54,64 @@ public abstract class AbstractBatchOptimizer {
         }
     }
 
+    List<Constraint> constraints = new ArrayList<>();
+
+    /**
+     * This adds a constraint on the weight vector, that a certain component must be set to a sparse index=value
+     *
+     * @param component the component to fix
+     * @param index the index of the fixed sparse component
+     * @param value the value to fix at
+     */
+    public void addSparseConstraint(int component, int index, double value) {
+        constraints.add(new Constraint(component, index, value));
+    }
+
+    /**
+     * This adds a constraint on the weight vector, that a certain component must be set to a dense array
+     *
+     * @param component the component to fix
+     * @param arr the dense array to set
+     */
+    public void addDenseConstraint(int component, double[] arr) {
+        constraints.add(new Constraint(component, arr));
+    }
+
+    /**
+     * A way to record a constraint on the weight vector
+     */
+    private static class Constraint {
+        int component;
+        boolean isSparse;
+
+        int index;
+        double value;
+
+        double[] arr;
+
+        public Constraint(int component, int index, double value) {
+            isSparse = true;
+            this.component = component;
+            this.index = index;
+            this.value = value;
+        }
+
+        public Constraint(int component, double[] arr) {
+            isSparse = false;
+            this.component = component;
+            this.arr = arr;
+        }
+
+        public void apply(ConcatVector weights) {
+            if (isSparse) {
+                weights.setSparseComponent(component, index, value);
+            }
+            else {
+                weights.setDenseComponent(component, arr);
+            }
+        }
+    }
+
     /**
      * This is the hook for subclassing batch optimizers to override in order to have their optimizer work.
      *
@@ -296,6 +354,13 @@ public abstract class AbstractBatchOptimizer {
 
                 System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
                 boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState);
+
+                // Apply constraints to the weights vector
+
+                for (Constraint constraint : constraints) {
+                    constraint.apply(weights);
+                }
+
                 if (converged) {
                     break;
                 }
