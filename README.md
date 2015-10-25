@@ -8,7 +8,7 @@ Maven:
     <dependency>
         <groupId>com.github.keenon</groupId>
         <artifactId>loglinear</artifactId>
-        <version>1.2</version>
+        <version>1.2.3</version>
     </dependency>
 
 For documentation, see the "doc/" folder.
@@ -59,6 +59,11 @@ You can now use model.cloneModel() to get a clean copy of the graphical model.
 You can also use optimizer.addSparseConstraint(int component, int index, double value) to hold the weight vector's 
 component 'component' fixed with 'index=value'. Analogously, you can use optimizer.addDenseConstraint(int component, 
 double[] arr) to hold the weight vector's component 'component' fixed with dense value 'arr'.
+
+# What's new in v1.2.3: Adding configuration to the optimizers
+
+Added parameters for quiet-ing output to stderr. Also added a convergenceDerivativeNorm for configuring the aggression 
+of convergence criteria.
 
 # Coming up in v1.3: Distributed Learning
 
