@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Random;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -27,9 +28,9 @@ public class OptimizerTests {
 
     @Theory
     public void testOptimizeLogLikelihood(AbstractBatchOptimizer optimizer,
-                                          @ForAll(sampleSize = 50) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
+                                          @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
                                           @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
-                                          @ForAll(sampleSize = 4) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
+                                          @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
         AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
         ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization);
         System.err.println("Finished optimizing");
@@ -43,6 +44,65 @@ public class OptimizerTests {
             int size = finalWeights.getNumberOfComponents();
             ConcatVector randomDirection = new ConcatVector(size);
             for (int j = 0; j < size; j++) {
+                double[] dense = new double[finalWeights.isComponentSparse(j) ? finalWeights.getSparseIndex(j) + 1 : finalWeights.getDenseComponent(j).length];
+                for (int k = 0; k < dense.length; k++) {
+                    dense[k] = (r.nextDouble()-0.5)*1.0e-3;
+                }
+                randomDirection.setDenseComponent(j, dense);
+            }
+
+            ConcatVector randomPerturbation = finalWeights.deepClone();
+            randomPerturbation.addVectorInPlace(randomDirection, 1.0);
+
+            double randomPerturbedLogLikelihood = getValueSum(dataset, randomPerturbation, ll, l2regularization);
+
+            // Check that we're within a very small margin of error (around 7 decimal places) of the randomly
+            // discovered value
+
+            if (logLikelihood < randomPerturbedLogLikelihood - Math.abs(1.0e-7 * logLikelihood)) {
+                System.err.println("Thought optimal point was: "+logLikelihood);
+                System.err.println("Discovered better point: "+randomPerturbedLogLikelihood);
+            }
+
+            assertTrue(logLikelihood >= randomPerturbedLogLikelihood - Math.abs(1.0e-7 * logLikelihood));
+        }
+    }
+
+
+    @Theory
+    public void testOptimizeLogLikelihoodWithConstraints(AbstractBatchOptimizer optimizer,
+                                                  @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
+                                                  @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
+                                                  @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
+        Random r = new Random(42);
+
+        int constraintComponent = r.nextInt(initialWeights.getNumberOfComponents());
+        double constraintValue = r.nextDouble();
+
+        if (r.nextBoolean()) {
+            optimizer.addSparseConstraint(constraintComponent, 0, constraintValue);
+        }
+        else {
+            optimizer.addDenseConstraint(constraintComponent, new double[]{constraintValue});
+        }
+
+        // Put in some constraints
+
+        AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
+        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization);
+        System.err.println("Finished optimizing");
+
+        assertEquals(constraintValue, finalWeights.getValueAt(constraintComponent, 0), 1.0e-7);
+
+        double logLikelihood = getValueSum(dataset, finalWeights, ll, l2regularization);
+
+        // Check in a whole bunch of random directions really nearby that there is no nearby point with a higher log
+        // likelihood
+        for (int i = 0; i < 1000; i++) {
+            int size = finalWeights.getNumberOfComponents();
+            ConcatVector randomDirection = new ConcatVector(size);
+            for (int j = 0; j < size; j++) {
+                if (j == constraintComponent) continue;
                 double[] dense = new double[finalWeights.isComponentSparse(j) ? finalWeights.getSparseIndex(j) + 1 : finalWeights.getDenseComponent(j).length];
                 for (int k = 0; k < dense.length; k++) {
                     dense[k] = (r.nextDouble()-0.5)*1.0e-3;

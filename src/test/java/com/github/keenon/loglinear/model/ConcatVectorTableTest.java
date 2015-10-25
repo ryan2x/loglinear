@@ -154,6 +154,21 @@ public class ConcatVectorTableTest {
         assertTrue(concatVectorTable.valueEquals(recovered, 1.0e-5));
     }
 
+    @Theory
+    public void testCloneTable(@ForAll(sampleSize = 50) @From(FeatureFactorGenerator.class) ConcatVector[][][] factor3) throws IOException {
+        ConcatVectorTable concatVectorTable = convertArrayToVectorTable(factor3);
+
+        ConcatVectorTable cloned = concatVectorTable.cloneTable();
+        for (int i = 0; i < factor3.length; i++) {
+            for (int j = 0; j < factor3[0].length; j++) {
+                for (int k = 0; k < factor3[0][0].length; k++) {
+                    assertTrue(factor3[i][j][k].valueEquals(cloned.getAssignmentValue(new int[]{i, j, k}).get(), 1.0e-5));
+                }
+            }
+        }
+        assertTrue(concatVectorTable.valueEquals(cloned, 1.0e-5));
+    }
+
     public static class FeatureFactorGenerator extends Generator<ConcatVector[][][]> {
         public FeatureFactorGenerator(Class<ConcatVector[][][]> type) {
             super(type);

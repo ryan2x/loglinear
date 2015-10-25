@@ -132,6 +132,16 @@ public class NDArray<T> implements Iterable<int[]> {
         return c;
     }
 
+    /**
+     * Clones the table, but keeps the values by reference.
+     * @return a new NDArray, a perfect replica of this one
+     */
+    public NDArray<T> cloneArray() {
+        NDArray<T> copy = new NDArray<>(dimensions.clone());
+        copy.values = values.clone();
+        return copy;
+    }
+
     ////////////////////////////////////////////////////////////////////////////
     // PRIVATE IMPLEMENTATION
     ////////////////////////////////////////////////////////////////////////////

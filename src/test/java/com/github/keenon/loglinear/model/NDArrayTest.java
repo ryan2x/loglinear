@@ -46,6 +46,14 @@ public class NDArrayTest {
         }
     }
 
+    @Theory
+    public void testClone(@ForAll(sampleSize = 50) @From(NDArrayGenerator.class) NDArrayWithGold<Double> testPair) throws Exception {
+        NDArray<Double> clone = testPair.array.cloneArray();
+        for (int[] assignment : testPair.gold.keySet()) {
+            Assert.assertEquals(testPair.gold.get(assignment), clone.getAssignmentValue(assignment), 1.0e-5);
+        }
+    }
+
     public static class NDArrayWithGold<T> {
         public NDArray<T> array;
         public Map<int[], T> gold = new HashMap<>();

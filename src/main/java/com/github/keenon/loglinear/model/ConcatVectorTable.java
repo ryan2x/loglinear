@@ -156,5 +156,25 @@ public class ConcatVectorTable extends NDArray<Supplier<ConcatVector>> {
             originalThunks = null;
         }
     }
+
+    /**
+     * Clones the table, but keeps the values by reference.
+     * @return a new NDArray, a perfect replica of this one
+     */
+    public ConcatVectorTable cloneTable() {
+        ConcatVectorTable copy = new ConcatVectorTable(getDimensions().clone());
+        // OPTIMIZATION:
+        // Rather than use the standard iterator, which creates lots of int[] arrays on the heap, which need to be GC'd,
+        // we use the fast version that just mutates one array. Since this is read once for us here, this is ideal.
+        Iterator<int[]> fastPassByReferenceIterator = fastPassByReferenceIterator();
+        int[] assignment = fastPassByReferenceIterator.next();
+        while (true) {
+            copy.setAssignmentValue(assignment, getAssignmentValue(assignment));
+            // Set the assignment arrays correctly
+            if (fastPassByReferenceIterator.hasNext()) fastPassByReferenceIterator.next();
+            else break;
+        }
+        return copy;
+    }
 }
 

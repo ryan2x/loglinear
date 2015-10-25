@@ -84,6 +84,18 @@ public class GraphicalModel {
             }
             return factor;
         }
+
+        /**
+         * Duplicates this factor.
+         * @return a copy of the factor
+         */
+        public Factor cloneFactor() {
+            Factor clone = new Factor();
+            clone.neigborIndices = neigborIndices.clone();
+            clone.featuresTable = featuresTable.cloneTable();
+            clone.metaData.putAll(metaData);
+            return clone;
+        }
     }
 
     /**
@@ -277,6 +289,29 @@ public class GraphicalModel {
         }
         s += "\n}";
         return s;
+    }
+
+    /**
+     * The point here is to allow us to save a copy of the model with a current set of factors and metadata mappings,
+     * which can come in super handy with gameplaying applications. The cloned model doesn't instantiate the feature
+     * thunks inside factors, those are just taken over individually.
+     *
+     * @return a clone
+     */
+    public GraphicalModel cloneModel() {
+        GraphicalModel clone = new GraphicalModel();
+        clone.modelMetaData.putAll(modelMetaData);
+        for (int i = 0; i < variableMetaData.size(); i++) {
+            if (variableMetaData.get(i) != null) {
+                clone.getVariableMetaDataByReference(i).putAll(variableMetaData.get(i));
+            }
+        }
+
+        for (Factor f : factors) {
+            clone.factors.add(f.cloneFactor());
+        }
+
+        return clone;
     }
 
     ////////////////////////////////////////////////////////////////////////////

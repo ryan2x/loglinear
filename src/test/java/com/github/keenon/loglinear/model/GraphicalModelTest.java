@@ -42,6 +42,13 @@ public class GraphicalModelTest {
     }
 
     @Theory
+    public void testClone(@ForAll(sampleSize = 50) @From(GraphicalModelGenerator.class) GraphicalModel graphicalModel) throws IOException {
+        GraphicalModel clone = graphicalModel.cloneModel();
+
+        assertTrue(graphicalModel.valueEquals(clone, 1.0e-5));
+    }
+
+    @Theory
     public void testGetVariableSizes(@ForAll(sampleSize = 50) @From(GraphicalModelGenerator.class) GraphicalModel graphicalModel) throws IOException {
         int[] sizes = graphicalModel.getVariableSizes();
 
