@@ -32,7 +32,7 @@ public class OptimizerTests {
                                           @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
                                           @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
         AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
-        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization);
+        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, true);
         System.err.println("Finished optimizing");
 
         double logLikelihood = getValueSum(dataset, finalWeights, ll, l2regularization);
@@ -68,7 +68,6 @@ public class OptimizerTests {
         }
     }
 
-
     @Theory
     public void testOptimizeLogLikelihoodWithConstraints(AbstractBatchOptimizer optimizer,
                                                   @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
@@ -89,10 +88,10 @@ public class OptimizerTests {
         // Put in some constraints
 
         AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
-        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization);
+        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, false);
         System.err.println("Finished optimizing");
 
-        assertEquals(constraintValue, finalWeights.getValueAt(constraintComponent, 0), 1.0e-7);
+        assertEquals(constraintValue, finalWeights.getValueAt(constraintComponent, 0), 1.0e-9);
 
         double logLikelihood = getValueSum(dataset, finalWeights, ll, l2regularization);
 

@@ -13,13 +13,13 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
     final static double alpha = 0.1;
 
     @Override
-    public boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState optimizationState) {
+    public boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState optimizationState, boolean quiet) {
         AdaGradOptimizationState s = (AdaGradOptimizationState)optimizationState;
 
         double logLikelihoodChange = logLikelihood - s.lastLogLikelihood;
 
         if (logLikelihoodChange == 0) {
-            System.err.println("\tlogLikelihood improvement = 0: quitting");
+            if (!quiet) System.err.println("\tlogLikelihood improvement = 0: quitting");
             return true;
         }
 
@@ -32,12 +32,12 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
             s.lastDerivative.mapInPlace((d) -> d / 2);
             weights.addVectorInPlace(s.lastDerivative, -1.0);
 
-            System.err.println("\tBACKTRACK...");
+            if (!quiet) System.err.println("\tBACKTRACK...");
 
             // if the lastDerivative norm falls below a threshold, it means we've converged
 
-            if (s.lastDerivative.dotProduct(s.lastDerivative) < 1.0e-9) {
-                System.err.println("\tBacktracking derivative norm "+s.lastDerivative.dotProduct(s.lastDerivative)+" < 1.0e-9: quitting");
+            if (s.lastDerivative.dotProduct(s.lastDerivative) < 1.0e-10) {
+                if (!quiet) System.err.println("\tBacktracking derivative norm "+s.lastDerivative.dotProduct(s.lastDerivative)+" < 1.0e-9: quitting");
                 return true;
             }
         }
@@ -64,7 +64,7 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
             s.lastDerivative = gradient;
             s.lastLogLikelihood = logLikelihood;
 
-            System.err.println("\tLL: "+logLikelihood);
+            if (!quiet) System.err.println("\tLL: "+logLikelihood);
         }
 
         return false;

@@ -66,7 +66,7 @@ public class CoNLLBenchmark {
         AbstractBatchOptimizer opt = new BacktrackingAdaGradOptimizer();
 
         // This training call is basically what we want the benchmark for. It should take 99% of the wall clock time
-        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.01);
+        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.01, 1.0e-5, false);
 
         System.err.println("Testing system...");
 

@@ -21,36 +21,57 @@ import java.util.Random;
  */
 public abstract class AbstractBatchOptimizer {
     public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
-        return optimize(dataset, fn, new ConcatVector(0), 0.0);
+        return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-5, false);
     }
 
-    public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
-        System.err.println("\n**************\nBeginning training\n");
+    public <T> ConcatVector optimize(T[] dataset,
+                                     AbstractDifferentiableFunction<T> fn,
+                                     ConcatVector initialWeights,
+                                     double l2regularization,
+                                     double convergenceDerivativeNorm,
+                                     boolean quiet) {
+        if (!quiet) System.err.println("\n**************\nBeginning training\n");
+        else System.err.println("[Beginning quiet training]");
 
-        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization);
+        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet);
         new Thread(mainWorker).start();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        System.err.println("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
-        System.err.println("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
-        System.err.println("if left to their own devices.\n");
+        if (!quiet) {
+            System.err.println("NOTE: you can press any key (and maybe ENTER afterwards to jog stdin) to terminate learning early.");
+            System.err.println("The convergence criteria are quite aggressive if left uninterrupted, and will run for a while");
+            System.err.println("if left to their own devices.\n");
 
-        while (true) {
-            if (mainWorker.isFinished) {
-                System.err.println("training completed without interruption");
-                return mainWorker.weights;
-            }
-            try {
-                if (br.ready()) {
-                    System.err.println("received quit command: quitting");
-                    System.err.println("training completed by interruption");
-                    mainWorker.isFinished = true;
+            while (true) {
+                if (mainWorker.isFinished) {
+                    System.err.println("training completed without interruption");
                     return mainWorker.weights;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                try {
+                    if (br.ready()) {
+                        System.err.println("received quit command: quitting");
+                        System.err.println("training completed by interruption");
+                        mainWorker.isFinished = true;
+                        return mainWorker.weights;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+        }
+        else {
+            while (!mainWorker.isFinished) {
+                synchronized (mainWorker.naturalTerminationBarrier) {
+                    try {
+                        mainWorker.naturalTerminationBarrier.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            System.err.println("[Quiet training complete]");
+            return mainWorker.weights;
         }
     }
 
@@ -128,9 +149,10 @@ public abstract class AbstractBatchOptimizer {
      * @param gradient the gradient at these weights
      * @param logLikelihood the log likelihood at these weights
      * @param state any saved state the optimizer wants to keep and pass around during each optimization run
+     * @param quiet whether or not to dump output about progress to the console
      * @return whether or not we've converged
      */
-    public abstract boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState state);
+    public abstract boolean updateWeights(ConcatVector weights, ConcatVector gradient, double logLikelihood, OptimizationState state, boolean quiet);
 
     /**
      * This is subclassed by children to store any state they need to perform optimization
@@ -202,14 +224,20 @@ public abstract class AbstractBatchOptimizer {
         T[] dataset;
         AbstractDifferentiableFunction<T> fn;
         double l2regularization;
+        double convergenceDerivativeNorm;
+        boolean quiet;
 
-        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization) {
+        final Object naturalTerminationBarrier = new Object();
+
+        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet) {
             optimizationState = getFreshOptimizationState(initialWeights);
             weights = initialWeights.deepClone();
 
             this.dataset = dataset;
             this.fn = fn;
             this.l2regularization = l2regularization;
+            this.convergenceDerivativeNorm = convergenceDerivativeNorm;
+            this.quiet = quiet;
         }
 
         /**
@@ -362,15 +390,17 @@ public abstract class AbstractBatchOptimizer {
                 // If our derivative is sufficiently small, we've converged
 
                 double derivativeNorm = derivative.dotProduct(derivative);
-                if (derivativeNorm < 1.0e-9) {
-                    System.err.println("Derivative norm "+derivativeNorm+" < 1.0e-9: quitting");
+                if (derivativeNorm < convergenceDerivativeNorm) {
+                    if (!quiet) System.err.println("Derivative norm "+derivativeNorm+" < "+convergenceDerivativeNorm+": quitting");
                     break;
                 }
 
                 // Do the actual computation
 
-                System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
-                boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState);
+                if (!quiet) {
+                    System.err.println("[" + gradientComputationTime + " ms, threads waiting " + threadWaiting + " ms]");
+                }
+                boolean converged = updateWeights(weights, derivative, logLikelihood, optimizationState, quiet);
 
                 // Apply constraints to the weights vector
 
@@ -383,6 +413,9 @@ public abstract class AbstractBatchOptimizer {
                 }
             }
 
+            synchronized (naturalTerminationBarrier) {
+                naturalTerminationBarrier.notifyAll();
+            }
             isFinished = true;
         }
     }
