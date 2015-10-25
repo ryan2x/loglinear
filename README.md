@@ -53,6 +53,13 @@ constructed, and doing that showed up optimizations that needed to happen about 
 small ones, during gradient computations, so that's all been cleaned up. We now have a means of really using loglinear
 in practice for real modelling challenges.
 
+# What's new in v1.2.2: Adding cloning and simple equality optimization constraints
+
+You can now use model.cloneModel() to get a clean copy of the graphical model.
+You can also use optimizer.addSparseConstraint(int component, int index, double value) to hold the weight vector's 
+component 'component' fixed with 'index=value'. Analogously, you can use optimizer.addDenseConstraint(int component, 
+double[] arr) to hold the weight vector's component 'component' fixed with dense value 'arr'.
+
 # Coming up in v1.3: Distributed Learning
 
 Distributed optimization for learning! Since the raw gradient computation is unlikely to get much faster after all this
