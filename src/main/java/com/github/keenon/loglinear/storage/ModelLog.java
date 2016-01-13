@@ -8,12 +8,12 @@ import java.util.*;
 /**
  * Created by keenon on 1/12/16.
  *
- * This is simpler than a ModelBatch, since it doesn't support deletion or editing post hoc. Files created by ModelLog
- * can be read by ModelBatch, and vice versa.
- *
  * The point of ModelLog is to open a streaming queue of data, backed by a file, which can be added to with minimal
  * disk IO. That optimizes for the common case, where we're recording a number of training examples to be used later
  * for training or analysis, but the examples are arriving in an online fashion.
+ *
+ * This is simpler than a ModelBatch, since it doesn't support deletion or editing post hoc. Files created by ModelLog
+ * can be read by ModelBatch, and vice versa.
  */
 public class ModelLog extends ArrayList<GraphicalModel> {
     public boolean writeWithFactors = false;
