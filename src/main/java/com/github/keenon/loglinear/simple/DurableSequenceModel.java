@@ -28,15 +28,15 @@ import java.util.function.Function;
  * This is a high level API to simplify the common task of making a simple sequence model, with binary factors. There
  * are really three things going on here
  */
-public class SequenceModel extends SimpleDurableModel<Annotation> {
+public class DurableSequenceModel extends SimpleDurableModel<Annotation> {
     public String[] tags;
 
-    private Map<GraphicalModel, Annotation> annotations = new HashMap<>();
     private Map<String, BiFunction<Annotation, Integer, String>> unaryStringFeatures = new HashMap<>();
     private Map<String, BiFunction<Annotation, Integer, double[]>> unaryEmbeddingFeatures = new HashMap<>();
     private Map<String, BiFunction<Annotation, Integer, String>> binaryStringFeatures = new HashMap<>();
+    private StanfordCoreNLP coreNLP;
 
-    private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.SequenceModel.SOURCE_TEXT";
+    private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.DurableSequenceModel.SOURCE_TEXT";
 
     /**
      * This is the parent constructor that does the basic work of creating the backing model store, an optimizer, and
@@ -46,9 +46,10 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
      * @param tags the tags we'll be using to classify the sequences into
      * @param coreNLP the instance of CoreNLP that we'll use to create any Annotation objects that we need
      */
-    public SequenceModel(String backingStorePath, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
+    public DurableSequenceModel(String backingStorePath, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
         super(backingStorePath);
         this.tags = tags;
+        this.coreNLP = coreNLP;
     }
 
     /**
@@ -80,14 +81,14 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
     public void addTrainingExample(Annotation annotation, String[] labels) {
         GraphicalModel model = createModel(annotation);
         for (int i = 0; i < labels.length; i++) {
-            int tag = -1;
+            int tagIndex = -1;
             for (int t = 0; t <tags.length; t++) {
                 if (tags[t].equals(labels[i])) {
-                    tag = t;
+                    tagIndex = t;
                 }
             }
-            assert(tag != -1);
-            model.getVariableMetaDataByReference(i).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+tag);
+            assert(tagIndex != -1);
+            model.getVariableMetaDataByReference(i).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+tagIndex);
         }
 
         addLabeledTrainingExample(model);
@@ -124,17 +125,21 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
     }
 
     @Override
-    public GraphicalModel createModel(Annotation annotation) {
+    protected GraphicalModel createModelInternal(Annotation annotation) {
         GraphicalModel model = new GraphicalModel();
         model.getModelMetaDataByReference().put(SOURCE_TEXT, annotation.toString());
-        annotations.put(model, annotation);
-        featurize(model);
         return model;
     }
 
-    private void featurize(GraphicalModel model) {
-        Annotation annotation = annotations.get(model);
+    @Override
+    protected Annotation restoreContextObjectFromModelTags(GraphicalModel model) {
+        Annotation annotation = new Annotation(model.getModelMetaDataByReference().get(SOURCE_TEXT));
+        coreNLP.annotate(annotation);
+        return annotation;
+    }
 
+    @Override
+    protected void featurizeModel(GraphicalModel model, Annotation annotation) {
         for (int i = 0; i < annotation.size(); i++) {
             final Integer f = i;
 

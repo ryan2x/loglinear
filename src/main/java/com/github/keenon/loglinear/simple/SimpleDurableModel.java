@@ -9,6 +9,9 @@ import com.github.keenon.loglinear.model.GraphicalModel;
 import com.github.keenon.loglinear.storage.ModelLog;
 
 import java.io.*;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by keenon on 1/13/16.
@@ -19,11 +22,12 @@ import java.io.*;
  * We have multiple SimpleDurableModel types as a simple interface for downstream users who don't want the full
  * complexity available in the real interface.
  */
-public abstract class SimpleDurableModel<T> {
+public abstract class SimpleDurableModel<T extends Serializable> {
     public ConcatVector weights;
 
     protected ConcatVectorNamespace namespace;
     protected ModelLog log;
+    protected Map<GraphicalModel, T> context = new IdentityHashMap<>();
 
     private String weightsPath;
     private String namespacePath;
@@ -77,6 +81,31 @@ public abstract class SimpleDurableModel<T> {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Interfaces for integrating packages like LENSE
+    ////////////////////////////////////////////////////////////////////////
+
+    /**
+     * IF YOU ARE AN END-USER, THIS ISN'T WHAT YOU'RE LOOKING FOR
+     *
+     * This needs to get implemented by subclasses, and is the primary complexity hiding mechanism for external apps
+     * that intend to integrate with the SimpleDurableModel interface, like Lense.
+     *
+     * @param t the input type that gives us the information to featurize a model
+     * @return a GraphicalModel that's fully featurized
+     */
+    public GraphicalModel createModel(T t) {
+        GraphicalModel model = createModelInternal(t);
+        context.put(model, t);
+        return model;
+    }
+
+    protected abstract GraphicalModel createModelInternal(T t);
+
+    ////////////////////////////////////////////////////////////////////////
+    // Protected interfaces only for subclasses
+    ////////////////////////////////////////////////////////////////////////
+
     /**
      * Puts an additional training example into the ModelLog, which writes to disk, and then kicks off a retraining
      * job if there aren't any currently running.
@@ -89,15 +118,25 @@ public abstract class SimpleDurableModel<T> {
     }
 
     /**
-     * IF YOU ARE AN END-USER, THIS ISN'T WHAT YOU'RE LOOKING FOR
+     * This is for subclasses, and is used to re-create any in-memory contextual information that might get stored
+     * along with the GraphicalModel for featurizing purposes. For example, CoreNLP Annotation objects can be
+     * re-generated from the original source text.
      *
-     * This needs to get implemented by subclasses, and is the primary complexity hiding mechanism for external apps
-     * that intend to integrate with the SimpleDurableModel interface, like Lense.
-     *
-     * @param t the input type that gives us the information to featurize a model
-     * @return a GraphicalModel that's fully featurized
+     * @param model the model, presumably with enough information encoded in its key-value store to recover the context
+     *              object T
+     * @return the context object T for this GraphicalModel, that will be cached and provided for future featurizing
      */
-    public abstract GraphicalModel createModel(T t);
+    protected abstract T restoreContextObjectFromModelTags(GraphicalModel model);
+
+    /**
+     * This is for subclasses, and is used to re-featurize before every training run, so that we can make sure that
+     * changing feature sets are reflected in the next set of weights after retraining. It also means that we can save
+     * logs of GraphicalModels that don't need to contain the features with them.
+     *
+     * @param model the model we'd like to featurize into
+     * @param t the input element that will be used as context for the featurizing
+     */
+    protected abstract void featurizeModel(GraphicalModel model, T t);
 
     ////////////////////////////////////////////////////////////////////////
     // Private interfaces
@@ -122,13 +161,25 @@ public abstract class SimpleDurableModel<T> {
         Object thisClosure = this;
         new Thread(() -> {
 
-            // Do the training
+            // Create the training set, and re-contextualize if necessary, and always re-featurize, in case the feature
+            // set has changed since the last time we ran training.
 
             GraphicalModel[] frozenSet;
             frozenSet = new GraphicalModel[log.size()];
             for (int i = 0; i < frozenSet.length; i++) {
                 frozenSet[i] = log.get(i);
             }
+            for (GraphicalModel model : frozenSet) {
+                // Generate context if necessary
+                if (!context.containsKey(model)) {
+                    context.put(model, restoreContextObjectFromModelTags(model));
+                }
+                // Refeaturize the model
+                featurizeModel(model, context.get(model));
+            }
+
+            // Do the training
+
             AbstractBatchOptimizer optimizer = new BacktrackingAdaGradOptimizer();
             weights = optimizer.optimize(frozenSet, new LogLikelihoodDifferentiableFunction());
 
