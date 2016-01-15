@@ -9,6 +9,7 @@ import com.github.keenon.loglinear.model.ConcatVectorNamespace;
 import com.github.keenon.loglinear.model.GraphicalModel;
 import com.github.keenon.loglinear.simple.SimpleDurableModel;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,14 +31,22 @@ import java.util.function.Function;
 public class SequenceModel extends SimpleDurableModel<Annotation> {
     public String[] tags;
 
+    private Map<GraphicalModel, Annotation> annotations = new HashMap<>();
+    private Map<String, BiFunction<Annotation, Integer, String>> unaryStringFeatures = new HashMap<>();
+    private Map<String, BiFunction<Annotation, Integer, double[]>> unaryEmbeddingFeatures = new HashMap<>();
+    private Map<String, BiFunction<Annotation, Integer, String>> binaryStringFeatures = new HashMap<>();
+
+    private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.SequenceModel.SOURCE_TEXT";
+
     /**
      * This is the parent constructor that does the basic work of creating the backing model store, an optimizer, and
      * retraining synchronization infrastructure.
      *
      * @param backingStorePath the path to a folder where we can store backing information about the model
      * @param tags the tags we'll be using to classify the sequences into
+     * @param coreNLP the instance of CoreNLP that we'll use to create any Annotation objects that we need
      */
-    public SequenceModel(String backingStorePath, String[] tags) throws IOException {
+    public SequenceModel(String backingStorePath, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
         super(backingStorePath);
         this.tags = tags;
     }
@@ -84,9 +93,6 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
         addLabeledTrainingExample(model);
     }
 
-    Map<String, BiFunction<Annotation, Integer, String>> unaryStringFeatures = new HashMap<>();
-    Map<String, BiFunction<Annotation, Integer, String>> binaryStringFeatures = new HashMap<>();
-
     /**
      * This adds a feature, which is a closure that takes an Annotation and an index into the sentence, and
      * returns a string value that's a feature on each unary factor in the sequence model.
@@ -95,6 +101,16 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
      */
     public void addUnaryStringFeature(String name, BiFunction<Annotation, Integer, String> newFeature) {
         unaryStringFeatures.put(name, newFeature);
+    }
+
+    /**
+     * This adds a feature, which is a closure that takes an Annotation and an index into the sentence, and
+     * returns a double array value (usually an embedding) that's a feature on each unary factor in the sequence model.
+     * @param name unique human readable name for the feature
+     * @param newFeature the closure. must be idempotent
+     */
+    public void addUnaryEmbeddingFeature(String name, BiFunction<Annotation, Integer, double[]> newFeature) {
+        unaryEmbeddingFeatures.put(name, newFeature);
     }
 
     /**
@@ -110,11 +126,15 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
     @Override
     public GraphicalModel createModel(Annotation annotation) {
         GraphicalModel model = new GraphicalModel();
-        featurize(model, annotation);
+        model.getModelMetaDataByReference().put(SOURCE_TEXT, annotation.toString());
+        annotations.put(model, annotation);
+        featurize(model);
         return model;
     }
 
-    private void featurize(GraphicalModel model, Annotation annotation) {
+    private void featurize(GraphicalModel model) {
+        Annotation annotation = annotations.get(model);
+
         for (int i = 0; i < annotation.size(); i++) {
             final Integer f = i;
 
@@ -126,6 +146,10 @@ public class SequenceModel extends SimpleDurableModel<Annotation> {
                 for (String feature : unaryStringFeatures.keySet()) {
                     String featureValue = unaryStringFeatures.get(feature).apply(annotation, f);
                     namespace.setSparseFeature(unaryFeatureVector, tag+":"+feature, featureValue, 1.0);
+                }
+                for (String feature : unaryEmbeddingFeatures.keySet()) {
+                    double[] featureValue = unaryEmbeddingFeatures.get(feature).apply(annotation, f);
+                    namespace.setDenseFeature(unaryFeatureVector, tag+":"+feature, featureValue);
                 }
                 return unaryFeatureVector;
             });
