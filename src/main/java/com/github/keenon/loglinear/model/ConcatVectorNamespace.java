@@ -2,6 +2,7 @@ package com.github.keenon.loglinear.model;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  * This is a wrapper function to keep a namespace of namespace of recognized features, so that building a set of
  * ConcatVectors for featurizing a model is easier and more intuitive. It's actually quite simple, and threadsafe.
  */
-public class ConcatVectorNamespace {
+public class ConcatVectorNamespace implements Serializable {
     final Map<String,Integer> featureToIndex = new HashMap<>();
     final Map<String, Map<String,Integer>> sparseFeatureIndex = new HashMap<>();
     final Map<String, Map<Integer,String>> reverseSparseFeatureIndex = new HashMap<>();
