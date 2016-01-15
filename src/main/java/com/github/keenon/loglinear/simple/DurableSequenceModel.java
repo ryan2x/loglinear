@@ -61,6 +61,7 @@ public class DurableSequenceModel extends SimpleDurableModel<Annotation> {
         String[] tagSequence = new String[annotation.size()];
 
         GraphicalModel model = createModel(annotation);
+        featurizeModel(model, annotation);
         CliqueTree tree = new CliqueTree(model, weights);
         int[] map = tree.calculateMAP();
 

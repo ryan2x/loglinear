@@ -29,6 +29,10 @@ public class ModelLog extends ArrayList<GraphicalModel> {
      * @throws IOException
      */
     public ModelLog(String filename) throws IOException {
+        File f = new File(filename);
+        System.err.println(filename);
+        if (!f.exists()) f.createNewFile();
+
         InputStream is = new FileInputStream(filename);
         GraphicalModel read;
         while ((read = GraphicalModel.readFromStream(is)) != null) {

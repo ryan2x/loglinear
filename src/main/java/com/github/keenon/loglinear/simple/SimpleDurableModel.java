@@ -203,6 +203,6 @@ public abstract class SimpleDurableModel<T extends Serializable> {
                     launchTrainingRunIfNotRunning();
                 }
             }
-        });
+        }).start();
     }
 }
