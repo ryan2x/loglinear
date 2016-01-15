@@ -21,7 +21,7 @@ import java.util.Random;
  */
 public abstract class AbstractBatchOptimizer {
     public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
-        return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-5, false);
+        return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-3, false);
     }
 
     public <T> ConcatVector optimize(T[] dataset,
