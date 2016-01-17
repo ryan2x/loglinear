@@ -40,6 +40,9 @@ public abstract class SimpleDurablePredictor<T extends Serializable> {
      * @param backingStorePath the path to a folder where we can store backing information about the model
      */
     public SimpleDurablePredictor(String backingStorePath) throws IOException {
+        File dir = new File(backingStorePath);
+        if (!dir.exists()) dir.mkdirs();
+
         log = new ModelLog(backingStorePath+"/model-log.ser");
 
         // Check if the weights have a complete, valid serialized form on the backing store, and load
