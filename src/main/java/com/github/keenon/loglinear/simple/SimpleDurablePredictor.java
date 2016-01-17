@@ -100,11 +100,26 @@ public abstract class SimpleDurablePredictor<T extends Serializable> {
         return model;
     }
 
-    protected abstract GraphicalModel createModelInternal(T t);
+    /**
+     * Blocks execution until the current training run is complete. Useful for initialization, etc
+     */
+    public void blockForRetraining() {
+        synchronized (this) {
+            if (trainingRunning) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////
     // Protected interfaces only for subclasses
     ////////////////////////////////////////////////////////////////////////
+
+    protected abstract GraphicalModel createModelInternal(T t);
 
     /**
      * Puts an additional training example into the ModelLog, which writes to disk, and then kicks off a retraining
@@ -146,7 +161,7 @@ public abstract class SimpleDurablePredictor<T extends Serializable> {
      * Checks, in a synchronized way, if a training run is currently going on any simple durable model that's in memory
      * on this machine.
      */
-    private void launchTrainingRunIfNotRunning() {
+    protected void launchTrainingRunIfNotRunning() {
         synchronized (this) {
             if (!trainingRunning) {
                 trainingRunning = true;
@@ -206,6 +221,7 @@ public abstract class SimpleDurablePredictor<T extends Serializable> {
 
             synchronized (thisClosure) {
                 trainingRunning = false;
+                thisClosure.notifyAll();
                 if (log.size() > frozenSet.length) {
                     launchTrainingRunIfNotRunning();
                 }

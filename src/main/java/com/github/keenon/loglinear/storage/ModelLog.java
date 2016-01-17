@@ -81,10 +81,12 @@ public class ModelLog extends ArrayList<GraphicalModel> {
             try {
                 if (writeWithFactors) {
                     m.writeToStream(os);
+                    os.flush();
                 } else {
                     Set<GraphicalModel.Factor> cachedFactors = m.factors;
                     m.factors = new HashSet<>();
                     m.writeToStream(os);
+                    os.flush();
                     m.factors = cachedFactors;
                 }
             } catch (IOException e) {
