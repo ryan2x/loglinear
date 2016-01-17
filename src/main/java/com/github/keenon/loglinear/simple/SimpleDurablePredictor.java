@@ -24,9 +24,9 @@ import java.util.Map;
  */
 public abstract class SimpleDurablePredictor<T extends Serializable> {
     public ConcatVector weights;
+    public ConcatVectorNamespace namespace;
+    public ModelLog log;
 
-    protected ConcatVectorNamespace namespace;
-    protected ModelLog log;
     protected Map<GraphicalModel, T> context = new IdentityHashMap<>();
 
     private String weightsPath;

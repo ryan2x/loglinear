@@ -18,8 +18,10 @@ import java.util.function.Function;
  * This is a high level API to simplify the common task of making a simple multiclass model over text sequences.
  */
 public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotation> {
+    public String[] tags;
 
-    private String[] tags;
+    private Map<String, Function<Annotation, String>> stringFeatures = new HashMap<>();
+    private Map<String, Function<Annotation, double[]>> embeddingFeatures = new HashMap<>();
     private StanfordCoreNLP coreNLP;
 
     private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.DurableMulticlassPredictor.SOURCE_TEXT";
@@ -36,9 +38,6 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
         this.tags = tags;
         this.coreNLP = coreNLP;
     }
-
-    private Map<String, Function<Annotation, String>> stringFeatures = new HashMap<>();
-    private Map<String, Function<Annotation, double[]>> embeddingFeatures = new HashMap<>();
 
     /**
      * This adds a feature, which is a closure that takes an Annotation and an index into the sentence, and
