@@ -1,34 +1,23 @@
 package com.github.keenon.loglinear.simple;
 
-import com.github.keenon.loglinear.ConcatVectorProto;
-import com.github.keenon.loglinear.GraphicalModelProto;
 import com.github.keenon.loglinear.inference.CliqueTree;
 import com.github.keenon.loglinear.learning.LogLikelihoodDifferentiableFunction;
 import com.github.keenon.loglinear.model.ConcatVector;
-import com.github.keenon.loglinear.model.ConcatVectorNamespace;
 import com.github.keenon.loglinear.model.GraphicalModel;
-import com.github.keenon.loglinear.simple.SimpleDurableModel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 /**
  * Created by keenon on 1/13/16.
  *
- * This is a high level API to simplify the common task of making a simple sequence model, with binary factors. There
- * are really three things going on here
+ * This is a high level API to simplify the common task of making a simple sequence model, with binary factors.
  */
-public class DurableSequenceModel extends SimpleDurableModel<Annotation> {
+public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation> {
     public String[] tags;
 
     private Map<String, BiFunction<Annotation, Integer, String>> unaryStringFeatures = new HashMap<>();
@@ -36,7 +25,7 @@ public class DurableSequenceModel extends SimpleDurableModel<Annotation> {
     private Map<String, BiFunction<Annotation, Integer, String>> binaryStringFeatures = new HashMap<>();
     private StanfordCoreNLP coreNLP;
 
-    private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.DurableSequenceModel.SOURCE_TEXT";
+    private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.DurableSequencePredictor.SOURCE_TEXT";
 
     /**
      * This is the parent constructor that does the basic work of creating the backing model store, an optimizer, and
@@ -46,7 +35,7 @@ public class DurableSequenceModel extends SimpleDurableModel<Annotation> {
      * @param tags the tags we'll be using to classify the sequences into
      * @param coreNLP the instance of CoreNLP that we'll use to create any Annotation objects that we need
      */
-    public DurableSequenceModel(String backingStorePath, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
+    public DurableSequencePredictor(String backingStorePath, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
         super(backingStorePath);
         this.tags = tags;
         this.coreNLP = coreNLP;

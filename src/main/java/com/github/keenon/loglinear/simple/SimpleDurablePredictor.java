@@ -16,13 +16,13 @@ import java.util.Map;
 /**
  * Created by keenon on 1/13/16.
  *
- * We have this interface so that users of these SimpleDurableModel's (like LENSE) can have a unified interface to talk to
- * several different kinds of SimpleDurableModel.
+ * We have this interface so that users of these SimpleDurablePredictor's (like LENSE) can have a unified interface to talk to
+ * several different kinds of SimpleDurablePredictor.
  *
- * We have multiple SimpleDurableModel types as a simple interface for downstream users who don't want the full
+ * We have multiple SimpleDurablePredictor types as a simple interface for downstream users who don't want the full
  * complexity available in the real interface.
  */
-public abstract class SimpleDurableModel<T extends Serializable> {
+public abstract class SimpleDurablePredictor<T extends Serializable> {
     public ConcatVector weights;
 
     protected ConcatVectorNamespace namespace;
@@ -39,7 +39,7 @@ public abstract class SimpleDurableModel<T extends Serializable> {
      *
      * @param backingStorePath the path to a folder where we can store backing information about the model
      */
-    public SimpleDurableModel(String backingStorePath) throws IOException {
+    public SimpleDurablePredictor(String backingStorePath) throws IOException {
         log = new ModelLog(backingStorePath+"/model-log.ser");
 
         // Check if the weights have a complete, valid serialized form on the backing store, and load
@@ -89,7 +89,7 @@ public abstract class SimpleDurableModel<T extends Serializable> {
      * IF YOU ARE AN END-USER, THIS ISN'T WHAT YOU'RE LOOKING FOR
      *
      * This needs to get implemented by subclasses, and is the primary complexity hiding mechanism for external apps
-     * that intend to integrate with the SimpleDurableModel interface, like Lense.
+     * that intend to integrate with the SimpleDurablePredictor interface, like Lense.
      *
      * @param t the input type that gives us the information to featurize a model
      * @return a GraphicalModel that's fully featurized
@@ -181,16 +181,23 @@ public abstract class SimpleDurableModel<T extends Serializable> {
             // Do the training
 
             AbstractBatchOptimizer optimizer = new BacktrackingAdaGradOptimizer();
-            weights = optimizer.optimize(frozenSet, new LogLikelihoodDifferentiableFunction());
+            weights = optimizer.optimize(frozenSet,
+                    new LogLikelihoodDifferentiableFunction(),
+                    weights,
+                    0.01, // l2 regularization
+                    1.0e-3, // convergence derivative norm
+                    false); // quiet flag
 
             // Write the results out to disk, just in case
 
             try {
                 OutputStream os = new FileOutputStream(weightsPath);
                 weights.writeToStream(os);
+                os.close();
 
                 ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(namespacePath));
                 oos.writeObject(namespace);
+                oos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
