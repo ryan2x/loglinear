@@ -50,7 +50,6 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
         String[] tagSequence = new String[annotation.size()];
 
         GraphicalModel model = createModel(annotation);
-        featurizeModel(model, annotation);
         CliqueTree tree = new CliqueTree(model, weights);
         int[] map = tree.calculateMAP();
 
@@ -118,6 +117,7 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
     protected GraphicalModel createModelInternal(Annotation annotation) {
         GraphicalModel model = new GraphicalModel();
         model.getModelMetaDataByReference().put(SOURCE_TEXT, annotation.toString());
+        featurizeModel(model, annotation);
         return model;
     }
 

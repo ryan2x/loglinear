@@ -66,7 +66,6 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
      */
     public String labelSequence(Annotation annotation) {
         GraphicalModel model = createModel(annotation);
-        featurizeModel(model, annotation);
         CliqueTree tree = new CliqueTree(model, weights);
         int[] map = tree.calculateMAP();
 
@@ -99,6 +98,7 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
     protected GraphicalModel createModelInternal(Annotation annotation) {
         GraphicalModel model = new GraphicalModel();
         model.getModelMetaDataByReference().put(SOURCE_TEXT, annotation.toString());
+        featurizeModel(model, annotation);
         return model;
     }
 
