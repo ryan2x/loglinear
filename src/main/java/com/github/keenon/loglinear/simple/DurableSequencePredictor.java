@@ -49,7 +49,7 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
      * @return an array with a single tag for each token in the annotation
      */
     public String[] labelSequence(Annotation annotation) {
-        String[] tagSequence = new String[annotation.size()];
+        String[] tagSequence = new String[annotation.get(CoreAnnotations.TokensAnnotation.class).size()];
 
         GraphicalModel model = createModel(annotation);
         CliqueTree tree = new CliqueTree(model, weights);
