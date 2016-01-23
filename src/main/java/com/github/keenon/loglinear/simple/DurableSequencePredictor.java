@@ -131,7 +131,7 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
     @Override
     protected void featurizeModel(GraphicalModel model, Annotation annotation) {
         for (int i = 0; i < annotation.size(); i++) {
-            final Integer f = i;
+            final int f = i;
 
             // Add unary factor
 
