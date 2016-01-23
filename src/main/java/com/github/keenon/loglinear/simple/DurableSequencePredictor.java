@@ -4,10 +4,12 @@ import com.github.keenon.loglinear.inference.CliqueTree;
 import com.github.keenon.loglinear.learning.LogLikelihoodDifferentiableFunction;
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -69,9 +71,26 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
      */
     public void addTrainingExample(Annotation annotation, String[] labels) {
         GraphicalModel model = createModel(annotation);
+        if (annotation.get(CoreAnnotations.TokensAnnotation.class).size() != labels.length) {
+            throw new IllegalStateException("Shouldn't pass a training example with a"+
+                    "different number of labels from tokens. Got a sentence \""+annotation+"\" with "+
+                    annotation.get(CoreAnnotations.TokensAnnotation.class).size()+" tokens, but got labels "+
+                    Arrays.toString(labels) + " with length "+labels.length);
+        }
+        assert(annotation.get(CoreAnnotations.TokensAnnotation.class).size() == labels.length);
+
+        int maxVar = 0;
+        for (GraphicalModel.Factor f : model.factors) {
+            for (int i : f.neigborIndices) if (i > maxVar) maxVar = i;
+        }
+        if (maxVar+1 != labels.length) {
+            System.err.println("Have the wrong number of labels!");
+            throw new IllegalStateException();
+        }
+
         for (int i = 0; i < labels.length; i++) {
             int tagIndex = -1;
-            for (int t = 0; t <tags.length; t++) {
+            for (int t = 0; t < tags.length; t++) {
                 if (tags[t].equals(labels[i])) {
                     tagIndex = t;
                 }
@@ -130,7 +149,7 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
 
     @Override
     protected void featurizeModel(GraphicalModel model, Annotation annotation) {
-        for (int i = 0; i < annotation.size(); i++) {
+        for (int i = 0; i < annotation.get(CoreAnnotations.TokensAnnotation.class).size(); i++) {
             final int f = i;
 
             // Add unary factor
@@ -151,7 +170,7 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
 
             // Add binary factor, if we're not at the end of the sequence
 
-            if (i == annotation.size() - 1) continue;
+            if (i == annotation.get(CoreAnnotations.TokensAnnotation.class).size() - 1) continue;
             model.addFactor(new int[]{i, i+1}, new int[]{tags.length, tags.length}, (assn) -> {
                 ConcatVector binaryFeatureVector = namespace.newVector();
                 String leftTag = tags[assn[0]];

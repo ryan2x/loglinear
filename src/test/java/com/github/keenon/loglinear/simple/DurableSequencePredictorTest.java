@@ -29,7 +29,13 @@ public class DurableSequencePredictorTest {
         DurableSequencePredictor predictor = new DurableSequencePredictor("src/test/resources/sequence", tags, pipeline);
 
         predictor.addBinaryStringFeature("bias", (((annotation, integer) -> "true")));
-        predictor.addUnaryStringFeature("token", ((annotation, index) -> annotation.get(CoreAnnotations.TokensAnnotation.class).get(index).word()));
+        predictor.addUnaryStringFeature("token", ((annotation, index) -> {
+            if (index >= annotation.get(CoreAnnotations.TokensAnnotation.class).size()) {
+                System.err.println("Request for "+index+" in sentence "+annotation);
+                throw new IllegalStateException();
+            }
+            return annotation.get(CoreAnnotations.TokensAnnotation.class).get(index).word();
+        }));
 
         Annotation annotation = new Annotation("hello from Bob");
         pipeline.annotate(annotation);
@@ -70,8 +76,6 @@ public class DurableSequencePredictorTest {
             Annotation annotation2 = new Annotation(tokens);
             pipeline.annotate(annotation2);
             predictor.addTrainingExample(annotation2, labels2);
-
-            System.err.println(predictor.log.size());
         }
 
         predictor.blockForRetraining();
