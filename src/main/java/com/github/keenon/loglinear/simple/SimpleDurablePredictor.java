@@ -16,17 +16,17 @@ import java.util.Map;
 /**
  * Created by keenon on 1/13/16.
  *
- * We have this interface so that users of these SimpleDurableModel's (like LENSE) can have a unified interface to talk to
- * several different kinds of SimpleDurableModel.
+ * We have this interface so that users of these SimpleDurablePredictor's (like LENSE) can have a unified interface to talk to
+ * several different kinds of SimpleDurablePredictor.
  *
- * We have multiple SimpleDurableModel types as a simple interface for downstream users who don't want the full
+ * We have multiple SimpleDurablePredictor types as a simple interface for downstream users who don't want the full
  * complexity available in the real interface.
  */
-public abstract class SimpleDurableModel<T extends Serializable> {
+public abstract class SimpleDurablePredictor<T extends Serializable> {
     public ConcatVector weights;
+    public ConcatVectorNamespace namespace;
+    public ModelLog log;
 
-    protected ConcatVectorNamespace namespace;
-    protected ModelLog log;
     protected Map<GraphicalModel, T> context = new IdentityHashMap<>();
 
     private String weightsPath;
@@ -39,7 +39,10 @@ public abstract class SimpleDurableModel<T extends Serializable> {
      *
      * @param backingStorePath the path to a folder where we can store backing information about the model
      */
-    public SimpleDurableModel(String backingStorePath) throws IOException {
+    public SimpleDurablePredictor(String backingStorePath) throws IOException {
+        File dir = new File(backingStorePath);
+        if (!dir.exists()) dir.mkdirs();
+
         log = new ModelLog(backingStorePath+"/model-log.ser");
 
         // Check if the weights have a complete, valid serialized form on the backing store, and load
@@ -89,7 +92,7 @@ public abstract class SimpleDurableModel<T extends Serializable> {
      * IF YOU ARE AN END-USER, THIS ISN'T WHAT YOU'RE LOOKING FOR
      *
      * This needs to get implemented by subclasses, and is the primary complexity hiding mechanism for external apps
-     * that intend to integrate with the SimpleDurableModel interface, like Lense.
+     * that intend to integrate with the SimpleDurablePredictor interface, like Lense.
      *
      * @param t the input type that gives us the information to featurize a model
      * @return a GraphicalModel that's fully featurized
@@ -100,11 +103,26 @@ public abstract class SimpleDurableModel<T extends Serializable> {
         return model;
     }
 
-    protected abstract GraphicalModel createModelInternal(T t);
+    /**
+     * Blocks execution until the current training run is complete. Useful for initialization, etc
+     */
+    public void blockForRetraining() {
+        synchronized (this) {
+            if (trainingRunning) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////
     // Protected interfaces only for subclasses
     ////////////////////////////////////////////////////////////////////////
+
+    protected abstract GraphicalModel createModelInternal(T t);
 
     /**
      * Puts an additional training example into the ModelLog, which writes to disk, and then kicks off a retraining
@@ -146,7 +164,7 @@ public abstract class SimpleDurableModel<T extends Serializable> {
      * Checks, in a synchronized way, if a training run is currently going on any simple durable model that's in memory
      * on this machine.
      */
-    private void launchTrainingRunIfNotRunning() {
+    protected void launchTrainingRunIfNotRunning() {
         synchronized (this) {
             if (!trainingRunning) {
                 trainingRunning = true;
@@ -182,16 +200,23 @@ public abstract class SimpleDurableModel<T extends Serializable> {
             // Do the training
 
             AbstractBatchOptimizer optimizer = new BacktrackingAdaGradOptimizer();
-            weights = optimizer.optimize(frozenSet, new LogLikelihoodDifferentiableFunction());
+            weights = optimizer.optimize(frozenSet,
+                    new LogLikelihoodDifferentiableFunction(),
+                    weights,
+                    0.01, // l2 regularization
+                    1.0e-3, // convergence derivative norm
+                    false); // quiet flag
 
             // Write the results out to disk, just in case
 
             try {
                 OutputStream os = new FileOutputStream(weightsPath);
                 weights.writeToStream(os);
+                os.close();
 
                 ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(namespacePath));
                 oos.writeObject(namespace);
+                oos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -200,6 +225,7 @@ public abstract class SimpleDurableModel<T extends Serializable> {
 
             synchronized (thisClosure) {
                 trainingRunning = false;
+                thisClosure.notifyAll();
                 if (log.size() > frozenSet.length) {
                     launchTrainingRunIfNotRunning();
                 }

@@ -490,6 +490,7 @@ public class ConcatVector {
         ConcatVector vec = new ConcatVector();
         vec.pointers = new double[components][];
         vec.sparse = new boolean[components];
+        vec.copyOnWrite = new boolean[components];
         for (int i = 0; i < components; i++) {
             ConcatVectorProto.ConcatVector.Component c = m.getComponent(i);
             vec.sparse[i] = c.getSparse();

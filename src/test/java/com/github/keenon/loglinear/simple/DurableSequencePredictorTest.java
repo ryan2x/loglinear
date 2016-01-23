@@ -8,14 +8,12 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by keenon on 1/15/16.
  *
- * Tests for DurableSequenceModel, which may not actually be very complex or randomized.
+ * Tests for DurableSequencePredictor, which may not actually be very complex or randomized.
  */
-public class DurableSequenceModelTest {
+public class DurableSequencePredictorTest {
 
     @Test
     public void testSequenceModel() throws Exception {
@@ -25,21 +23,22 @@ public class DurableSequenceModelTest {
         props.setProperty("annotators", "tokenize, ssplit");
         StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-        DurableSequenceModel model = new DurableSequenceModel("src/test/resources/sequence", tags, pipeline);
+        DurableSequencePredictor predictor = new DurableSequencePredictor("src/test/resources/sequence", tags, pipeline);
 
-        model.addUnaryStringFeature("token", ((annotation, index) -> annotation.get(CoreAnnotations.TokensAnnotation.class).get(index).word()));
+        predictor.addUnaryStringFeature("token", ((annotation, index) -> annotation.get(CoreAnnotations.TokensAnnotation.class).get(index).word()));
 
         Annotation annotation = new Annotation("hello from Bob");
         pipeline.annotate(annotation);
         String[] labels = new String[]{"none", "none", "person"};
-        model.addTrainingExample(annotation, labels);
+        predictor.addTrainingExample(annotation, labels);
 
-        System.err.println(model.log.size());
+        System.err.println(predictor.log.size());
 
-        Thread.sleep(20000);
+        predictor.blockForRetraining();
 
-        Annotation annotation2 = new Annotation("hello from Bob");
+        Annotation annotation2 = new Annotation("Bob from hello");
         pipeline.annotate(annotation2);
-        System.err.println(Arrays.toString(model.labelSequence(annotation2)));
+        System.err.println("-----\n\n");
+        System.err.println(Arrays.toString(predictor.labelSequence(annotation2)));
     }
 }
