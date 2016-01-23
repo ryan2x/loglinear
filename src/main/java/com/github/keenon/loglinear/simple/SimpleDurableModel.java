@@ -175,6 +175,7 @@ public abstract class SimpleDurableModel<T extends Serializable> {
                     context.put(model, restoreContextObjectFromModelTags(model));
                 }
                 // Refeaturize the model
+                model.factors.clear();
                 featurizeModel(model, context.get(model));
             }
 
