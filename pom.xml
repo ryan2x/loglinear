@@ -4,7 +4,7 @@
 
     <groupId>com.github.keenon</groupId>
     <artifactId>loglinear</artifactId>
-    <version>1.2.8-SNAPSHOT</version>
+    <version>1.2.9-SNAPSHOT</version>
 
     <!-- Sonatype repo -->
 
