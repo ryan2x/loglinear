@@ -10,10 +10,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -25,6 +22,7 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
     public String[] tags;
 
     private Map<String, Function<Annotation, String>> stringFeatures = new HashMap<>();
+    private Map<String, Function<Annotation, Set<String>>> setFeatures = new HashMap<>();
     private Map<String, Function<Annotation, double[]>> embeddingFeatures = new HashMap<>();
     private StanfordCoreNLP coreNLP;
 
@@ -116,6 +114,16 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
 
     /**
      * This adds a feature, which is a closure that takes an Annotation and an index into the sentence, and
+     * returns a set of string values that's a feature on each unary factor in the sequence model.
+     * @param name unique human readable name for the feature
+     * @param newFeature the closure. must be idempotent
+     */
+    public void addSetFeature(String name, Function<Annotation, Set<String>> newFeature) {
+        setFeatures.put(name, newFeature);
+    }
+
+    /**
+     * This adds a feature, which is a closure that takes an Annotation and an index into the sentence, and
      * returns a double array value (usually an embedding) that's a feature on each unary factor in the sequence model.
      * @param name unique human readable name for the feature
      * @param newFeature the closure. must be idempotent
@@ -194,6 +202,12 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
             for (String feature : stringFeatures.keySet()) {
                 String featureValue = stringFeatures.get(feature).apply(annotation);
                 namespace.setSparseFeature(featureVector, tag+":"+feature, featureValue, 1.0);
+            }
+            for (String feature : setFeatures.keySet()) {
+                Set<String> featureValue = setFeatures.get(feature).apply(annotation);
+                for (String setElem : featureValue) {
+                    namespace.setDenseFeature(featureVector, tag+":"+feature+":"+setElem, new double[]{1.0});
+                }
             }
             for (String feature : embeddingFeatures.keySet()) {
                 double[] featureValue = embeddingFeatures.get(feature).apply(annotation);
