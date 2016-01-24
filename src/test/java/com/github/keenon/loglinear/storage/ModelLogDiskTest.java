@@ -24,13 +24,13 @@ import static org.junit.Assert.*;
  * This just double checks that we can write and read these model batches without loss.
  */
 @RunWith(Theories.class)
-public class ModelLogTest {
+public class ModelLogDiskTest {
     @Theory
     public void testProtoBatch(@ForAll(sampleSize = 50) @From(ModelBatchTest.BatchGenerator.class) ModelBatch batch) throws IOException {
         ByteArrayInputStream emptyInputStream = new ByteArrayInputStream(new byte[0]);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        ModelLog log = new ModelLog(emptyInputStream, byteArrayOutputStream);
+        ModelLog log = new ModelLogDisk(emptyInputStream, byteArrayOutputStream);
         log.writeWithFactors = true;
         for (GraphicalModel model : batch) {
             log.add(model);
@@ -40,7 +40,7 @@ public class ModelLogTest {
         byte[] bytes = byteArrayOutputStream.toByteArray();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
 
-        ModelLog recovered = new ModelLog(byteArrayInputStream, byteArrayOutputStream);
+        ModelLog recovered = new ModelLogDisk(byteArrayInputStream, byteArrayOutputStream);
         byteArrayInputStream.close();
 
         assertEquals(batch.size(), recovered.size());
@@ -55,7 +55,7 @@ public class ModelLogTest {
         ByteArrayInputStream emptyInputStream = new ByteArrayInputStream(new byte[0]);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        ModelLog log = new ModelLog(emptyInputStream, byteArrayOutputStream);
+        ModelLog log = new ModelLogDisk(emptyInputStream, byteArrayOutputStream);
         log.writeWithFactors = true;
         for (GraphicalModel model : batch) {
             log.add(model);
@@ -67,7 +67,7 @@ public class ModelLogTest {
 
         ByteArrayOutputStream secondByteArrayOutputStream = new ByteArrayOutputStream();
         secondByteArrayOutputStream.write(bytes);
-        ModelLog secondLog = new ModelLog(byteArrayInputStream, secondByteArrayOutputStream);
+        ModelLog secondLog = new ModelLogDisk(byteArrayInputStream, secondByteArrayOutputStream);
         secondByteArrayOutputStream.close();
 
         secondLog.writeWithFactors = true;
@@ -80,7 +80,7 @@ public class ModelLogTest {
         byte[] finalBytes = secondByteArrayOutputStream.toByteArray();
         ByteArrayInputStream secondByteArrayInputStream = new ByteArrayInputStream(finalBytes);
 
-        ModelLog recovered = new ModelLog(secondByteArrayInputStream, byteArrayOutputStream);
+        ModelLog recovered = new ModelLogDisk(secondByteArrayInputStream, byteArrayOutputStream);
         secondByteArrayInputStream.close();
 
         assertEquals(batch.size()*2, recovered.size());

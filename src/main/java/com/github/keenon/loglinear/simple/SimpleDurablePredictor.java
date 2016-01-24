@@ -7,6 +7,7 @@ import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.ConcatVectorNamespace;
 import com.github.keenon.loglinear.model.GraphicalModel;
 import com.github.keenon.loglinear.storage.ModelLog;
+import com.github.keenon.loglinear.storage.ModelLogDisk;
 
 import java.io.*;
 import java.util.IdentityHashMap;
@@ -34,16 +35,28 @@ public abstract class SimpleDurablePredictor<T extends Serializable> {
     private boolean trainingRunning = false;
 
     /**
+     * This is a simple constructor where we don't pass in a backing store for the data we're using, and so we construct
+     * a sensible default, which is to have the log be a ModelLogDisk in the location of the backingStorePath.
+     *
+     * @param backingStorePath the path to a folder where we can store backing information about the model
+     * @throws IOException
+     */
+    public SimpleDurablePredictor(String backingStorePath) throws IOException {
+        this(backingStorePath, new ModelLogDisk(backingStorePath+"/model-log.ser"));
+    }
+
+    /**
      * This is the parent constructor that does the basic work of creating the backing model store, an optimizer, and
      * retraining synchronization infrastructure.
      *
      * @param backingStorePath the path to a folder where we can store backing information about the model
+     * @param log the storage system we're going to use to store sequences
      */
-    public SimpleDurablePredictor(String backingStorePath) throws IOException {
+    public SimpleDurablePredictor(String backingStorePath, ModelLog log) throws IOException {
         File dir = new File(backingStorePath);
         if (!dir.exists()) dir.mkdirs();
 
-        log = new ModelLog(backingStorePath+"/model-log.ser");
+        this.log = log;
 
         // Check if the weights have a complete, valid serialized form on the backing store, and load
 
