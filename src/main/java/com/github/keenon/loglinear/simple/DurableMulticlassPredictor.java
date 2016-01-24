@@ -4,11 +4,15 @@ import com.github.keenon.loglinear.inference.CliqueTree;
 import com.github.keenon.loglinear.learning.LogLikelihoodDifferentiableFunction;
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
+import com.github.keenon.loglinear.storage.ModelLog;
+import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -25,6 +29,20 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
     private StanfordCoreNLP coreNLP;
 
     private static final String SOURCE_TEXT = "com.github.keenon.loglinear.simple.DurableMulticlassPredictor.SOURCE_TEXT";
+    private static final String CLASS_LABEL = "com.github.keenon.loglinear.simple.DurableMulticlassPredictor.CLASS_LABEL";
+
+    /**
+     * This is the parent constructor that does the basic work of creating the backing model store, an optimizer, and
+     * retraining synchronization infrastructure.
+     *
+     * @param backingStorePath the path to a folder where we can store backing information about the model
+     */
+    public DurableMulticlassPredictor(String backingStorePath, ModelLog log, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
+        super(backingStorePath, log);
+
+        this.tags = tags;
+        this.coreNLP = coreNLP;
+    }
 
     /**
      * This is the parent constructor that does the basic work of creating the backing model store, an optimizer, and
@@ -33,10 +51,57 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
      * @param backingStorePath the path to a folder where we can store backing information about the model
      */
     public DurableMulticlassPredictor(String backingStorePath, String[] tags, StanfordCoreNLP coreNLP) throws IOException {
-        super(backingStorePath);
+        super(backingStorePath, null);
 
         this.tags = tags;
         this.coreNLP = coreNLP;
+        this.log = new MulticlassModelLog(backingStorePath+"/data.tsv");
+    }
+
+    public class MulticlassModelLog extends ModelLog {
+        BufferedWriter bw;
+
+        public MulticlassModelLog(String path) throws IOException {
+            File f = new File(path);
+            if (!f.exists()) f.createNewFile();
+
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String line;
+            while (true) {
+                line = br.readLine();
+                String[] parts = new String[0];
+                if (line != null) parts = line.split("\t");
+
+                if (parts.length == 2) {
+                    // Part of a continuing sentence, a token-label pair
+                    String label = parts[0];
+                    String sentence = parts[1];
+
+                    Annotation annotation = new Annotation(sentence);
+                    coreNLP.annotate(annotation);
+                    add(createLabeledModel(annotation, label), false);
+                }
+
+                if (line == null) break;
+            }
+
+            bw = new BufferedWriter(new FileWriter(path, true)); // the true is for "append".
+        }
+
+        @Override
+        public void writeExample(GraphicalModel m) throws IOException {
+            bw.write(m.getModelMetaDataByReference().get(CLASS_LABEL));
+            bw.write("\t");
+            bw.write(m.getModelMetaDataByReference().get(SOURCE_TEXT).replaceAll("\t", "   "));
+            bw.write("\n");
+            bw.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            bw.flush();
+            bw.close();
+        }
     }
 
     /**
@@ -73,13 +138,13 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
     }
 
     /**
-     * Create a training example, with the given labels, add it the classifier's set, and retrain (if we're not
-     * retraining already). Also writes out to the durable log on disk.
+     * Builds a GraphicalModel for this Annotation object, and a label to it
      *
      * @param annotation the sentence
      * @param label the gold label for this sentence
+     * @return a labeled GraphicalModel suitable for training models with
      */
-    public void addTrainingExample(Annotation annotation, String label) {
+    private GraphicalModel createLabeledModel(Annotation annotation, String label) {
         GraphicalModel model = createModel(annotation);
 
         int tagIndex = -1;
@@ -90,8 +155,20 @@ public class DurableMulticlassPredictor extends SimpleDurablePredictor<Annotatio
         }
         assert(tagIndex != -1);
         model.getVariableMetaDataByReference(0).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, ""+tagIndex);
+        model.getModelMetaDataByReference().put(CLASS_LABEL, label);
 
-        addLabeledTrainingExample(model);
+        return model;
+    }
+
+    /**
+     * Create a training example, with the given labels, add it the classifier's set, and retrain (if we're not
+     * retraining already). Also writes out to the durable log on disk.
+     *
+     * @param annotation the sentence
+     * @param label the gold label for this sentence
+     */
+    public void addTrainingExample(Annotation annotation, String label) {
+        addLabeledTrainingExample(createLabeledModel(annotation, label));
     }
 
     @Override

@@ -106,7 +106,7 @@ public class DurableSequencePredictor extends SimpleDurablePredictor<Annotation>
                 if (line == null) break;
             }
 
-            bw = new BufferedWriter(new FileWriter(path));
+            bw = new BufferedWriter(new FileWriter(path, true)); // the true is for "append".
         }
 
         @Override
