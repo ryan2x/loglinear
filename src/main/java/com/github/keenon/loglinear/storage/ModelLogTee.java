@@ -8,7 +8,7 @@ import java.io.IOException;
  * Created by keenon on 1/23/16.
  *
  * This logs to two different ModelLogs, though it only reads from the first. Otherwise this functions just like a regular
- * ModelLog.
+ * ModelLog. Think of the "tee" command in Unix.
  */
 public class ModelLogTee extends ModelLog {
     ModelLog main;
