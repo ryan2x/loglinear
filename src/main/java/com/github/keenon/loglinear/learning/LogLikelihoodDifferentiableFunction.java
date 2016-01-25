@@ -61,6 +61,11 @@ public class LogLikelihoodDifferentiableFunction extends AbstractDifferentiableF
                     int trainingObservation = Integer.parseInt(model.getVariableMetaDataByReference(factor.neigborIndices[i]).get(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE));
                     assignment[i] = trainingObservation;
                 }
+                if (assignment[i] < 0 || assignment[i] >= factor.featuresTable.getDimensions()[i]) {
+                    throw new IllegalStateException("Model isn't fully or correctly labeled. Have that variable "+i+" has assignment "+assignment[i]+" (-1 means no label was present).\n"+
+                            "To solve this problem, make sure you set model.getVariableMetaDataByReference(i).put(LogLikelihoodDifferentiableFunction.VARIABLE_TRAINING_VALUE, \"\"+variableTrainingLabel) for all the" +
+                            " variables represented in the model before using it as a training example.");
+                }
             }
             ConcatVector features = factor.featuresTable.getAssignmentValue(assignment).get();
             // Add the log-likelihood from this observation to the log-likelihood
