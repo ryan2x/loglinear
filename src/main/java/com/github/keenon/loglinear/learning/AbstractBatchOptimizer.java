@@ -8,9 +8,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created by keenon on 8/26/15.
@@ -21,7 +26,10 @@ import java.util.Random;
  */
 public abstract class AbstractBatchOptimizer {
     public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
-        return optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-3, false);
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        ConcatVector weights = optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-3, false, executor);
+        executor.shutdown();
+        return weights;
     }
 
     public <T> ConcatVector optimize(T[] dataset,
@@ -29,11 +37,12 @@ public abstract class AbstractBatchOptimizer {
                                      ConcatVector initialWeights,
                                      double l2regularization,
                                      double convergenceDerivativeNorm,
-                                     boolean quiet) {
+                                     boolean quiet,
+                                     ThreadPoolExecutor executor) {
         if (!quiet) System.err.println("\n**************\nBeginning training\n");
         else System.err.println("[Beginning quiet training]");
 
-        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet);
+        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet, executor);
         new Thread(mainWorker).start();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -179,8 +188,6 @@ public abstract class AbstractBatchOptimizer {
         AbstractDifferentiableFunction<T> fn;
         ConcatVector weights;
 
-        long jvmThreadId = 0;
-
         // This is to help the dynamic re-balancing of work queues
         long finishedAtTime = 0;
         long cpuTimeRequired = 0;
@@ -198,7 +205,7 @@ public abstract class AbstractBatchOptimizer {
 
         @Override
         public void run() {
-            long startTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(jvmThreadId);
+            long startTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
 
             for (T datum : queue) {
                 localLogLikelihood += fn.getSummaryForInstance(datum, weights, localDerivative);
@@ -208,7 +215,7 @@ public abstract class AbstractBatchOptimizer {
 
             finishedAtTime = System.currentTimeMillis();
 
-            long endTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(jvmThreadId);
+            long endTime = ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
             cpuTimeRequired = endTime - startTime;
         }
     }
@@ -226,10 +233,11 @@ public abstract class AbstractBatchOptimizer {
         double l2regularization;
         double convergenceDerivativeNorm;
         boolean quiet;
+        ThreadPoolExecutor executor;
 
         final Object naturalTerminationBarrier = new Object();
 
-        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet) {
+        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet, ThreadPoolExecutor executor) {
             optimizationState = getFreshOptimizationState(initialWeights);
             weights = initialWeights.deepClone();
 
@@ -238,6 +246,7 @@ public abstract class AbstractBatchOptimizer {
             this.l2regularization = l2regularization;
             this.convergenceDerivativeNorm = convergenceDerivativeNorm;
             this.quiet = quiet;
+            this.executor = executor;
         }
 
         /**
@@ -302,12 +311,11 @@ public abstract class AbstractBatchOptimizer {
 
                 if (useThreads) {
                     GradientWorker[] workers = new GradientWorker[numThreads];
-                    Thread[] threads = new Thread[numThreads];
+                    @SuppressWarnings("unchecked")
+                    Future<Void>[] threads = (Future<Void>[])new Future[numThreads];
                     for (int i = 0; i < workers.length; i++) {
                         workers[i] = new GradientWorker(this, i, numThreads, queues[i], fn, weights);
-                        threads[i] = new Thread(workers[i]);
-                        workers[i].jvmThreadId = threads[i].getId();
-                        threads[i].start();
+                        threads[i] = (Future<Void>)executor.submit(workers[i]);
                     }
 
                     // This is for logging
@@ -322,8 +330,8 @@ public abstract class AbstractBatchOptimizer {
 
                     for (int i = 0; i < workers.length; i++) {
                         try {
-                            threads[i].join();
-                        } catch (InterruptedException e) {
+                            threads[i].get();
+                        } catch (InterruptedException | ExecutionException e) {
                             e.printStackTrace();
                         }
                         logLikelihood += workers[i].localLogLikelihood;
