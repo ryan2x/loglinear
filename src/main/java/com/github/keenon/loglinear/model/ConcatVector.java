@@ -612,7 +612,7 @@ public class ConcatVector {
             loadedNative = true;
         }
         catch (UnsatisfiedLinkError e) {
-            System.err.println("Couldn't find the native acceleration library for ConcatVector");
+            log.info("Couldn't find the native acceleration library for ConcatVector");
         }
     }
     */

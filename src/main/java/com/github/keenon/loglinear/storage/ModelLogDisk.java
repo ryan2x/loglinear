@@ -1,6 +1,8 @@
 package com.github.keenon.loglinear.storage;
 
 import com.github.keenon.loglinear.model.GraphicalModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashSet;
@@ -12,6 +14,11 @@ import java.util.Set;
  * Implements a ModelLog that lives on disk
  */
 public class ModelLogDisk extends ModelLog {
+    /**
+     * An SLF4J Logger for this class.
+     */
+    private static final Logger log = LoggerFactory.getLogger(ModelLogDisk.class);
+
     OutputStream os;
 
     /**
@@ -29,7 +36,7 @@ public class ModelLogDisk extends ModelLog {
             if (!dir.exists()) dir.mkdirs();
         }
         File f = new File(filename);
-        System.err.println(filename);
+        log.info(filename);
         if (!f.exists()) {
             f.createNewFile();
         }
