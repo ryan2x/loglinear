@@ -120,6 +120,10 @@ public class ConcatVector {
      * @param values their values
      */
     public void setSparseComponent(int component, int[] indices, double[] values) {
+        if (component >= pointers.length) {
+            increaseSizeTo(component+1);
+        }
+
         assert(indices.length == values.length);
 
         if (indices.length == 0) {
