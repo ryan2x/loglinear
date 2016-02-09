@@ -53,7 +53,7 @@ public class ConcatVectorTest {
         ConcatVector v1 = new ConcatVector(1);
         ConcatVector v2 = new ConcatVector(1);
 
-        v1.setDenseComponent(0,vector1);
+        v1.setDenseComponent(0, vector1);
         v2.setDenseComponent(0, vector2);
 
         double sum = 0.0f;
@@ -220,19 +220,6 @@ public class ConcatVectorTest {
     public void testSizes(@ForAll(sampleSize = 50) @From(DenseTestVectorGenerator.class) DenseTestVector d1) {
         int size = d1.vector.getNumberOfComponents();
         assertEquals(d1.values.length, size);
-    }
-
-    @Theory
-    public void testIsSparse(@ForAll(sampleSize = 50) @From(DenseTestVectorGenerator.class) DenseTestVector d1) {
-        int size = d1.vector.getNumberOfComponents();
-        assertEquals(d1.values.length, size);
-        for (int i = 0; i < d1.values.length; i++) {
-            if (d1.vector.isComponentSparse(i)) {
-                for (int j = 0; j < d1.values[i].length; j++) {
-                    if (d1.vector.getSparseIndex(i) != j) assertEquals(0.0, d1.values[i][j], 1.0e-9);
-                }
-            }
-        }
     }
 
     @Theory
@@ -460,36 +447,40 @@ public class ConcatVectorTest {
         public DenseTestVector generate(SourceOfRandomness sourceOfRandomness, GenerationStatus generationStatus) {
             int length = sourceOfRandomness.nextInt(10);
             double[][] trueValues = new double[length][];
-            boolean[] sparse = new boolean[length];
-            int[] sizes = new int[length];
-
-            // Generate sizes in advance, so we can pass the clues on to the constructor for the multivector
-            for (int i = 0; i < length; i++) {
-                boolean isSparse = sourceOfRandomness.nextBoolean();
-                sparse[i] = isSparse;
-                if (isSparse) {
-                    sizes[i] = -1;
-                }
-                else {
-                    int componentLength = sourceOfRandomness.nextInt(SPARSE_VECTOR_LENGTH);
-                    sizes[i] = componentLength;
-                }
-            }
 
             ConcatVector mv = new ConcatVector(length);
             for (int i = 0; i < length; i++) {
-                if (sparse[i]) {
+                int type = sourceOfRandomness.nextInt(0,2);
+                if (type == 0) {
                     trueValues[i] = new double[SPARSE_VECTOR_LENGTH];
                     int sparseIndex = sourceOfRandomness.nextInt(SPARSE_VECTOR_LENGTH);
                     double sparseValue = sourceOfRandomness.nextDouble();
                     trueValues[i][sparseIndex] = sparseValue;
                     mv.setSparseComponent(i, sparseIndex, sparseValue);
                 }
+                else if (type == 1) {
+                    int numElems = sourceOfRandomness.nextInt(0,3);
+                    trueValues[i] = new double[SPARSE_VECTOR_LENGTH];
+                    int[] sparseIndices = new int[numElems];
+                    double[] sparseValues = new double[numElems];
+                    for (int j = 0; j < numElems; j++) {
+                        sparseValues[j] = sourceOfRandomness.nextDouble();
+                        outer: while (true) {
+                            sparseIndices[j] = sourceOfRandomness.nextInt(SPARSE_VECTOR_LENGTH);
+                            for (int k = 0; k < j; k++) {
+                                if (sparseIndices[j] == sparseIndices[k]) continue outer;
+                            }
+                            trueValues[i][sparseIndices[j]] = sparseValues[j];
+                            break;
+                        }
+                    }
+                    mv.setSparseComponent(i, sparseIndices, sparseValues);
+                }
                 else {
-                    trueValues[i] = new double[sizes[i]];
+                    trueValues[i] = new double[sourceOfRandomness.nextInt(10)];
                     // Ensure we have some null components in our generated vector
-                    if (sizes[i] > 0) {
-                        for (int j = 0; j < sizes[i]; j++) {
+                    if (trueValues[i].length > 0) {
+                        for (int j = 0; j < trueValues[i].length; j++) {
                             trueValues[i][j] = sourceOfRandomness.nextDouble();
                         }
                         mv.setDenseComponent(i, trueValues[i]);

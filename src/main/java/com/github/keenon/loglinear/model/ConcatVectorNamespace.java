@@ -3,6 +3,7 @@ package com.github.keenon.loglinear.model;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -104,6 +105,44 @@ public class ConcatVectorNamespace implements Serializable {
     }
 
     /**
+     * This adds a sparse set feature to a vector, setting the appropriate components of the given vector to the passed
+     * in value.
+     * @param vector the vector
+     * @param featureName the feature whose value to set
+     * @param sparseFeatures the indices we wish to set, and their values
+     */
+    public void setSparseFeature(ConcatVector vector, String featureName, Map<String,Double> sparseFeatures) {
+        int[] indices = new int[sparseFeatures.size()];
+        double[] values = new double[sparseFeatures.size()];
+        int offset = 0;
+        for (String index : sparseFeatures.keySet()) {
+            indices[offset] = ensureSparseFeature(featureName, index);
+            values[offset] = sparseFeatures.get(index);
+            offset++;
+        }
+        vector.setSparseComponent(ensureFeature(featureName), indices, values);
+    }
+
+    /**
+     * This adds a sparse set feature to a vector, setting the appropriate components of the given vector to the passed
+     * in value.
+     * @param vector the vector
+     * @param featureName the feature whose value to set
+     * @param sparseFeatures the indices we wish to set, whose values will all be set to 1.0
+     */
+    public void setSparseFeature(ConcatVector vector, String featureName, Collection<String> sparseFeatures) {
+        int[] indices = new int[sparseFeatures.size()];
+        double[] values = new double[sparseFeatures.size()];
+        int offset = 0;
+        for (String index : sparseFeatures) {
+            indices[offset] = ensureSparseFeature(featureName, index);
+            values[offset] = 1.0;
+            offset++;
+        }
+        vector.setSparseComponent(ensureFeature(featureName), indices, values);
+    }
+
+    /**
      * This prints out a ConcatVector by mapping to the namespace, to make debugging learning algorithms easier.
      *
      * @param vector the vector to print
@@ -115,7 +154,10 @@ public class ConcatVectorNamespace implements Serializable {
             bw.write(":\n");
             int i = featureToIndex.get(key);
             if (vector.isComponentSparse(i)) {
-                debugFeatureValue(key, vector.getSparseIndex(i), vector, bw);
+                int[] indices = vector.getSparseIndices(i);
+                for (int j : indices) {
+                    debugFeatureValue(key, j, vector, bw);
+                }
             }
             else {
                 double[] arr = vector.getDenseComponent(i);

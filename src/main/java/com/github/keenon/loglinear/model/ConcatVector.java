@@ -5,6 +5,7 @@ import com.github.keenon.loglinear.ConcatVectorProto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.function.Function;
 
 /**
@@ -112,6 +113,33 @@ public class ConcatVector {
     }
 
     /**
+     * Sets a component to a set of sparse indices, each with a value.
+     *
+     * @param component the index of the component to set
+     * @param indices the indices of the vector to give values to
+     * @param values their values
+     */
+    public void setSparseComponent(int component, int[] indices, double[] values) {
+        assert(indices.length == values.length);
+
+        if (indices.length == 0) {
+            pointers[component] = new double[2];
+            sparse[component] = true;
+            copyOnWrite[component] = false;
+        }
+        else {
+            double[] sparseInfo = new double[indices.length * 2];
+            for (int i = 0; i < indices.length; i++) {
+                sparseInfo[i * 2] = indices[i];
+                sparseInfo[(i * 2) + 1] = values[i];
+            }
+            pointers[component] = sparseInfo;
+            sparse[component] = true;
+            copyOnWrite[component] = false;
+        }
+    }
+
+    /**
      * This function assumes both vectors are infinitely padded with 0s, so it won't complain if there's a dim mismatch.
      * There are no side effects.
      *
@@ -127,18 +155,29 @@ public class ConcatVector {
             for (int i = 0; i < Math.min(pointers.length, other.pointers.length); i++) {
                 if (pointers[i] == null || other.pointers[i] == null) continue;
                 if (sparse[i] && other.sparse[i]) {
-                    if ((int) pointers[i][0] == (int) other.pointers[i][0]) {
-                        sum += pointers[i][1] * other.pointers[i][1];
+                    outer: for (int j = 0; j < pointers[i].length/2; j++) {
+                        int sparseIndex = (int)pointers[i][j*2];
+                        for (int k = 0; k < other.pointers[i].length/2; k++) {
+                            int otherSparseIndex = (int) other.pointers[i][k*2];
+                            if (sparseIndex == otherSparseIndex) {
+                                sum += pointers[i][(j*2)+1]*other.pointers[i][(k*2)+1];
+                                continue outer;
+                            }
+                        }
                     }
                 } else if (sparse[i] && !other.sparse[i]) {
-                    int sparseIndex = (int) pointers[i][0];
-                    if (sparseIndex >= 0 && sparseIndex < other.pointers[i].length) {
-                        sum += other.pointers[i][sparseIndex] * pointers[i][1];
+                    for (int j = 0; j < pointers[i].length/2; j++) {
+                        int sparseIndex = (int) pointers[i][j*2];
+                        if (sparseIndex >= 0 && sparseIndex < other.pointers[i].length) {
+                            sum += other.pointers[i][sparseIndex] * pointers[i][(j*2)+1];
+                        }
                     }
                 } else if (!sparse[i] && other.sparse[i]) {
-                    int sparseIndex = (int) other.pointers[i][0];
-                    if (sparseIndex >= 0 && sparseIndex < pointers[i].length) {
-                        sum += pointers[i][sparseIndex] * other.pointers[i][1];
+                    for (int j = 0; j < other.pointers[i].length/2; j++) {
+                        int sparseIndex = (int) other.pointers[i][j * 2];
+                        if (sparseIndex >= 0 && sparseIndex < pointers[i].length) {
+                            sum += pointers[i][sparseIndex] * other.pointers[i][(j*2)+1];
+                        }
                     }
                 } else {
                     for (int j = 0; j < Math.min(pointers[i].length, other.pointers[i].length); j++) {
@@ -195,10 +234,12 @@ public class ConcatVector {
                 // Otherwise do the standard thing
                 else {
                     if (other.sparse[i]) {
-                        pointers[i] = new double[2];
+                        pointers[i] = new double[other.pointers[i].length];
                         copyOnWrite[i] = false;
-                        pointers[i][0] = other.pointers[i][0];
-                        pointers[i][1] = other.pointers[i][1] * multiple;
+                        for (int j = 0; j < other.pointers[i].length/2; j++) {
+                            pointers[i][j*2] = other.pointers[i][j*2];
+                            pointers[i][(j*2)+1] = other.pointers[i][(j*2)+1] * multiple;
+                        }
                     } else {
                         pointers[i] = new double[other.pointers[i].length];
                         copyOnWrite[i] = false;
@@ -210,54 +251,122 @@ public class ConcatVector {
             }
             // Handle rescaling on a component-by-component basis
             else if (sparse[i] && !other.sparse[i]) {
-                int sparseIndex = (int) pointers[i][0];
-                double sparseValue = pointers[i][1];
-                sparse[i] = false;
-                pointers[i] = new double[Math.max(sparseIndex + 1, other.pointers[i].length)];
-                copyOnWrite[i] = false;
-                if (sparseIndex >= 0) {
-                    pointers[i][sparseIndex] = sparseValue;
+                int maxSparseIndex = -1;
+                for (int j = 0; j < pointers[i].length/2; j++) {
+                    int sparseIndex = (int) pointers[i][j*2];
+                    if (sparseIndex > maxSparseIndex) maxSparseIndex = sparseIndex;
                 }
+                // Convert to a dense vector
+                double[] newPointers = new double[Math.max(maxSparseIndex + 1, other.pointers[i].length)];
+                for (int j = 0; j < pointers[i].length/2; j++) {
+                    int sparseIndex = (int) pointers[i][j*2];
+                    if (sparseIndex >= 0) newPointers[sparseIndex] = pointers[i][(j*2)+1];
+                }
+                // Add the other vector's dense values, multiplied by the scalar
                 for (int j = 0; j < other.pointers[i].length; j++) {
-                    pointers[i][j] += other.pointers[i][j] * multiple;
+                    newPointers[j] += other.pointers[i][j] * multiple;
                 }
+                // Update
+                sparse[i] = false;
+                copyOnWrite[i] = false;
+                pointers[i] = newPointers;
             } else if (sparse[i] && other.sparse[i]) {
-                int mySparseIndex = (int) pointers[i][0];
-                int otherSparseIndex = (int) other.pointers[i][0];
-                if (mySparseIndex == otherSparseIndex) {
-                    if (copyOnWrite[i]) {
-                        pointers[i] = pointers[i].clone();
-                        copyOnWrite[i] = false;
-                    }
-                    pointers[i][1] += other.pointers[i][1] * multiple;
-                } else {
+
+                // Figure out how big the vector would be if it were dense
+
+                int maxSparseIndex = 0;
+                for (int j = 0; j < pointers[i].length/2; j++) {
+                    int sparseIndex = (int) pointers[i][j*2];
+                    if (sparseIndex > maxSparseIndex) maxSparseIndex = sparseIndex;
+                }
+                for (int j = 0; j < other.pointers[i].length/2; j++) {
+                    int sparseIndex = (int) other.pointers[i][j*2];
+                    if (sparseIndex > maxSparseIndex) maxSparseIndex = sparseIndex;
+                }
+
+                // Figure out (an upper bound on) how big the vector would be if it remained sparse
+
+                int numEntries = pointers[i].length/2 + other.pointers[i].length/2;
+
+                // Only switch over to dense if the physical double array will be smaller
+
+                if (numEntries*2 > maxSparseIndex) {
                     sparse[i] = false;
-                    double mySparseValue = pointers[i][1];
-                    pointers[i] = new double[Math.max(mySparseIndex + 1, otherSparseIndex + 1)];
+                    double[] newPointers = new double[maxSparseIndex + 1];
                     copyOnWrite[i] = false;
-                    if (mySparseIndex >= 0) {
-                        pointers[i][mySparseIndex] = mySparseValue;
+                    for (int j = 0; j < pointers[i].length/2; j++) {
+                        int sparseIndex = (int) pointers[i][j*2];
+                        if (sparseIndex >= 0) newPointers[sparseIndex] = pointers[i][(j*2)+1];
                     }
-                    if (otherSparseIndex >= 0) {
-                        pointers[i][otherSparseIndex] = other.pointers[i][1] * multiple;
+                    for (int j = 0; j < other.pointers[i].length/2; j++) {
+                        int sparseIndex = (int) other.pointers[i][j*2];
+                        if (sparseIndex >= 0) newPointers[sparseIndex] += other.pointers[i][(j*2)+1] * multiple;
                     }
+                    pointers[i] = newPointers;
+                }
+
+                // Otherwise compose a joint sparse array
+
+                else {
+                    int duplicates = 0;
+                    outer: for (int j = 0; j < pointers[i].length/2; j++) {
+                        for (int k = 0; k < other.pointers[i].length/2; k++) {
+                            if (pointers[i][j*2] == other.pointers[i][k*2]) {
+                                duplicates++;
+                                continue outer;
+                            }
+                        }
+                    }
+
+                    double[] newPointers = new double[(numEntries-duplicates)*2];
+                    int usedNewPointers = 0;
+
+                    for (int j = 0; j < pointers[i].length/2; j++) {
+                        newPointers[j*2] = pointers[i][j*2];
+                        newPointers[(j*2)+1] = pointers[i][(j*2)+1];
+                        usedNewPointers = j+1;
+                    }
+                    outer: for (int j = 0; j < other.pointers[i].length/2; j++) {
+                        int otherSparseIndex = (int) other.pointers[i][j*2];
+                        for (int k = 0; k < usedNewPointers; k++) {
+                            int sparseIndex = (int) newPointers[k*2];
+                            if (otherSparseIndex == sparseIndex) {
+                                newPointers[(j*2)+1] += other.pointers[i][(k*2)+1]*multiple;
+                                continue outer;
+                            }
+                        }
+                        // If this isn't true we somehow messed up calculating the number of sparse entries needed
+                        assert(usedNewPointers < newPointers.length);
+                        newPointers[(usedNewPointers*2)] = other.pointers[i][j*2];
+                        newPointers[(usedNewPointers*2)+1] = other.pointers[i][(j*2)+1]*multiple;
+                        usedNewPointers++;
+                    }
+
+                    copyOnWrite[i] = false;
+                    sparse[i] = true;
+                    pointers[i] = newPointers;
                 }
             } else if (!sparse[i] && other.sparse[i]) {
-                int sparseIndex = (int) other.pointers[i][0];
-                if (sparseIndex >= pointers[i].length) {
+                int maxSparseIndex = 0;
+                for (int j = 0; j < other.pointers[i].length/2; j++) {
+                    int sparseIndex = (int) other.pointers[i][j*2];
+                    if (sparseIndex > maxSparseIndex) maxSparseIndex = sparseIndex;
+                }
+                if (maxSparseIndex >= pointers[i].length) {
                     int newSize = pointers[i].length;
-                    while (newSize <= sparseIndex) newSize *= 2;
+                    while (newSize <= maxSparseIndex) newSize *= 2;
                     double[] denseBuf = new double[newSize];
                     System.arraycopy(pointers[i], 0, denseBuf, 0, pointers[i].length);
                     copyOnWrite[i] = false;
                     pointers[i] = denseBuf;
                 }
-                if (sparseIndex >= 0) {
-                    if (copyOnWrite[i]) {
-                        pointers[i] = pointers[i].clone();
-                        copyOnWrite[i] = false;
-                    }
-                    pointers[i][sparseIndex] += other.pointers[i][1] * multiple;
+                if (copyOnWrite[i]) {
+                    pointers[i] = pointers[i].clone();
+                    copyOnWrite[i] = false;
+                }
+                for (int j = 0; j < other.pointers[i].length/2; j++) {
+                    int sparseIndex = (int) other.pointers[i][j*2];
+                    if (sparseIndex >= 0) pointers[i][sparseIndex] += other.pointers[i][(j*2)+1] * multiple;
                 }
             } else {
                 assert (!sparse[i] && !other.sparse[i]);
@@ -297,47 +406,47 @@ public class ConcatVector {
                 pointers[i] = pointers[i].clone();
             }
 
-            if (i >= other.pointers.length) {
-                if (sparse[i]) {
-                    pointers[i][1] = 0;
-                }
-                else {
-                    for (int j = 0; j < pointers[i].length; j++) {
-                        pointers[i][j] = 0;
-                    }
-                }
-            }
-            else if (other.pointers[i] == null) {
+            if (i >= other.pointers.length || other.pointers[i] == null) {
                 pointers[i] = null;
             }
             else if (sparse[i] && other.sparse[i]) {
-                if ((int)pointers[i][0] == (int)other.pointers[i][0]) {
-                    pointers[i][1] *= other.pointers[i][1];
-                }
-                else {
-                    pointers[i][1] = 0.0f;
+                outer: for (int j = 0; j < pointers[i].length/2; j++) {
+                    int sparseValue = (int) pointers[i][j*2];
+                    for (int k = 0; k < other.pointers[i].length/2; k++) {
+                        int otherSparseValue = (int) other.pointers[i][k*2];
+                        if (sparseValue == otherSparseValue) {
+                            pointers[i][(j*2)+1] *= other.pointers[i][(k*2)+1];
+                            continue outer;
+                        }
+                    }
+                    pointers[i][(j*2)+1] = 0;
                 }
             }
             else if (sparse[i] && !other.sparse[i]) {
-                int sparseIndex = (int)pointers[i][0];
-                if (sparseIndex >= 0 && sparseIndex < other.pointers[i].length) {
-                    pointers[i][1] *= other.pointers[i][sparseIndex];
-                }
-                else {
-                    pointers[i][1] = 0.0f;
+                for (int j = 0; j < pointers[i].length/2; j++) {
+                    int sparseIndex = (int)pointers[i][j*2];
+                    if (sparseIndex >= 0 && sparseIndex < other.pointers[i].length) {
+                        pointers[i][(j*2)+1] *= other.pointers[i][sparseIndex];
+                    }
+                    else {
+                        pointers[i][(j*2)+1] = 0.0f;
+                    }
                 }
             }
             else if (!sparse[i] && other.sparse[i]) {
-                int sparseIndex = (int)other.pointers[i][0];
-                double sparseValue = 0.0f;
-                if (sparseIndex >= 0 && sparseIndex < pointers[i].length) {
-                    sparseValue = pointers[i][sparseIndex] * other.pointers[i][1];
+                // Note: there are cases where we want this element to actually become sparse, but I can't think of any
+                // in practice, so we won't bother with the complexity
+                boolean[] touched = new boolean[pointers[i].length];
+                for (int j = 0; j < other.pointers[i].length/2; j++) {
+                    int sparseIndex = (int)other.pointers[i][j*2];
+                    if (sparseIndex >= 0 && sparseIndex < pointers[i].length) {
+                        pointers[i][sparseIndex] *= other.pointers[i][(j*2)+1];
+                        touched[sparseIndex] = true;
+                    }
                 }
-                sparse[i] = true;
-                pointers[i] = new double[]{
-                        sparseIndex,
-                        sparseValue
-                };
+                for (int j = 0; j < pointers[i].length; j++) {
+                    if (!touched[j]) pointers[i][j] = 0.0;
+                }
             }
             else {
                 for (int j = 0; j < Math.min(pointers[i].length, other.pointers[i].length); j++) {
@@ -365,7 +474,9 @@ public class ConcatVector {
             }
 
             if (sparse[i]) {
-                pointers[i][1] = fn.apply(pointers[i][1]);
+                for (int j = 0; j < pointers[i].length/2; j++) {
+                    pointers[i][(j*2)+1] = fn.apply(pointers[i][(j*2)+1]);
+                }
             }
             else {
                 for (int j = 0; j < pointers[i].length; j++) {
@@ -415,8 +526,10 @@ public class ConcatVector {
         if (component < pointers.length) {
             if (pointers[component] == null) return 0;
             else if (sparse[component]) {
-                int sparseIndex = (int)pointers[component][0];
-                if (sparseIndex == offset) return pointers[component][1];
+                for (int j = 0; j < pointers[component].length/2; j++) {
+                    int sparseIndex = (int)pointers[component][j*2];
+                    if (sparseIndex == offset) return pointers[component][(j*2)+1];
+                }
             }
             else {
                 if (offset < pointers[component].length) {
@@ -436,6 +549,21 @@ public class ConcatVector {
     public int getSparseIndex(int component) {
         assert(sparse[component]);
         return (int)pointers[component][0];
+    }
+
+    /**
+     * Gets you the indices of multi hot in a component, assuming it is sparse. Throws an assert if it isn't.
+     *
+     * @param component the index of the sparse component.
+     * @return the index of the one-hot value within that sparse component.
+     */
+    public int[] getSparseIndices(int component) {
+        assert(sparse[component]);
+        int[] indices = new int[pointers[component].length/2];
+        for (int i = 0; i < pointers[component].length/2; i++) {
+            indices[i] = (int)pointers[component][i*2];
+        }
+        return indices;
     }
 
     /**
@@ -565,7 +693,10 @@ public class ConcatVector {
                 sb.append("0=0.0");
             }
             else if (sparse[i]) {
-                sb.append((int)pointers[i][0]).append("=").append(pointers[i][1]);
+                for (int j = 0; j < pointers[i].length/2; j++) {
+                    if (j > 0) sb.append(",");
+                    sb.append((int)pointers[i][j*2]).append("=").append(pointers[i][(j*2)+1]);
+                }
             }
             else {
                 for (int j = 0; j < pointers[i].length; j++) {
