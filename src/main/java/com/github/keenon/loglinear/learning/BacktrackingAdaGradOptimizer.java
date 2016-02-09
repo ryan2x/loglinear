@@ -1,6 +1,8 @@
 package com.github.keenon.loglinear.learning;
 
 import com.github.keenon.loglinear.model.ConcatVector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by keenon on 8/26/15.
@@ -8,6 +10,10 @@ import com.github.keenon.loglinear.model.ConcatVector;
  * Handles optimizing an AbstractDifferentiableFunction through AdaGrad guarded by backtracking.
  */
 public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
+    /**
+     * An SLF4J Logger for this class.
+     */
+    private static final Logger log = LoggerFactory.getLogger(BacktrackingAdaGradOptimizer.class);
 
     // this magic number was arrived at with relation to the CoNLL benchmark, and tinkering
     final static double alpha = 0.1;
@@ -19,7 +25,7 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
         double logLikelihoodChange = logLikelihood - s.lastLogLikelihood;
 
         if (logLikelihoodChange == 0) {
-            if (!quiet) System.err.println("\tlogLikelihood improvement = 0: quitting");
+            if (!quiet) log.info("\tlogLikelihood improvement = 0: quitting");
             return true;
         }
 
@@ -32,12 +38,12 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
             s.lastDerivative.mapInPlace((d) -> d / 2);
             weights.addVectorInPlace(s.lastDerivative, -1.0);
 
-            if (!quiet) System.err.println("\tBACKTRACK...");
+            if (!quiet) log.info("\tBACKTRACK...");
 
             // if the lastDerivative norm falls below a threshold, it means we've converged
 
             if (s.lastDerivative.dotProduct(s.lastDerivative) < 1.0e-10) {
-                if (!quiet) System.err.println("\tBacktracking derivative norm "+s.lastDerivative.dotProduct(s.lastDerivative)+" < 1.0e-9: quitting");
+                if (!quiet) log.info("\tBacktracking derivative norm "+s.lastDerivative.dotProduct(s.lastDerivative)+" < 1.0e-9: quitting");
                 return true;
             }
         }
@@ -64,7 +70,7 @@ public class BacktrackingAdaGradOptimizer extends AbstractBatchOptimizer {
             s.lastDerivative = gradient;
             s.lastLogLikelihood = logLikelihood;
 
-            if (!quiet) System.err.println("\tLL: "+logLikelihood);
+            if (!quiet) log.info("\tLL: "+logLikelihood);
         }
 
         return false;

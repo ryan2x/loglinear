@@ -2,6 +2,8 @@ package com.github.keenon.loglinear.inference;
 
 import com.github.keenon.loglinear.model.ConcatVector;
 import com.github.keenon.loglinear.model.GraphicalModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -13,6 +15,11 @@ import java.util.*;
  * and that it can change between inference calls in small ways, so that cacheing of some results is worthwhile.
  */
 public class CliqueTree {
+    /**
+     * An SLF4J Logger for this class.
+     */
+    private static final Logger log = LoggerFactory.getLogger(CliqueTree.class);
+
     GraphicalModel model;
     ConcatVector weights;
 
@@ -397,9 +404,9 @@ public class CliqueTree {
                 // toVisitArray[cursor] = false;
                 trees[cursor] = treeIndex;
                 if (visited[cursor]) {
-                    System.err.println("Visited contains: " + cursor);
-                    System.err.println("Visited: " + Arrays.toString(visited));
-                    System.err.println("To visit: " + toVisit);
+                    log.info("Visited contains: " + cursor);
+                    log.info("Visited: " + Arrays.toString(visited));
+                    log.info("To visit: " + toVisit);
                 }
                 assert (!visited[cursor]);
                 visited[cursor] = true;
@@ -573,9 +580,9 @@ public class CliqueTree {
                         double valueSum = convergedClique.valueSum();
                         if (Double.isFinite(valueSum) && Double.isFinite(treePartitionFunctions[trees[i]])) {
                             if (Math.abs(treePartitionFunctions[trees[i]] - valueSum) >= 1.0e-3 * treePartitionFunctions[trees[i]]) {
-                                System.err.println("Different partition functions for tree " + trees[i] + ": ");
-                                System.err.println("Pre-existing for tree: " + treePartitionFunctions[trees[i]]);
-                                System.err.println("This clique for tree: " + valueSum);
+                                log.info("Different partition functions for tree " + trees[i] + ": ");
+                                log.info("Pre-existing for tree: " + treePartitionFunctions[trees[i]]);
+                                log.info("This clique for tree: " + valueSum);
                             }
                             assert (Math.abs(treePartitionFunctions[trees[i]] - valueSum) < 1.0e-3 * treePartitionFunctions[trees[i]]);
                         }
