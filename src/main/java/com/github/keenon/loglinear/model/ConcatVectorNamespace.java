@@ -14,6 +14,9 @@ import java.util.Map;
  * ConcatVectors for featurizing a model is easier and more intuitive. It's actually quite simple, and threadsafe.
  */
 public class ConcatVectorNamespace implements Serializable {
+    /** A serialversionuid so we can save this robustly */
+    private static final long serialVersionUID = 42L;
+
     final Map<String,Integer> featureToIndex = new HashMap<>();
     final Map<String, Map<String,Integer>> sparseFeatureIndex = new HashMap<>();
     final Map<String, Map<Integer,String>> reverseSparseFeatureIndex = new HashMap<>();
