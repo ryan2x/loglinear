@@ -335,7 +335,7 @@ public class ConcatVector {
                         for (int k = 0; k < usedNewPointers; k++) {
                             int sparseIndex = (int) newPointers[k*2];
                             if (otherSparseIndex == sparseIndex) {
-                                newPointers[(j*2)+1] += other.pointers[i][(k*2)+1]*multiple;
+                                newPointers[(k*2)+1] += other.pointers[i][(j*2)+1]*multiple;
                                 continue outer;
                             }
                         }
