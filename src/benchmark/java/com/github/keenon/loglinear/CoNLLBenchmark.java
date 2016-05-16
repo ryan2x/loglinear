@@ -69,7 +69,7 @@ public class CoNLLBenchmark {
 
         // This training call is basically what we want the benchmark for. It should take 99% of the wall clock time
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.01, 1.0e-5, false, executor);
+        ConcatVector weights = opt.optimize(trainingSet, new LogLikelihoodDifferentiableFunction(), namespace.newWeightsVector(), 0.01, 1.0e-5, false, executor, Optional.of(namespace));
         executor.shutdown();
 
         System.err.println("Testing system...");

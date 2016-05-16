@@ -1,7 +1,6 @@
 package com.github.keenon.loglinear;
 
 import com.github.keenon.loglinear.model.ConcatVector;
-import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

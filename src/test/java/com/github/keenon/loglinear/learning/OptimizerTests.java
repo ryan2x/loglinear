@@ -1,6 +1,7 @@
 package com.github.keenon.loglinear.learning;
 
 import com.github.keenon.loglinear.model.ConcatVector;
+import com.github.keenon.loglinear.model.ConcatVectorNamespace;
 import com.github.keenon.loglinear.model.GraphicalModel;
 import com.pholser.junit.quickcheck.ForAll;
 import com.pholser.junit.quickcheck.From;
@@ -10,6 +11,7 @@ import org.junit.contrib.theories.Theories;
 import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -35,7 +37,7 @@ public class OptimizerTests {
                                           @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
         AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, true, executor);
+        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, true, executor, Optional.<ConcatVectorNamespace>empty());
         executor.shutdown();
         System.err.println("Finished optimizing");
 
@@ -93,7 +95,7 @@ public class OptimizerTests {
 
         AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, false, executor);
+        ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, false, executor, Optional.<ConcatVectorNamespace>empty());
         executor.shutdown();
         System.err.println("Finished optimizing");
 
