@@ -14,6 +14,9 @@ import java.util.Map;
  * ConcatVectors for featurizing a model is easier and more intuitive. It's actually quite simple, and threadsafe.
  */
 public class ConcatVectorNamespace implements Serializable {
+    /** A serialversionuid so we can save this robustly */
+    private static final long serialVersionUID = 42L;
+
     // This is the name of a feature that we expect all weight vectors to set to 1.0
     static final String ALWAYS_ONE_FEATURE = "__lense__.ALWAYS_ONE";
 
