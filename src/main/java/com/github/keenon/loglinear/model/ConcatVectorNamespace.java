@@ -14,6 +14,9 @@ import java.util.Map;
  * ConcatVectors for featurizing a model is easier and more intuitive. It's actually quite simple, and threadsafe.
  */
 public class ConcatVectorNamespace implements Serializable {
+    // This is the name of a feature that we expect all weight vectors to set to 1.0
+    static final String ALWAYS_ONE_FEATURE = "__lense__.ALWAYS_ONE";
+
     final Map<String,Integer> featureToIndex = new HashMap<>();
     final Map<String, Map<String,Integer>> sparseFeatureIndex = new HashMap<>();
     final Map<String, Map<Integer,String>> reverseSparseFeatureIndex = new HashMap<>();
@@ -79,6 +82,17 @@ public class ConcatVectorNamespace implements Serializable {
             }
             return sparseIndex.get(index);
         }
+    }
+
+    /**
+     * Sets the special "always one" feature slot to something. For weight vectors, this should always be set to 1.0.
+     * For everyone else, this can be set to whatever people want.
+     *
+     * @param vector the vector we'd like to set
+     * @param value the value we'd like to set it to
+     */
+    public void setAlwaysOneFeature(ConcatVector vector, double value) {
+        setDenseFeature(vector, ALWAYS_ONE_FEATURE, new double[]{value});
     }
 
     /**

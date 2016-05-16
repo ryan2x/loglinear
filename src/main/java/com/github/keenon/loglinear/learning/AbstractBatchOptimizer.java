@@ -13,6 +13,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -34,7 +35,7 @@ public abstract class AbstractBatchOptimizer {
 
     public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ConcatVector weights = optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-3, false, executor);
+        ConcatVector weights = optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-3, false, executor, Optional.<ConcatVectorNamespace>empty());
         executor.shutdown();
         return weights;
     }
@@ -45,11 +46,12 @@ public abstract class AbstractBatchOptimizer {
                                      double l2regularization,
                                      double convergenceDerivativeNorm,
                                      boolean quiet,
-                                     ThreadPoolExecutor executor) {
+                                     ThreadPoolExecutor executor,
+                                     Optional<ConcatVectorNamespace> namespace) {
         if (!quiet) log.info("\n**************\nBeginning training\n");
         else log.info("[Beginning quiet training]");
 
-        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet, executor);
+        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet, executor, namespace);
         new Thread(mainWorker).start();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -241,10 +243,11 @@ public abstract class AbstractBatchOptimizer {
         double convergenceDerivativeNorm;
         boolean quiet;
         ThreadPoolExecutor executor;
+        Optional<ConcatVectorNamespace> namespace;
 
         final Object naturalTerminationBarrier = new Object();
 
-        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet, ThreadPoolExecutor executor) {
+        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet, ThreadPoolExecutor executor, Optional<ConcatVectorNamespace> namespace) {
             optimizationState = getFreshOptimizationState(initialWeights);
             weights = initialWeights.deepClone();
 
@@ -254,6 +257,7 @@ public abstract class AbstractBatchOptimizer {
             this.convergenceDerivativeNorm = convergenceDerivativeNorm;
             this.quiet = quiet;
             this.executor = executor;
+            this.namespace = namespace;
         }
 
         /**
@@ -402,6 +406,12 @@ public abstract class AbstractBatchOptimizer {
                     constraint.applyToDerivative(derivative);
                 }
 
+                // If we have a namespace, apply the standard ALWAYS_ONE constraint
+
+                if (namespace.isPresent()) {
+                    namespace.get().setAlwaysOneFeature(derivative, 0.0);
+                }
+
                 // If our derivative is sufficiently small, we've converged
 
                 double derivativeNorm = derivative.dotProduct(derivative);
@@ -421,6 +431,12 @@ public abstract class AbstractBatchOptimizer {
 
                 for (Constraint constraint : constraints) {
                     constraint.applyToWeights(weights);
+                }
+
+                // If we have a namespace, apply the standard ALWAYS_ONE constraint
+
+                if (namespace.isPresent()) {
+                    namespace.get().setAlwaysOneFeature(weights, 1.0);
                 }
 
                 if (converged) {
