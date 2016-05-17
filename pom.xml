@@ -4,7 +4,7 @@
 
     <groupId>com.github.keenon</groupId>
     <artifactId>loglinear</artifactId>
-    <version>1.3.6</version>
+    <version>1.3.6-SNAPSHOT</version>
 
     <!-- Sonatype repo -->
 
@@ -34,7 +34,7 @@
     <scm>
         <connection>scm:git:https://github.com/keenon/loglinear.git</connection>
         <url>https://github.com/keenon/loglinear</url>
-        <tag>loglinear-1.3.6</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <developers>
