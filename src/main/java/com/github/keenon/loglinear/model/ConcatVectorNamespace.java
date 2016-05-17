@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class ConcatVectorNamespace implements Serializable {
     /** A serialversionuid so we can save this robustly */
-    private static final long serialVersionUID = 42;
+    private static final long serialVersionUID = 8993759749908519745L;
 
     // This is the name of a feature that we expect all weight vectors to set to 1.0
     static final String ALWAYS_ONE_FEATURE = "__lense__.ALWAYS_ONE";
