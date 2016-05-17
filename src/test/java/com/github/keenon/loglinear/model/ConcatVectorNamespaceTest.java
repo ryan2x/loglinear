@@ -12,8 +12,10 @@ import org.junit.contrib.theories.Theories;
 import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
+import javax.lang.model.element.Name;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -53,6 +55,23 @@ public class ConcatVectorNamespaceTest {
         assertEquals(regularSum.dotProduct(regular2), namespaceSum.dotProduct(namespace2), 1.0e-5);
     }
 
+    @Theory
+    public void testProtoNamespace(@ForAll(sampleSize = 50) @From(NamespaceGenerator.class) ConcatVectorNamespace namespace) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        namespace.writeToStream(byteArrayOutputStream);
+        byteArrayOutputStream.close();
+
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+
+        ConcatVectorNamespace recovered = ConcatVectorNamespace.readFromStream(byteArrayInputStream);
+
+        assertEquals(namespace.featureToIndex, recovered.featureToIndex);
+        assertEquals(namespace.sparseFeatureIndex, recovered.sparseFeatureIndex);
+    }
+
     public ConcatVector toNamespaceVector(ConcatVectorNamespace namespace, Map<Integer,Integer> featureMap) {
         ConcatVector newVector = namespace.newVector();
         for (int i : featureMap.keySet()) {
@@ -89,6 +108,38 @@ public class ConcatVectorNamespaceTest {
                 featureMap.put(featureValue, sourceOfRandomness.nextInt(2));
             }
             return featureMap;
+        }
+    }
+
+    public static class NamespaceGenerator extends Generator<ConcatVectorNamespace> {
+        public NamespaceGenerator(Class<ConcatVectorNamespace> type) {
+            super(type);
+        }
+
+        private Map<String, Integer> generateFeatureMap(SourceOfRandomness sourceOfRandomness) {
+            Map<String, Integer> featureMap = new HashMap<>();
+            int numFeatures = sourceOfRandomness.nextInt(1,15);
+            for (int i = 0; i < numFeatures; i++) {
+                int featureValue = sourceOfRandomness.nextInt(20);
+                while (featureMap.containsKey(""+featureValue)) {
+                    featureValue = sourceOfRandomness.nextInt(20);
+                }
+
+                featureMap.put(""+featureValue, sourceOfRandomness.nextInt(2));
+            }
+            return featureMap;
+        }
+
+        @Override
+        public ConcatVectorNamespace generate(SourceOfRandomness sourceOfRandomness, GenerationStatus generationStatus) {
+            ConcatVectorNamespace namespace = new ConcatVectorNamespace();
+            namespace.featureToIndex.putAll(generateFeatureMap(sourceOfRandomness));
+            for (String key : namespace.featureToIndex.keySet()) {
+                if (sourceOfRandomness.nextBoolean()) {
+                    namespace.sparseFeatureIndex.put(key, generateFeatureMap(sourceOfRandomness));
+                }
+            }
+            return namespace;
         }
     }
 }

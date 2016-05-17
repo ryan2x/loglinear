@@ -1,0 +1,19 @@
+package com.github.keenon;
+
+option java_package = "com.github.keenon.loglinear";
+option java_outer_classname = "ConcatVectorNamespaceProto";
+
+message ConcatVectorNamespace {
+    message FeatureToIndexComponent {
+        required string key = 1;
+        required int32 data = 2;
+    }
+
+    message SparseFeatureIndex {
+        required string key = 1;
+        repeated FeatureToIndexComponent featureToIndex = 2;
+    }
+
+    repeated FeatureToIndexComponent featureToIndex = 1;
+    repeated SparseFeatureIndex sparseFeatureIndex = 2;
+}

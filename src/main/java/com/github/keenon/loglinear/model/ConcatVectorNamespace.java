@@ -1,8 +1,9 @@
 package com.github.keenon.loglinear.model;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import com.github.keenon.loglinear.ConcatVectorNamespaceProto;
+import com.github.keenon.loglinear.ConcatVectorProto;
+
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,12 +16,12 @@ import java.util.Map;
  */
 public class ConcatVectorNamespace implements Serializable {
     /** A serialversionuid so we can save this robustly */
-    private static final long serialVersionUID = 42L;
+    private static final long serialVersionUID = 42;
 
     // This is the name of a feature that we expect all weight vectors to set to 1.0
     static final String ALWAYS_ONE_FEATURE = "__lense__.ALWAYS_ONE";
 
-    final Map<String,Integer> featureToIndex = new HashMap<>();
+    final Map<String, Integer> featureToIndex = new HashMap<>();
     final Map<String, Map<String,Integer>> sparseFeatureIndex = new HashMap<>();
     final Map<String, Map<Integer,String>> reverseSparseFeatureIndex = new HashMap<>();
 
@@ -157,6 +158,85 @@ public class ConcatVectorNamespace implements Serializable {
             offset++;
         }
         vector.setSparseComponent(ensureFeature(featureName), indices, values);
+    }
+
+    /**
+     * Writes the protobuf version of this vector to a stream. reversible with readFromStream().
+     *
+     * @param stream the output stream to write to
+     * @throws IOException passed through from the stream
+     */
+    public void writeToStream(OutputStream stream) throws IOException {
+        getProtoBuilder().build().writeDelimitedTo(stream);
+    }
+
+    /**
+     * Static function to deserialize a concat vector from an input stream.
+     *
+     * @param stream the stream to read from, assuming protobuf encoding
+     * @return a new concat vector
+     * @throws IOException passed through from the stream
+     */
+    public static ConcatVectorNamespace readFromStream(InputStream stream) throws IOException {
+        return readFromProto(ConcatVectorNamespaceProto.ConcatVectorNamespace.parseDelimitedFrom(stream));
+    }
+
+    /**
+     * @return a Builder for proto serialization
+     */
+    public ConcatVectorNamespaceProto.ConcatVectorNamespace.Builder getProtoBuilder() {
+        ConcatVectorNamespaceProto.ConcatVectorNamespace.Builder m = ConcatVectorNamespaceProto.ConcatVectorNamespace.newBuilder();
+
+        // Add the outer layer features
+        for (String feature : featureToIndex.keySet()) {
+            ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.Builder component = ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.newBuilder();
+
+            component.setKey(feature);
+            component.setData(featureToIndex.get(feature));
+
+            m.addFeatureToIndex(component);
+        }
+
+        for (String feature : sparseFeatureIndex.keySet()) {
+            ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex.Builder sparseFeature = ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex.newBuilder();
+
+            sparseFeature.setKey(feature);
+            for (String sparseFeatureName : sparseFeatureIndex.get(feature).keySet()) {
+                ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.Builder component = ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.newBuilder();
+                component.setKey(sparseFeatureName);
+                component.setData(sparseFeatureIndex.get(feature).get(sparseFeatureName));
+                sparseFeature.addFeatureToIndex(component);
+            }
+
+            m.addSparseFeatureIndex(sparseFeature);
+        }
+
+        return m;
+    }
+
+    /**
+     * Recreates an in-memory concat vector object from a Proto serialization.
+     *
+     * @param m the concat vector proto
+     * @return an in-memory concat vector object
+     */
+    public static ConcatVectorNamespace readFromProto(ConcatVectorNamespaceProto.ConcatVectorNamespace m) {
+        ConcatVectorNamespace namespace = new ConcatVectorNamespace();
+
+        for (ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent component : m.getFeatureToIndexList()) {
+            namespace.featureToIndex.put(component.getKey(), component.getData());
+        }
+
+        for (ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex sparseFeature : m.getSparseFeatureIndexList()) {
+            String key = sparseFeature.getKey();
+            Map<String, Integer> sparseMap = new HashMap<>();
+            for (ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent component : sparseFeature.getFeatureToIndexList()) {
+                sparseMap.put(component.getKey(), component.getData());
+            }
+            namespace.sparseFeatureIndex.put(key, sparseMap);
+        }
+
+        return namespace;
     }
 
     /**
