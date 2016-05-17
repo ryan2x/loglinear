@@ -70,6 +70,7 @@ public class ConcatVectorNamespaceTest {
 
         assertEquals(namespace.featureToIndex, recovered.featureToIndex);
         assertEquals(namespace.sparseFeatureIndex, recovered.sparseFeatureIndex);
+        assertEquals(namespace.reverseSparseFeatureIndex, recovered.reverseSparseFeatureIndex);
     }
 
     public ConcatVector toNamespaceVector(ConcatVectorNamespace namespace, Map<Integer,Integer> featureMap) {
@@ -136,7 +137,11 @@ public class ConcatVectorNamespaceTest {
             namespace.featureToIndex.putAll(generateFeatureMap(sourceOfRandomness));
             for (String key : namespace.featureToIndex.keySet()) {
                 if (sourceOfRandomness.nextBoolean()) {
-                    namespace.sparseFeatureIndex.put(key, generateFeatureMap(sourceOfRandomness));
+                    Map<String, Integer> sparseMap = generateFeatureMap(sourceOfRandomness);
+                    Map<Integer, String> reverseSparseMap = new HashMap<>();
+                    for (String sparseKey : sparseMap.keySet()) reverseSparseMap.put(sparseMap.get(sparseKey), sparseKey);
+                    namespace.sparseFeatureIndex.put(key, sparseMap);
+                    namespace.reverseSparseFeatureIndex.put(key, reverseSparseMap);
                 }
             }
             return namespace;

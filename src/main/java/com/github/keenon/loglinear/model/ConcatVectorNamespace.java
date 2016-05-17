@@ -230,10 +230,13 @@ public class ConcatVectorNamespace implements Serializable {
         for (ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex sparseFeature : m.getSparseFeatureIndexList()) {
             String key = sparseFeature.getKey();
             Map<String, Integer> sparseMap = new HashMap<>();
+            Map<Integer, String> reverseSparseMap = new HashMap<>();
             for (ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent component : sparseFeature.getFeatureToIndexList()) {
                 sparseMap.put(component.getKey(), component.getData());
+                reverseSparseMap.put(component.getData(), component.getKey());
             }
             namespace.sparseFeatureIndex.put(key, sparseMap);
+            namespace.reverseSparseFeatureIndex.put(key, reverseSparseMap);
         }
 
         return namespace;
