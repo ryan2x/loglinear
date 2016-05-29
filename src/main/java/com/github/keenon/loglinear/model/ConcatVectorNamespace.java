@@ -33,19 +33,28 @@ public class ConcatVectorNamespace implements Serializable {
         return new ConcatVector(featureToIndex.size());
     }
 
+    public ConcatVector newWeightsVector() {
+        return newWeightsVector(true);
+    }
+
     /**
      * This constructs a fresh vector that is sized correctly to accommodate all the known sparse values for vectors
      * that are possibly sparse.
      *
+     * @param presize a flag for whether or not to create all the dense double arrays for our sparse features
+     *
      * @return a new, internally correctly sized ConcatVector that will work correctly as weights for features from
      *         this namespace;
      */
-    public ConcatVector newWeightsVector() {
+    public ConcatVector newWeightsVector(boolean presize) {
         ConcatVector vector = new ConcatVector(featureToIndex.size());
-        for (String s : sparseFeatureIndex.keySet()) {
-            int size = sparseFeatureIndex.get(s).size();
-            vector.setDenseComponent(ensureFeature(s), new double[size]);
+        if (presize) {
+            for (String s : sparseFeatureIndex.keySet()) {
+                int size = sparseFeatureIndex.get(s).size();
+                vector.setDenseComponent(ensureFeature(s), new double[size]);
+            }
         }
+        setAlwaysOneFeature(vector, 1);
         return vector;
     }
 
