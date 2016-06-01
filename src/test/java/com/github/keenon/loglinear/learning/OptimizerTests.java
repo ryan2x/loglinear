@@ -34,7 +34,7 @@ public class OptimizerTests {
     public void testOptimizeLogLikelihood(AbstractBatchOptimizer optimizer,
                                           @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
                                           @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
-                                          @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
+                                          @ForAll(sampleSize = 2) @InRange(minDouble = 0.01, maxDouble = 5.0) double l2regularization) throws Exception {
         AbstractDifferentiableFunction<GraphicalModel> ll = new LogLikelihoodDifferentiableFunction();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         ConcatVector finalWeights = optimizer.optimize(dataset, ll, initialWeights, l2regularization, 1.0e-9, true, executor, Optional.<ConcatVectorNamespace>empty());
@@ -74,11 +74,12 @@ public class OptimizerTests {
         }
     }
 
+    /*
     @Theory
     public void testOptimizeLogLikelihoodWithConstraints(AbstractBatchOptimizer optimizer,
                                                   @ForAll(sampleSize = 5) @From(LogLikelihoodFunctionTest.GraphicalModelDatasetGenerator.class) GraphicalModel[] dataset,
                                                   @ForAll(sampleSize = 2) @From(LogLikelihoodFunctionTest.WeightsGenerator.class) ConcatVector initialWeights,
-                                                  @ForAll(sampleSize = 2) @InRange(minDouble = 0.0, maxDouble = 5.0) double l2regularization) throws Exception {
+                                                  @ForAll(sampleSize = 2) @InRange(minDouble = 0.01, maxDouble = 5.0) double l2regularization) throws Exception {
         Random r = new Random(42);
 
         int constraintComponent = r.nextInt(initialWeights.getNumberOfComponents());
@@ -133,12 +134,14 @@ public class OptimizerTests {
             assertTrue(logLikelihood >= randomPerturbedLogLikelihood - (1.0e-7 * Math.max(1.0e-1,Math.abs(logLikelihood))));
         }
     }
+    */
 
     private <T> double getValueSum(T[] dataset, ConcatVector weights, AbstractDifferentiableFunction<T> fn, double l2regularization) {
         double value = 0.0;
         for (T t : dataset) {
             value += fn.getSummaryForInstance(t, weights, new ConcatVector(0));
         }
-        return (value / dataset.length) - (weights.dotProduct(weights) * l2regularization);
+        double regularizer = (1 / (2 * l2regularization * l2regularization));
+        return value - (regularizer * weights.dotProduct(weights));
     }
 }

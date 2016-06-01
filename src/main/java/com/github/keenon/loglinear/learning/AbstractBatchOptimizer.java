@@ -35,7 +35,7 @@ public abstract class AbstractBatchOptimizer {
 
     public <T> ConcatVector optimize(T[] dataset, AbstractDifferentiableFunction<T> fn) {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ConcatVector weights = optimize(dataset, fn, new ConcatVector(0), 0.0, 1.0e-3, false, executor, Optional.<ConcatVectorNamespace>empty());
+        ConcatVector weights = optimize(dataset, fn, new ConcatVector(0), 1.0, 1.0e-3, false, executor, Optional.<ConcatVectorNamespace>empty());
         executor.shutdown();
         return weights;
     }
@@ -43,15 +43,17 @@ public abstract class AbstractBatchOptimizer {
     public <T> ConcatVector optimize(T[] dataset,
                                      AbstractDifferentiableFunction<T> fn,
                                      ConcatVector initialWeights,
-                                     double l2regularization,
+                                     double sigma,
                                      double convergenceDerivativeNorm,
                                      boolean quiet,
                                      ThreadPoolExecutor executor,
                                      Optional<ConcatVectorNamespace> namespace) {
+        if (sigma == 0) throw new IllegalArgumentException("Can't have a sigma of 0. This corresponds to infinite regularization, which is impossible.");
+
         if (!quiet) log.info("\n**************\nBeginning training\n");
         else log.info("[Beginning quiet training]");
 
-        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, l2regularization, convergenceDerivativeNorm, quiet, executor, namespace);
+        TrainingWorker<T> mainWorker = new TrainingWorker<>(dataset, fn, initialWeights, sigma, convergenceDerivativeNorm, quiet, executor, namespace);
         new Thread(mainWorker).start();
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -239,7 +241,7 @@ public abstract class AbstractBatchOptimizer {
 
         T[] dataset;
         AbstractDifferentiableFunction<T> fn;
-        double l2regularization;
+        double sigma;
         double convergenceDerivativeNorm;
         boolean quiet;
         ThreadPoolExecutor executor;
@@ -247,13 +249,13 @@ public abstract class AbstractBatchOptimizer {
 
         final Object naturalTerminationBarrier = new Object();
 
-        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double l2regularization, double convergenceDerivativeNorm, boolean quiet, ThreadPoolExecutor executor, Optional<ConcatVectorNamespace> namespace) {
+        public TrainingWorker(T[] dataset, AbstractDifferentiableFunction<T> fn, ConcatVector initialWeights, double sigma, double convergenceDerivativeNorm, boolean quiet, ThreadPoolExecutor executor, Optional<ConcatVectorNamespace> namespace) {
             optimizationState = getFreshOptimizationState(initialWeights);
             weights = initialWeights.deepClone();
 
             this.dataset = dataset;
             this.fn = fn;
-            this.l2regularization = l2regularization;
+            this.sigma = sigma;
             this.convergenceDerivativeNorm = convergenceDerivativeNorm;
             this.quiet = quiet;
             this.executor = executor;
@@ -390,15 +392,19 @@ public abstract class AbstractBatchOptimizer {
                     }
                 }
 
-                logLikelihood /= dataset.length;
-                derivative.mapInPlace((d) -> d / dataset.length);
+                // We removed normalizing by dataset length to bring behavior in line with CoreNLP
+
+                // logLikelihood /= dataset.length;
+                // derivative.mapInPlace((d) -> d / dataset.length);
 
                 long gradientComputationTime = System.currentTimeMillis() - startTime;
 
                 // Regularization
 
-                logLikelihood = logLikelihood - (l2regularization * weights.dotProduct(weights));
-                derivative.addVectorInPlace(weights, -2 * l2regularization);
+                // We added this equation to the regularizer to bring behavior in line with CoreNLP
+                double l2reg = (1 / (2 * sigma * sigma));
+                logLikelihood = logLikelihood - (l2reg * weights.dotProduct(weights));
+                derivative.addVectorInPlace(weights, -2 * l2reg);
 
                 // Zero out the derivative on the components we're holding fixed
 
