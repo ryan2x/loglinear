@@ -4,9 +4,7 @@ import com.github.keenon.loglinear.ConcatVectorNamespaceProto;
 import com.github.keenon.loglinear.ConcatVectorProto;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by keenon on 10/20/15.
@@ -252,27 +250,96 @@ public class ConcatVectorNamespace implements Serializable {
     }
 
     /**
+     * WARNING: this will change if your namespace registers any new feature names
+     * ANOTHER WARNING: if you have a bunch of sparse components, this will be huge and mostly zeros
+     *
+     * That said, if you really know what you're doing, here's how you convert a ConcatVector into a flat array, if for
+     * example you want to use it with another library.
+     *
+     * @param vector the vector to convert to a double array
+     * @return a dense array
+     */
+    /*
+    public double[] dangerousFlatArrayConversion(ConcatVector vector) {
+        Map<Integer, String> indexToFeature = new HashMap<>();
+        for (String key : featureToIndex.keySet()) {
+            indexToFeature.put(featureToIndex.get(key), key);
+        }
+
+        int numComponents = vector.getNumberOfComponents();
+        int totalSize = 0;
+        for (int i = 0; i < numComponents; i++) {
+            if (!vector.isComponentSparse(i)) {
+                totalSize += vector.getDenseComponent(i).length;
+            }
+            if (indexToFeature.containsKey(i)) {
+                if (sparseFeatureIndex.containsKey(indexToFeature.get(i))) {
+                    totalSize += sparseFeatureIndex.get(indexToFeature.get(i)).size();
+                }
+            }
+        }
+    }
+    */
+
+    /**
      * This prints out a ConcatVector by mapping to the namespace, to make debugging learning algorithms easier.
      *
      * @param vector the vector to print
      * @param bw the output stream to write to
      */
     public void debugVector(ConcatVector vector, BufferedWriter bw) throws IOException {
+        List<String> features = new ArrayList<>();
+        Map<String, List<Integer>> sortedFeatures = new HashMap<>();
+
         for (String key : featureToIndex.keySet()) {
-            bw.write(key);
-            bw.write(":\n");
+            features.add(key);
             int i = featureToIndex.get(key);
+
+            List<Integer> featureIndices = new ArrayList<>();
             if (vector.isComponentSparse(i)) {
                 int[] indices = vector.getSparseIndices(i);
                 for (int j : indices) {
-                    debugFeatureValue(key, j, vector, bw);
+                    featureIndices.add(j);
                 }
             }
             else {
                 double[] arr = vector.getDenseComponent(i);
                 for (int j = 0; j < arr.length; j++) {
-                    debugFeatureValue(key, j, vector, bw);
+                    featureIndices.add(j);
                 }
+            }
+            featureIndices.sort((a,b) -> {
+                if (Math.abs(vector.getValueAt(i, a)) < Math.abs(vector.getValueAt(i, b))) {
+                    return 1;
+                }
+                else if (Math.abs(vector.getValueAt(i, a)) > Math.abs(vector.getValueAt(i, b))) {
+                    return -1;
+                }
+                else {
+                    return 0;
+                }
+            });
+
+            sortedFeatures.put(key, featureIndices);
+        }
+
+        features.sort((a,b) -> {
+            double bestAValue = sortedFeatures.get(a).size() == 0 ? 0.0 : Math.abs(vector.getValueAt(featureToIndex.get(a), sortedFeatures.get(a).get(0)));
+            double bestBValue = sortedFeatures.get(b).size() == 0 ? 0.0 : Math.abs(vector.getValueAt(featureToIndex.get(b), sortedFeatures.get(b).get(0)));
+            if (bestAValue < bestBValue) {
+                return 1;
+            }
+            else if (bestAValue > bestBValue) {
+                return -1;
+            }
+            else return 0;
+        });
+
+        for (String key : features) {
+            bw.write("FEATURE: \""+key);
+            bw.write("\"\n");
+            for (int j : sortedFeatures.get(key)) {
+                debugFeatureValue(key, j, vector, bw);
             }
         }
     }
@@ -284,7 +351,9 @@ public class ConcatVectorNamespace implements Serializable {
         bw.write("\t");
         if (sparseFeatureIndex.containsKey(feature) && sparseFeatureIndex.get(feature).values().contains(index)) {
             // we can map this index to an interpretable string, so we do
+            bw.write("SPARSE VALUE \"");
             bw.write(reverseSparseFeatureIndex.get(feature).get(index));
+            bw.write("\"");
         }
         else {
             // we can't map this to a useful string, so we default to the number
