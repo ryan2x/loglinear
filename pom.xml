@@ -4,7 +4,7 @@
 
     <groupId>com.github.keenon</groupId>
     <artifactId>loglinear</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.5-SNAPSHOT</version>
 
     <!-- Sonatype repo -->
 
@@ -59,6 +59,13 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.5</version>
+        </dependency>
+
+        <!-- HPPC -->
+        <dependency>
+            <groupId>com.carrotsearch</groupId>
+            <artifactId>hppc</artifactId>
+            <version>0.7.1</version>
         </dependency>
 
         <!-- Quickcheck dependencies -->

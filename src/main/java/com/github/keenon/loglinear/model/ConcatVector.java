@@ -5,7 +5,6 @@ import com.github.keenon.loglinear.ConcatVectorProto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.function.Function;
 
 /**

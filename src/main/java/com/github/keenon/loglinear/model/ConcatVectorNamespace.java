@@ -1,7 +1,8 @@
 package com.github.keenon.loglinear.model;
 
+import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.github.keenon.loglinear.ConcatVectorNamespaceProto;
-import com.github.keenon.loglinear.ConcatVectorProto;
 
 import java.io.*;
 import java.util.*;
@@ -19,9 +20,9 @@ public class ConcatVectorNamespace implements Serializable {
     // This is the name of a feature that we expect all weight vectors to set to 1.0
     static final String ALWAYS_ONE_FEATURE = "__lense__.ALWAYS_ONE";
 
-    final Map<String, Integer> featureToIndex = new HashMap<>();
-    final Map<String, Map<String,Integer>> sparseFeatureIndex = new HashMap<>();
-    final Map<String, Map<Integer,String>> reverseSparseFeatureIndex = new HashMap<>();
+    final ObjectIntMap<String> featureToIndex = new ObjectIntHashMap<>();
+    final ObjectObjectMap<String, ObjectIntMap<String>> sparseFeatureIndex = new ObjectObjectHashMap<>();
+    final ObjectObjectMap<String, IntObjectMap<String>> reverseSparseFeatureIndex = new ObjectObjectHashMap<>();
 
     /**
      * Creates a new vector that is appropriately sized to accommodate all the features that have been named so far.
@@ -47,9 +48,9 @@ public class ConcatVectorNamespace implements Serializable {
     public ConcatVector newWeightsVector(boolean presize) {
         ConcatVector vector = new ConcatVector(featureToIndex.size());
         if (presize) {
-            for (String s : sparseFeatureIndex.keySet()) {
-                int size = sparseFeatureIndex.get(s).size();
-                vector.setDenseComponent(ensureFeature(s), new double[size]);
+            for (ObjectCursor<String> s : sparseFeatureIndex.keys()) {
+                int size = sparseFeatureIndex.get(s.value).size();
+                vector.setDenseComponent(ensureFeature(s.value), new double[size]);
             }
         }
         setAlwaysOneFeature(vector, 1);
@@ -62,12 +63,17 @@ public class ConcatVectorNamespace implements Serializable {
      * @param featureName the feature to add to our index
      */
     public int ensureFeature(String featureName) {
-        synchronized (featureToIndex) {
-            if (!featureToIndex.containsKey(featureName)) {
-                featureToIndex.put(featureName, featureToIndex.size());
+        int feature = featureToIndex.getOrDefault(featureName, -1);
+        if (feature == -1) {
+            synchronized (featureToIndex) {
+                feature = featureToIndex.getOrDefault(featureName, -1);
+                if (feature == -1) {
+                    feature = featureToIndex.size();
+                    featureToIndex.put(featureName, feature);
+                }
             }
-            return featureToIndex.get(featureName);
         }
+        return feature;
     }
 
     /**
@@ -78,21 +84,33 @@ public class ConcatVectorNamespace implements Serializable {
      */
     public int ensureSparseFeature(String featureName, String index) {
         ensureFeature(featureName);
-        synchronized (sparseFeatureIndex) {
-            if (!sparseFeatureIndex.containsKey(featureName)) {
-                sparseFeatureIndex.put(featureName, new HashMap<>());
-                reverseSparseFeatureIndex.put(featureName, new HashMap<>());
+        ObjectIntMap<String> sparseIndex = sparseFeatureIndex.get(featureName);
+        IntObjectMap<String> reverseSparseIndex = reverseSparseFeatureIndex.get(featureName);
+        if (sparseIndex == null || reverseSparseIndex == null) {
+            synchronized (sparseFeatureIndex) {
+                sparseIndex = sparseFeatureIndex.get(featureName);
+                reverseSparseIndex = reverseSparseFeatureIndex.get(featureName);
+                if (sparseIndex == null || reverseSparseIndex == null) {
+                    sparseIndex = new ObjectIntHashMap<>();
+                    reverseSparseIndex = new IntObjectHashMap<>();
+                    sparseFeatureIndex.put(featureName, sparseIndex);
+                    reverseSparseFeatureIndex.put(featureName, reverseSparseIndex);
+                }
             }
         }
-        final Map<String,Integer> sparseIndex = sparseFeatureIndex.get(featureName);
-        final Map<Integer,String> reverseSparseIndex = reverseSparseFeatureIndex.get(featureName);
-        synchronized (sparseIndex) {
-            if (!sparseIndex.containsKey(index)) {
-                reverseSparseIndex.put(sparseIndex.size(), index);
-                sparseIndex.put(index, sparseIndex.size());
+        Integer rtn = sparseIndex.getOrDefault(index, -1);
+        if (rtn == -1) {
+            //noinspection SynchronizationOnLocalVariableOrMethodParameter
+            synchronized (sparseIndex) {
+                rtn = sparseIndex.getOrDefault(index, -1);
+                if (rtn == -1) {
+                    rtn = sparseIndex.size();
+                    reverseSparseIndex.put(rtn, index);
+                    sparseIndex.put(index, rtn);
+                }
             }
-            return sparseIndex.get(index);
         }
+        return rtn;
     }
 
     /**
@@ -195,23 +213,23 @@ public class ConcatVectorNamespace implements Serializable {
         ConcatVectorNamespaceProto.ConcatVectorNamespace.Builder m = ConcatVectorNamespaceProto.ConcatVectorNamespace.newBuilder();
 
         // Add the outer layer features
-        for (String feature : featureToIndex.keySet()) {
+        for (ObjectCursor<String> feature : featureToIndex.keys()) {
             ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.Builder component = ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.newBuilder();
 
-            component.setKey(feature);
-            component.setData(featureToIndex.get(feature));
+            component.setKey(feature.value);
+            component.setData(featureToIndex.getOrDefault(feature.value, -1));
 
             m.addFeatureToIndex(component);
         }
 
-        for (String feature : sparseFeatureIndex.keySet()) {
+        for (ObjectCursor<String> feature : sparseFeatureIndex.keys()) {
             ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex.Builder sparseFeature = ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex.newBuilder();
 
-            sparseFeature.setKey(feature);
-            for (String sparseFeatureName : sparseFeatureIndex.get(feature).keySet()) {
+            sparseFeature.setKey(feature.value);
+            for (ObjectCursor<String> sparseFeatureName : sparseFeatureIndex.get(feature.value).keys()) {
                 ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.Builder component = ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent.newBuilder();
-                component.setKey(sparseFeatureName);
-                component.setData(sparseFeatureIndex.get(feature).get(sparseFeatureName));
+                component.setKey(sparseFeatureName.value);
+                component.setData(sparseFeatureIndex.get(feature.value).getOrDefault(sparseFeatureName.value, -1));
                 sparseFeature.addFeatureToIndex(component);
             }
 
@@ -236,8 +254,8 @@ public class ConcatVectorNamespace implements Serializable {
 
         for (ConcatVectorNamespaceProto.ConcatVectorNamespace.SparseFeatureIndex sparseFeature : m.getSparseFeatureIndexList()) {
             String key = sparseFeature.getKey();
-            Map<String, Integer> sparseMap = new HashMap<>();
-            Map<Integer, String> reverseSparseMap = new HashMap<>();
+            ObjectIntMap<String> sparseMap = new ObjectIntHashMap<>();
+            IntObjectMap<String> reverseSparseMap = new IntObjectHashMap<>();
             for (ConcatVectorNamespaceProto.ConcatVectorNamespace.FeatureToIndexComponent component : sparseFeature.getFeatureToIndexList()) {
                 sparseMap.put(component.getKey(), component.getData());
                 reverseSparseMap.put(component.getData(), component.getKey());
@@ -291,9 +309,9 @@ public class ConcatVectorNamespace implements Serializable {
         List<String> features = new ArrayList<>();
         Map<String, List<Integer>> sortedFeatures = new HashMap<>();
 
-        for (String key : featureToIndex.keySet()) {
-            features.add(key);
-            int i = featureToIndex.get(key);
+        for (ObjectCursor<String> key : featureToIndex.keys()) {
+            features.add(key.value);
+            int i = featureToIndex.getOrDefault(key.value,  -1);
 
             List<Integer> featureIndices = new ArrayList<>();
             if (vector.isComponentSparse(i)) {
@@ -320,12 +338,12 @@ public class ConcatVectorNamespace implements Serializable {
                 }
             });
 
-            sortedFeatures.put(key, featureIndices);
+            sortedFeatures.put(key.value, featureIndices);
         }
 
         features.sort((a,b) -> {
-            double bestAValue = sortedFeatures.get(a).size() == 0 ? 0.0 : Math.abs(vector.getValueAt(featureToIndex.get(a), sortedFeatures.get(a).get(0)));
-            double bestBValue = sortedFeatures.get(b).size() == 0 ? 0.0 : Math.abs(vector.getValueAt(featureToIndex.get(b), sortedFeatures.get(b).get(0)));
+            double bestAValue = sortedFeatures.get(a).size() == 0 ? 0.0 : Math.abs(vector.getValueAt(featureToIndex.getOrDefault(a, -1), sortedFeatures.get(a).get(0)));
+            double bestBValue = sortedFeatures.get(b).size() == 0 ? 0.0 : Math.abs(vector.getValueAt(featureToIndex.getOrDefault(b, -1), sortedFeatures.get(b).get(0)));
             if (bestAValue < bestBValue) {
                 return 1;
             }
@@ -360,7 +378,7 @@ public class ConcatVectorNamespace implements Serializable {
             bw.write(Integer.toString(index));
         }
         bw.write(": ");
-        bw.write(Double.toString(vector.getValueAt(featureToIndex.get(feature), index)));
+        bw.write(Double.toString(vector.getValueAt(featureToIndex.getOrDefault(feature, -1), index)));
         bw.write("\n");
     }
 }
