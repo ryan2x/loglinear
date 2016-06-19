@@ -360,6 +360,9 @@ public class ConcatVectorNamespace implements Serializable {
                 debugFeatureValue(key, j, vector, bw);
             }
         }
+        
+        // Flush the writer
+        bw.flush();
     }
 
     /**
