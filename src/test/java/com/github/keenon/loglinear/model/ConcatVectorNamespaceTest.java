@@ -2,27 +2,26 @@ package com.github.keenon.loglinear.model;
 
 import static org.junit.Assert.*;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.ObjectIntHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.pholser.junit.quickcheck.ForAll;
 import com.pholser.junit.quickcheck.From;
 import com.pholser.junit.quickcheck.generator.GenerationStatus;
 import com.pholser.junit.quickcheck.generator.Generator;
-import com.pholser.junit.quickcheck.generator.InRange;
 import com.pholser.junit.quickcheck.random.SourceOfRandomness;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.contrib.theories.Theories;
 import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
-import javax.lang.model.element.Name;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.function.Function;
-
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeTrue;
+import java.util.*;
 
 /**
  * Created by keenon on 10/20/15.
@@ -32,6 +31,28 @@ import static org.junit.Assume.assumeTrue;
  */
 @RunWith(Theories.class)
 public class ConcatVectorNamespaceTest {
+
+    @Ignore
+    @Test
+    public void testSpeed() {
+        System.err.println("Initializing...");
+        ConcatVectorNamespace namespace = new ConcatVectorNamespace();
+        List<String> uuids = new ArrayList<>();
+        for (int i = 0; i < 1000 * 1000; ++i) {
+            String uuid = UUID.randomUUID().toString();
+            namespace.ensureFeature(uuid);
+            uuids.add(uuid);
+        }
+        System.err.println("Running...");
+        long start = System.currentTimeMillis();
+        long sum = 0;
+        for (int i = 0; i < 1000 * 1000 * 1000; ++i) {
+            sum += namespace.ensureFeature(uuids.get(i % uuids.size()));
+        }
+        System.err.println(sum);  // to prohibit JIT
+        System.err.println("Took " + (System.currentTimeMillis() - start) / 1000 + " seconds");
+    }
+
     @Theory
     public void testResizeOnSetComponent(@ForAll(sampleSize = 50) @From(MapGenerator.class) Map<Integer,Integer> featureMap1,
                                          @ForAll(sampleSize = 50) @From(MapGenerator.class) Map<Integer,Integer> featureMap2) {
@@ -117,8 +138,8 @@ public class ConcatVectorNamespaceTest {
             super(type);
         }
 
-        private Map<String, Integer> generateFeatureMap(SourceOfRandomness sourceOfRandomness) {
-            Map<String, Integer> featureMap = new HashMap<>();
+        private ObjectIntMap<String> generateFeatureMap(SourceOfRandomness sourceOfRandomness) {
+            ObjectIntMap<String> featureMap = new ObjectIntHashMap<>();
             int numFeatures = sourceOfRandomness.nextInt(1,15);
             for (int i = 0; i < numFeatures; i++) {
                 int featureValue = sourceOfRandomness.nextInt(20);
@@ -135,13 +156,13 @@ public class ConcatVectorNamespaceTest {
         public ConcatVectorNamespace generate(SourceOfRandomness sourceOfRandomness, GenerationStatus generationStatus) {
             ConcatVectorNamespace namespace = new ConcatVectorNamespace();
             namespace.featureToIndex.putAll(generateFeatureMap(sourceOfRandomness));
-            for (String key : namespace.featureToIndex.keySet()) {
+            for (ObjectCursor<String> key : namespace.featureToIndex.keys()) {
                 if (sourceOfRandomness.nextBoolean()) {
-                    Map<String, Integer> sparseMap = generateFeatureMap(sourceOfRandomness);
-                    Map<Integer, String> reverseSparseMap = new HashMap<>();
-                    for (String sparseKey : sparseMap.keySet()) reverseSparseMap.put(sparseMap.get(sparseKey), sparseKey);
-                    namespace.sparseFeatureIndex.put(key, sparseMap);
-                    namespace.reverseSparseFeatureIndex.put(key, reverseSparseMap);
+                    ObjectIntMap<String> sparseMap = generateFeatureMap(sourceOfRandomness);
+                    IntObjectMap< String> reverseSparseMap = new IntObjectHashMap<>();
+                    for (ObjectCursor<String> sparseKey : sparseMap.keys()) reverseSparseMap.put(sparseMap.get(sparseKey.value), sparseKey.value);
+                    namespace.sparseFeatureIndex.put(key.value, sparseMap);
+                    namespace.reverseSparseFeatureIndex.put(key.value, reverseSparseMap);
                 }
             }
             return namespace;
