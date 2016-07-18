@@ -1,9 +1,12 @@
-package com.github.keenon;
+syntax = "proto2";
+
+package com.github.keenon.loglinear;
 
 option java_package = "com.github.keenon.loglinear";
 option java_outer_classname = "GraphicalModelProto";
 
 import "ConcatVectorTable.proto";
+import "NDArrayDoubles.proto";
 
 message GraphicalModel {
     repeated Factor factor = 1;
@@ -11,10 +14,17 @@ message GraphicalModel {
     optional MetaData metaData = 3;
 }
 
+enum FactorType {
+    Vector = 1;
+    Static = 2;
+}
+
 message Factor {
-    required ConcatVectorTable featuresTable = 1;
-    repeated int32 neighbor = 2;
-    optional MetaData metaData = 3;
+    required FactorType factorType = 1;
+    optional ConcatVectorTable featuresTable = 2;
+    optional NDArrayDoubles staticFeaturesTable = 3;
+    repeated int32 neighbor = 4;
+    optional MetaData metaData = 5;
 }
 
 message MetaData {

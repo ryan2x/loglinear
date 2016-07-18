@@ -8,77 +8,159 @@ public final class GraphicalModelProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  /**
+   * Protobuf enum {@code com.github.keenon.loglinear.FactorType}
+   */
+  public enum FactorType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>Vector = 1;</code>
+     */
+    Vector(0, 1),
+    /**
+     * <code>Static = 2;</code>
+     */
+    Static(1, 2),
+    ;
+
+    /**
+     * <code>Vector = 1;</code>
+     */
+    public static final int Vector_VALUE = 1;
+    /**
+     * <code>Static = 2;</code>
+     */
+    public static final int Static_VALUE = 2;
+
+
+    public final int getNumber() { return value; }
+
+    public static FactorType valueOf(int value) {
+      switch (value) {
+        case 1: return Vector;
+        case 2: return Static;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<FactorType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<FactorType>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<FactorType>() {
+            public FactorType findValueByNumber(int number) {
+              return FactorType.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.github.keenon.loglinear.GraphicalModelProto.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final FactorType[] VALUES = values();
+
+    public static FactorType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private FactorType(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:com.github.keenon.loglinear.FactorType)
+  }
+
   public interface GraphicalModelOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.github.keenon.GraphicalModel)
+      // @@protoc_insertion_point(interface_extends:com.github.keenon.loglinear.GraphicalModel)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     java.util.List<com.github.keenon.loglinear.GraphicalModelProto.Factor> 
         getFactorList();
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.Factor getFactor(int index);
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     int getFactorCount();
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     java.util.List<? extends com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder> 
         getFactorOrBuilderList();
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder getFactorOrBuilder(
         int index);
 
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     java.util.List<com.github.keenon.loglinear.GraphicalModelProto.MetaData> 
         getVariableMetaDataList();
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.MetaData getVariableMetaData(int index);
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     int getVariableMetaDataCount();
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     java.util.List<? extends com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> 
         getVariableMetaDataOrBuilderList();
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getVariableMetaDataOrBuilder(
         int index);
 
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
      */
     boolean hasMetaData();
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.MetaData getMetaData();
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder();
   }
   /**
-   * Protobuf type {@code com.github.keenon.GraphicalModel}
+   * Protobuf type {@code com.github.keenon.loglinear.GraphicalModel}
    */
   public static final class GraphicalModel extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:com.github.keenon.GraphicalModel)
+      // @@protoc_insertion_point(message_implements:com.github.keenon.loglinear.GraphicalModel)
       GraphicalModelOrBuilder {
     // Use GraphicalModel.newBuilder() to construct.
     private GraphicalModel(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
@@ -174,12 +256,12 @@ public final class GraphicalModelProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_GraphicalModel_descriptor;
+      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_GraphicalModel_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_GraphicalModel_fieldAccessorTable
+      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_GraphicalModel_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.github.keenon.loglinear.GraphicalModelProto.GraphicalModel.class, com.github.keenon.loglinear.GraphicalModelProto.GraphicalModel.Builder.class);
     }
@@ -203,32 +285,32 @@ public final class GraphicalModelProto {
     public static final int FACTOR_FIELD_NUMBER = 1;
     private java.util.List<com.github.keenon.loglinear.GraphicalModelProto.Factor> factor_;
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     public java.util.List<com.github.keenon.loglinear.GraphicalModelProto.Factor> getFactorList() {
       return factor_;
     }
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     public java.util.List<? extends com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder> 
         getFactorOrBuilderList() {
       return factor_;
     }
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     public int getFactorCount() {
       return factor_.size();
     }
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.Factor getFactor(int index) {
       return factor_.get(index);
     }
     /**
-     * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+     * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder getFactorOrBuilder(
         int index) {
@@ -238,32 +320,32 @@ public final class GraphicalModelProto {
     public static final int VARIABLEMETADATA_FIELD_NUMBER = 2;
     private java.util.List<com.github.keenon.loglinear.GraphicalModelProto.MetaData> variableMetaData_;
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     public java.util.List<com.github.keenon.loglinear.GraphicalModelProto.MetaData> getVariableMetaDataList() {
       return variableMetaData_;
     }
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     public java.util.List<? extends com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> 
         getVariableMetaDataOrBuilderList() {
       return variableMetaData_;
     }
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     public int getVariableMetaDataCount() {
       return variableMetaData_.size();
     }
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.MetaData getVariableMetaData(int index) {
       return variableMetaData_.get(index);
     }
     /**
-     * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+     * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getVariableMetaDataOrBuilder(
         int index) {
@@ -273,19 +355,19 @@ public final class GraphicalModelProto {
     public static final int METADATA_FIELD_NUMBER = 3;
     private com.github.keenon.loglinear.GraphicalModelProto.MetaData metaData_;
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
      */
     public boolean hasMetaData() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.MetaData getMetaData() {
       return metaData_;
     }
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
       return metaData_;
@@ -424,20 +506,20 @@ public final class GraphicalModelProto {
       return builder;
     }
     /**
-     * Protobuf type {@code com.github.keenon.GraphicalModel}
+     * Protobuf type {@code com.github.keenon.loglinear.GraphicalModel}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.github.keenon.GraphicalModel)
+        // @@protoc_insertion_point(builder_implements:com.github.keenon.loglinear.GraphicalModel)
         com.github.keenon.loglinear.GraphicalModelProto.GraphicalModelOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_GraphicalModel_descriptor;
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_GraphicalModel_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_GraphicalModel_fieldAccessorTable
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_GraphicalModel_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.github.keenon.loglinear.GraphicalModelProto.GraphicalModel.class, com.github.keenon.loglinear.GraphicalModelProto.GraphicalModel.Builder.class);
       }
@@ -492,7 +574,7 @@ public final class GraphicalModelProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_GraphicalModel_descriptor;
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_GraphicalModel_descriptor;
       }
 
       public com.github.keenon.loglinear.GraphicalModelProto.GraphicalModel getDefaultInstanceForType() {
@@ -654,7 +736,7 @@ public final class GraphicalModelProto {
           com.github.keenon.loglinear.GraphicalModelProto.Factor, com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder, com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder> factorBuilder_;
 
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public java.util.List<com.github.keenon.loglinear.GraphicalModelProto.Factor> getFactorList() {
         if (factorBuilder_ == null) {
@@ -664,7 +746,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public int getFactorCount() {
         if (factorBuilder_ == null) {
@@ -674,7 +756,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.Factor getFactor(int index) {
         if (factorBuilder_ == null) {
@@ -684,7 +766,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder setFactor(
           int index, com.github.keenon.loglinear.GraphicalModelProto.Factor value) {
@@ -701,7 +783,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder setFactor(
           int index, com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder builderForValue) {
@@ -715,7 +797,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder addFactor(com.github.keenon.loglinear.GraphicalModelProto.Factor value) {
         if (factorBuilder_ == null) {
@@ -731,7 +813,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder addFactor(
           int index, com.github.keenon.loglinear.GraphicalModelProto.Factor value) {
@@ -748,7 +830,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder addFactor(
           com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder builderForValue) {
@@ -762,7 +844,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder addFactor(
           int index, com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder builderForValue) {
@@ -776,7 +858,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder addAllFactor(
           java.lang.Iterable<? extends com.github.keenon.loglinear.GraphicalModelProto.Factor> values) {
@@ -791,7 +873,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder clearFactor() {
         if (factorBuilder_ == null) {
@@ -804,7 +886,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public Builder removeFactor(int index) {
         if (factorBuilder_ == null) {
@@ -817,14 +899,14 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder getFactorBuilder(
           int index) {
         return getFactorFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder getFactorOrBuilder(
           int index) {
@@ -834,7 +916,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public java.util.List<? extends com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder> 
            getFactorOrBuilderList() {
@@ -845,14 +927,14 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder addFactorBuilder() {
         return getFactorFieldBuilder().addBuilder(
             com.github.keenon.loglinear.GraphicalModelProto.Factor.getDefaultInstance());
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder addFactorBuilder(
           int index) {
@@ -860,7 +942,7 @@ public final class GraphicalModelProto {
             index, com.github.keenon.loglinear.GraphicalModelProto.Factor.getDefaultInstance());
       }
       /**
-       * <code>repeated .com.github.keenon.Factor factor = 1;</code>
+       * <code>repeated .com.github.keenon.loglinear.Factor factor = 1;</code>
        */
       public java.util.List<com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder> 
            getFactorBuilderList() {
@@ -894,7 +976,7 @@ public final class GraphicalModelProto {
           com.github.keenon.loglinear.GraphicalModelProto.MetaData, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder, com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> variableMetaDataBuilder_;
 
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public java.util.List<com.github.keenon.loglinear.GraphicalModelProto.MetaData> getVariableMetaDataList() {
         if (variableMetaDataBuilder_ == null) {
@@ -904,7 +986,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public int getVariableMetaDataCount() {
         if (variableMetaDataBuilder_ == null) {
@@ -914,7 +996,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData getVariableMetaData(int index) {
         if (variableMetaDataBuilder_ == null) {
@@ -924,7 +1006,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder setVariableMetaData(
           int index, com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
@@ -941,7 +1023,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder setVariableMetaData(
           int index, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder builderForValue) {
@@ -955,7 +1037,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder addVariableMetaData(com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
         if (variableMetaDataBuilder_ == null) {
@@ -971,7 +1053,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder addVariableMetaData(
           int index, com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
@@ -988,7 +1070,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder addVariableMetaData(
           com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder builderForValue) {
@@ -1002,7 +1084,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder addVariableMetaData(
           int index, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder builderForValue) {
@@ -1016,7 +1098,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder addAllVariableMetaData(
           java.lang.Iterable<? extends com.github.keenon.loglinear.GraphicalModelProto.MetaData> values) {
@@ -1031,7 +1113,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder clearVariableMetaData() {
         if (variableMetaDataBuilder_ == null) {
@@ -1044,7 +1126,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public Builder removeVariableMetaData(int index) {
         if (variableMetaDataBuilder_ == null) {
@@ -1057,14 +1139,14 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder getVariableMetaDataBuilder(
           int index) {
         return getVariableMetaDataFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getVariableMetaDataOrBuilder(
           int index) {
@@ -1074,7 +1156,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public java.util.List<? extends com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> 
            getVariableMetaDataOrBuilderList() {
@@ -1085,14 +1167,14 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder addVariableMetaDataBuilder() {
         return getVariableMetaDataFieldBuilder().addBuilder(
             com.github.keenon.loglinear.GraphicalModelProto.MetaData.getDefaultInstance());
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder addVariableMetaDataBuilder(
           int index) {
@@ -1100,7 +1182,7 @@ public final class GraphicalModelProto {
             index, com.github.keenon.loglinear.GraphicalModelProto.MetaData.getDefaultInstance());
       }
       /**
-       * <code>repeated .com.github.keenon.MetaData variableMetaData = 2;</code>
+       * <code>repeated .com.github.keenon.loglinear.MetaData variableMetaData = 2;</code>
        */
       public java.util.List<com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder> 
            getVariableMetaDataBuilderList() {
@@ -1125,13 +1207,13 @@ public final class GraphicalModelProto {
       private com.google.protobuf.SingleFieldBuilder<
           com.github.keenon.loglinear.GraphicalModelProto.MetaData, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder, com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> metaDataBuilder_;
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public boolean hasMetaData() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData getMetaData() {
         if (metaDataBuilder_ == null) {
@@ -1141,7 +1223,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public Builder setMetaData(com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
         if (metaDataBuilder_ == null) {
@@ -1157,7 +1239,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public Builder setMetaData(
           com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder builderForValue) {
@@ -1171,7 +1253,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public Builder mergeMetaData(com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
         if (metaDataBuilder_ == null) {
@@ -1190,7 +1272,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public Builder clearMetaData() {
         if (metaDataBuilder_ == null) {
@@ -1203,7 +1285,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder getMetaDataBuilder() {
         bitField0_ |= 0x00000004;
@@ -1211,7 +1293,7 @@ public final class GraphicalModelProto {
         return getMetaDataFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
         if (metaDataBuilder_ != null) {
@@ -1221,7 +1303,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.github.keenon.loglinear.GraphicalModelProto.MetaData, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder, com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> 
@@ -1237,7 +1319,7 @@ public final class GraphicalModelProto {
         return metaDataBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:com.github.keenon.GraphicalModel)
+      // @@protoc_insertion_point(builder_scope:com.github.keenon.loglinear.GraphicalModel)
     }
 
     static {
@@ -1245,58 +1327,80 @@ public final class GraphicalModelProto {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:com.github.keenon.GraphicalModel)
+    // @@protoc_insertion_point(class_scope:com.github.keenon.loglinear.GraphicalModel)
   }
 
   public interface FactorOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.github.keenon.Factor)
+      // @@protoc_insertion_point(interface_extends:com.github.keenon.loglinear.Factor)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+     * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+     */
+    boolean hasFactorType();
+    /**
+     * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+     */
+    com.github.keenon.loglinear.GraphicalModelProto.FactorType getFactorType();
+
+    /**
+     * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
      */
     boolean hasFeaturesTable();
     /**
-     * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+     * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
      */
     com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable();
     /**
-     * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+     * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
      */
     com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTableOrBuilder getFeaturesTableOrBuilder();
 
     /**
-     * <code>repeated int32 neighbor = 2;</code>
+     * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+     */
+    boolean hasStaticFeaturesTable();
+    /**
+     * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+     */
+    com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles getStaticFeaturesTable();
+    /**
+     * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+     */
+    com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoublesOrBuilder getStaticFeaturesTableOrBuilder();
+
+    /**
+     * <code>repeated int32 neighbor = 4;</code>
      */
     java.util.List<java.lang.Integer> getNeighborList();
     /**
-     * <code>repeated int32 neighbor = 2;</code>
+     * <code>repeated int32 neighbor = 4;</code>
      */
     int getNeighborCount();
     /**
-     * <code>repeated int32 neighbor = 2;</code>
+     * <code>repeated int32 neighbor = 4;</code>
      */
     int getNeighbor(int index);
 
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
      */
     boolean hasMetaData();
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.MetaData getMetaData();
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
      */
     com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder();
   }
   /**
-   * Protobuf type {@code com.github.keenon.Factor}
+   * Protobuf type {@code com.github.keenon.loglinear.Factor}
    */
   public static final class Factor extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:com.github.keenon.Factor)
+      // @@protoc_insertion_point(message_implements:com.github.keenon.loglinear.Factor)
       FactorOrBuilder {
     // Use Factor.newBuilder() to construct.
     private Factor(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
@@ -1343,9 +1447,20 @@ public final class GraphicalModelProto {
               }
               break;
             }
-            case 10: {
+            case 8: {
+              int rawValue = input.readEnum();
+              com.github.keenon.loglinear.GraphicalModelProto.FactorType value = com.github.keenon.loglinear.GraphicalModelProto.FactorType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(1, rawValue);
+              } else {
+                bitField0_ |= 0x00000001;
+                factorType_ = value;
+              }
+              break;
+            }
+            case 18: {
               com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000001) == 0x00000001)) {
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
                 subBuilder = featuresTable_.toBuilder();
               }
               featuresTable_ = input.readMessage(com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.PARSER, extensionRegistry);
@@ -1353,23 +1468,36 @@ public final class GraphicalModelProto {
                 subBuilder.mergeFrom(featuresTable_);
                 featuresTable_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000001;
+              bitField0_ |= 0x00000002;
               break;
             }
-            case 16: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+            case 26: {
+              com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                subBuilder = staticFeaturesTable_.toBuilder();
+              }
+              staticFeaturesTable_ = input.readMessage(com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(staticFeaturesTable_);
+                staticFeaturesTable_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000004;
+              break;
+            }
+            case 32: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
                 neighbor_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000008;
               }
               neighbor_.add(input.readInt32());
               break;
             }
-            case 18: {
+            case 34: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
                 neighbor_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000008;
               }
               while (input.getBytesUntilLimit() > 0) {
                 neighbor_.add(input.readInt32());
@@ -1377,9 +1505,9 @@ public final class GraphicalModelProto {
               input.popLimit(limit);
               break;
             }
-            case 26: {
+            case 42: {
               com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
                 subBuilder = metaData_.toBuilder();
               }
               metaData_ = input.readMessage(com.github.keenon.loglinear.GraphicalModelProto.MetaData.PARSER, extensionRegistry);
@@ -1387,7 +1515,7 @@ public final class GraphicalModelProto {
                 subBuilder.mergeFrom(metaData_);
                 metaData_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000002;
+              bitField0_ |= 0x00000008;
               break;
             }
           }
@@ -1398,7 +1526,7 @@ public final class GraphicalModelProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
           neighbor_ = java.util.Collections.unmodifiableList(neighbor_);
         }
         this.unknownFields = unknownFields.build();
@@ -1407,12 +1535,12 @@ public final class GraphicalModelProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_Factor_descriptor;
+      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_Factor_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_Factor_fieldAccessorTable
+      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_Factor_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.github.keenon.loglinear.GraphicalModelProto.Factor.class, com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder.class);
     }
@@ -1433,72 +1561,110 @@ public final class GraphicalModelProto {
     }
 
     private int bitField0_;
-    public static final int FEATURESTABLE_FIELD_NUMBER = 1;
-    private com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable featuresTable_;
+    public static final int FACTORTYPE_FIELD_NUMBER = 1;
+    private com.github.keenon.loglinear.GraphicalModelProto.FactorType factorType_;
     /**
-     * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+     * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
      */
-    public boolean hasFeaturesTable() {
+    public boolean hasFactorType() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+     * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+     */
+    public com.github.keenon.loglinear.GraphicalModelProto.FactorType getFactorType() {
+      return factorType_;
+    }
+
+    public static final int FEATURESTABLE_FIELD_NUMBER = 2;
+    private com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable featuresTable_;
+    /**
+     * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
+     */
+    public boolean hasFeaturesTable() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
      */
     public com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable() {
       return featuresTable_;
     }
     /**
-     * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+     * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
      */
     public com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTableOrBuilder getFeaturesTableOrBuilder() {
       return featuresTable_;
     }
 
-    public static final int NEIGHBOR_FIELD_NUMBER = 2;
+    public static final int STATICFEATURESTABLE_FIELD_NUMBER = 3;
+    private com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles staticFeaturesTable_;
+    /**
+     * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+     */
+    public boolean hasStaticFeaturesTable() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+     */
+    public com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles getStaticFeaturesTable() {
+      return staticFeaturesTable_;
+    }
+    /**
+     * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+     */
+    public com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoublesOrBuilder getStaticFeaturesTableOrBuilder() {
+      return staticFeaturesTable_;
+    }
+
+    public static final int NEIGHBOR_FIELD_NUMBER = 4;
     private java.util.List<java.lang.Integer> neighbor_;
     /**
-     * <code>repeated int32 neighbor = 2;</code>
+     * <code>repeated int32 neighbor = 4;</code>
      */
     public java.util.List<java.lang.Integer>
         getNeighborList() {
       return neighbor_;
     }
     /**
-     * <code>repeated int32 neighbor = 2;</code>
+     * <code>repeated int32 neighbor = 4;</code>
      */
     public int getNeighborCount() {
       return neighbor_.size();
     }
     /**
-     * <code>repeated int32 neighbor = 2;</code>
+     * <code>repeated int32 neighbor = 4;</code>
      */
     public int getNeighbor(int index) {
       return neighbor_.get(index);
     }
 
-    public static final int METADATA_FIELD_NUMBER = 3;
+    public static final int METADATA_FIELD_NUMBER = 5;
     private com.github.keenon.loglinear.GraphicalModelProto.MetaData metaData_;
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
      */
     public boolean hasMetaData() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.MetaData getMetaData() {
       return metaData_;
     }
     /**
-     * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+     * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
      */
     public com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
       return metaData_;
     }
 
     private void initFields() {
+      factorType_ = com.github.keenon.loglinear.GraphicalModelProto.FactorType.Vector;
       featuresTable_ = com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
+      staticFeaturesTable_ = com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.getDefaultInstance();
       neighbor_ = java.util.Collections.emptyList();
       metaData_ = com.github.keenon.loglinear.GraphicalModelProto.MetaData.getDefaultInstance();
     }
@@ -1508,13 +1674,15 @@ public final class GraphicalModelProto {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasFeaturesTable()) {
+      if (!hasFactorType()) {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!getFeaturesTable().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
+      if (hasFeaturesTable()) {
+        if (!getFeaturesTable().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -1524,13 +1692,19 @@ public final class GraphicalModelProto {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(1, featuresTable_);
-      }
-      for (int i = 0; i < neighbor_.size(); i++) {
-        output.writeInt32(2, neighbor_.get(i));
+        output.writeEnum(1, factorType_.getNumber());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(3, metaData_);
+        output.writeMessage(2, featuresTable_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeMessage(3, staticFeaturesTable_);
+      }
+      for (int i = 0; i < neighbor_.size(); i++) {
+        output.writeInt32(4, neighbor_.get(i));
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeMessage(5, metaData_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1543,7 +1717,15 @@ public final class GraphicalModelProto {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, featuresTable_);
+          .computeEnumSize(1, factorType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, featuresTable_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, staticFeaturesTable_);
       }
       {
         int dataSize = 0;
@@ -1554,9 +1736,9 @@ public final class GraphicalModelProto {
         size += dataSize;
         size += 1 * getNeighborList().size();
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, metaData_);
+          .computeMessageSize(5, metaData_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1637,20 +1819,20 @@ public final class GraphicalModelProto {
       return builder;
     }
     /**
-     * Protobuf type {@code com.github.keenon.Factor}
+     * Protobuf type {@code com.github.keenon.loglinear.Factor}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.github.keenon.Factor)
+        // @@protoc_insertion_point(builder_implements:com.github.keenon.loglinear.Factor)
         com.github.keenon.loglinear.GraphicalModelProto.FactorOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_Factor_descriptor;
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_Factor_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_Factor_fieldAccessorTable
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_Factor_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.github.keenon.loglinear.GraphicalModelProto.Factor.class, com.github.keenon.loglinear.GraphicalModelProto.Factor.Builder.class);
       }
@@ -1668,6 +1850,7 @@ public final class GraphicalModelProto {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
           getFeaturesTableFieldBuilder();
+          getStaticFeaturesTableFieldBuilder();
           getMetaDataFieldBuilder();
         }
       }
@@ -1677,20 +1860,28 @@ public final class GraphicalModelProto {
 
       public Builder clear() {
         super.clear();
+        factorType_ = com.github.keenon.loglinear.GraphicalModelProto.FactorType.Vector;
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (featuresTableBuilder_ == null) {
           featuresTable_ = com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
         } else {
           featuresTableBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        neighbor_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000002);
+        if (staticFeaturesTableBuilder_ == null) {
+          staticFeaturesTable_ = com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.getDefaultInstance();
+        } else {
+          staticFeaturesTableBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        neighbor_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
         if (metaDataBuilder_ == null) {
           metaData_ = com.github.keenon.loglinear.GraphicalModelProto.MetaData.getDefaultInstance();
         } else {
           metaDataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -1700,7 +1891,7 @@ public final class GraphicalModelProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_Factor_descriptor;
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_Factor_descriptor;
       }
 
       public com.github.keenon.loglinear.GraphicalModelProto.Factor getDefaultInstanceForType() {
@@ -1722,18 +1913,30 @@ public final class GraphicalModelProto {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
+        result.factorType_ = factorType_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
         if (featuresTableBuilder_ == null) {
           result.featuresTable_ = featuresTable_;
         } else {
           result.featuresTable_ = featuresTableBuilder_.build();
         }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        if (staticFeaturesTableBuilder_ == null) {
+          result.staticFeaturesTable_ = staticFeaturesTable_;
+        } else {
+          result.staticFeaturesTable_ = staticFeaturesTableBuilder_.build();
+        }
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
           neighbor_ = java.util.Collections.unmodifiableList(neighbor_);
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000008);
         }
         result.neighbor_ = neighbor_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000002;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000008;
         }
         if (metaDataBuilder_ == null) {
           result.metaData_ = metaData_;
@@ -1756,13 +1959,19 @@ public final class GraphicalModelProto {
 
       public Builder mergeFrom(com.github.keenon.loglinear.GraphicalModelProto.Factor other) {
         if (other == com.github.keenon.loglinear.GraphicalModelProto.Factor.getDefaultInstance()) return this;
+        if (other.hasFactorType()) {
+          setFactorType(other.getFactorType());
+        }
         if (other.hasFeaturesTable()) {
           mergeFeaturesTable(other.getFeaturesTable());
+        }
+        if (other.hasStaticFeaturesTable()) {
+          mergeStaticFeaturesTable(other.getStaticFeaturesTable());
         }
         if (!other.neighbor_.isEmpty()) {
           if (neighbor_.isEmpty()) {
             neighbor_ = other.neighbor_;
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000008);
           } else {
             ensureNeighborIsMutable();
             neighbor_.addAll(other.neighbor_);
@@ -1777,13 +1986,15 @@ public final class GraphicalModelProto {
       }
 
       public final boolean isInitialized() {
-        if (!hasFeaturesTable()) {
+        if (!hasFactorType()) {
           
           return false;
         }
-        if (!getFeaturesTable().isInitialized()) {
-          
-          return false;
+        if (hasFeaturesTable()) {
+          if (!getFeaturesTable().isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -1807,17 +2018,52 @@ public final class GraphicalModelProto {
       }
       private int bitField0_;
 
+      private com.github.keenon.loglinear.GraphicalModelProto.FactorType factorType_ = com.github.keenon.loglinear.GraphicalModelProto.FactorType.Vector;
+      /**
+       * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+       */
+      public boolean hasFactorType() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+       */
+      public com.github.keenon.loglinear.GraphicalModelProto.FactorType getFactorType() {
+        return factorType_;
+      }
+      /**
+       * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+       */
+      public Builder setFactorType(com.github.keenon.loglinear.GraphicalModelProto.FactorType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
+        factorType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .com.github.keenon.loglinear.FactorType factorType = 1;</code>
+       */
+      public Builder clearFactorType() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        factorType_ = com.github.keenon.loglinear.GraphicalModelProto.FactorType.Vector;
+        onChanged();
+        return this;
+      }
+
       private com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable featuresTable_ = com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable, com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.Builder, com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTableOrBuilder> featuresTableBuilder_;
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public boolean hasFeaturesTable() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
+        return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable getFeaturesTable() {
         if (featuresTableBuilder_ == null) {
@@ -1827,7 +2073,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public Builder setFeaturesTable(com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable value) {
         if (featuresTableBuilder_ == null) {
@@ -1839,11 +2085,11 @@ public final class GraphicalModelProto {
         } else {
           featuresTableBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public Builder setFeaturesTable(
           com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.Builder builderForValue) {
@@ -1853,15 +2099,15 @@ public final class GraphicalModelProto {
         } else {
           featuresTableBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public Builder mergeFeaturesTable(com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable value) {
         if (featuresTableBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
               featuresTable_ != com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.getDefaultInstance()) {
             featuresTable_ =
               com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.newBuilder(featuresTable_).mergeFrom(value).buildPartial();
@@ -1872,11 +2118,11 @@ public final class GraphicalModelProto {
         } else {
           featuresTableBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000002;
         return this;
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public Builder clearFeaturesTable() {
         if (featuresTableBuilder_ == null) {
@@ -1885,19 +2131,19 @@ public final class GraphicalModelProto {
         } else {
           featuresTableBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.Builder getFeaturesTableBuilder() {
-        bitField0_ |= 0x00000001;
+        bitField0_ |= 0x00000002;
         onChanged();
         return getFeaturesTableFieldBuilder().getBuilder();
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       public com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTableOrBuilder getFeaturesTableOrBuilder() {
         if (featuresTableBuilder_ != null) {
@@ -1907,7 +2153,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>required .com.github.keenon.ConcatVectorTable featuresTable = 1;</code>
+       * <code>optional .com.github.keenon.ConcatVectorTable featuresTable = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable, com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTable.Builder, com.github.keenon.loglinear.ConcatVectorTableProto.ConcatVectorTableOrBuilder> 
@@ -1923,34 +2169,150 @@ public final class GraphicalModelProto {
         return featuresTableBuilder_;
       }
 
+      private com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles staticFeaturesTable_ = com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles, com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.Builder, com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoublesOrBuilder> staticFeaturesTableBuilder_;
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public boolean hasStaticFeaturesTable() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles getStaticFeaturesTable() {
+        if (staticFeaturesTableBuilder_ == null) {
+          return staticFeaturesTable_;
+        } else {
+          return staticFeaturesTableBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public Builder setStaticFeaturesTable(com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles value) {
+        if (staticFeaturesTableBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          staticFeaturesTable_ = value;
+          onChanged();
+        } else {
+          staticFeaturesTableBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public Builder setStaticFeaturesTable(
+          com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.Builder builderForValue) {
+        if (staticFeaturesTableBuilder_ == null) {
+          staticFeaturesTable_ = builderForValue.build();
+          onChanged();
+        } else {
+          staticFeaturesTableBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public Builder mergeStaticFeaturesTable(com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles value) {
+        if (staticFeaturesTableBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+              staticFeaturesTable_ != com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.getDefaultInstance()) {
+            staticFeaturesTable_ =
+              com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.newBuilder(staticFeaturesTable_).mergeFrom(value).buildPartial();
+          } else {
+            staticFeaturesTable_ = value;
+          }
+          onChanged();
+        } else {
+          staticFeaturesTableBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public Builder clearStaticFeaturesTable() {
+        if (staticFeaturesTableBuilder_ == null) {
+          staticFeaturesTable_ = com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.getDefaultInstance();
+          onChanged();
+        } else {
+          staticFeaturesTableBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.Builder getStaticFeaturesTableBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getStaticFeaturesTableFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      public com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoublesOrBuilder getStaticFeaturesTableOrBuilder() {
+        if (staticFeaturesTableBuilder_ != null) {
+          return staticFeaturesTableBuilder_.getMessageOrBuilder();
+        } else {
+          return staticFeaturesTable_;
+        }
+      }
+      /**
+       * <code>optional .NDArrayDoubles staticFeaturesTable = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles, com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.Builder, com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoublesOrBuilder> 
+          getStaticFeaturesTableFieldBuilder() {
+        if (staticFeaturesTableBuilder_ == null) {
+          staticFeaturesTableBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles, com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoubles.Builder, com.github.keenon.loglinear.NDArrayDoublesProto.NDArrayDoublesOrBuilder>(
+                  getStaticFeaturesTable(),
+                  getParentForChildren(),
+                  isClean());
+          staticFeaturesTable_ = null;
+        }
+        return staticFeaturesTableBuilder_;
+      }
+
       private java.util.List<java.lang.Integer> neighbor_ = java.util.Collections.emptyList();
       private void ensureNeighborIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
           neighbor_ = new java.util.ArrayList<java.lang.Integer>(neighbor_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000008;
          }
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public java.util.List<java.lang.Integer>
           getNeighborList() {
         return java.util.Collections.unmodifiableList(neighbor_);
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public int getNeighborCount() {
         return neighbor_.size();
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public int getNeighbor(int index) {
         return neighbor_.get(index);
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public Builder setNeighbor(
           int index, int value) {
@@ -1960,7 +2322,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public Builder addNeighbor(int value) {
         ensureNeighborIsMutable();
@@ -1969,7 +2331,7 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public Builder addAllNeighbor(
           java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -1980,11 +2342,11 @@ public final class GraphicalModelProto {
         return this;
       }
       /**
-       * <code>repeated int32 neighbor = 2;</code>
+       * <code>repeated int32 neighbor = 4;</code>
        */
       public Builder clearNeighbor() {
         neighbor_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -1993,13 +2355,13 @@ public final class GraphicalModelProto {
       private com.google.protobuf.SingleFieldBuilder<
           com.github.keenon.loglinear.GraphicalModelProto.MetaData, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder, com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> metaDataBuilder_;
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public boolean hasMetaData() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData getMetaData() {
         if (metaDataBuilder_ == null) {
@@ -2009,7 +2371,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public Builder setMetaData(com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
         if (metaDataBuilder_ == null) {
@@ -2021,11 +2383,11 @@ public final class GraphicalModelProto {
         } else {
           metaDataBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public Builder setMetaData(
           com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder builderForValue) {
@@ -2035,15 +2397,15 @@ public final class GraphicalModelProto {
         } else {
           metaDataBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public Builder mergeMetaData(com.github.keenon.loglinear.GraphicalModelProto.MetaData value) {
         if (metaDataBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+          if (((bitField0_ & 0x00000010) == 0x00000010) &&
               metaData_ != com.github.keenon.loglinear.GraphicalModelProto.MetaData.getDefaultInstance()) {
             metaData_ =
               com.github.keenon.loglinear.GraphicalModelProto.MetaData.newBuilder(metaData_).mergeFrom(value).buildPartial();
@@ -2054,11 +2416,11 @@ public final class GraphicalModelProto {
         } else {
           metaDataBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public Builder clearMetaData() {
         if (metaDataBuilder_ == null) {
@@ -2067,19 +2429,19 @@ public final class GraphicalModelProto {
         } else {
           metaDataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder getMetaDataBuilder() {
-        bitField0_ |= 0x00000004;
+        bitField0_ |= 0x00000010;
         onChanged();
         return getMetaDataFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       public com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder getMetaDataOrBuilder() {
         if (metaDataBuilder_ != null) {
@@ -2089,7 +2451,7 @@ public final class GraphicalModelProto {
         }
       }
       /**
-       * <code>optional .com.github.keenon.MetaData metaData = 3;</code>
+       * <code>optional .com.github.keenon.loglinear.MetaData metaData = 5;</code>
        */
       private com.google.protobuf.SingleFieldBuilder<
           com.github.keenon.loglinear.GraphicalModelProto.MetaData, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder, com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder> 
@@ -2105,7 +2467,7 @@ public final class GraphicalModelProto {
         return metaDataBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:com.github.keenon.Factor)
+      // @@protoc_insertion_point(builder_scope:com.github.keenon.loglinear.Factor)
     }
 
     static {
@@ -2113,11 +2475,11 @@ public final class GraphicalModelProto {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:com.github.keenon.Factor)
+    // @@protoc_insertion_point(class_scope:com.github.keenon.loglinear.Factor)
   }
 
   public interface MetaDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:com.github.keenon.MetaData)
+      // @@protoc_insertion_point(interface_extends:com.github.keenon.loglinear.MetaData)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -2159,11 +2521,11 @@ public final class GraphicalModelProto {
         getValueBytes(int index);
   }
   /**
-   * Protobuf type {@code com.github.keenon.MetaData}
+   * Protobuf type {@code com.github.keenon.loglinear.MetaData}
    */
   public static final class MetaData extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:com.github.keenon.MetaData)
+      // @@protoc_insertion_point(message_implements:com.github.keenon.loglinear.MetaData)
       MetaDataOrBuilder {
     // Use MetaData.newBuilder() to construct.
     private MetaData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
@@ -2248,12 +2610,12 @@ public final class GraphicalModelProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_MetaData_descriptor;
+      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_MetaData_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_MetaData_fieldAccessorTable
+      return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_MetaData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.github.keenon.loglinear.GraphicalModelProto.MetaData.class, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder.class);
     }
@@ -2460,20 +2822,20 @@ public final class GraphicalModelProto {
       return builder;
     }
     /**
-     * Protobuf type {@code com.github.keenon.MetaData}
+     * Protobuf type {@code com.github.keenon.loglinear.MetaData}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:com.github.keenon.MetaData)
+        // @@protoc_insertion_point(builder_implements:com.github.keenon.loglinear.MetaData)
         com.github.keenon.loglinear.GraphicalModelProto.MetaDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_MetaData_descriptor;
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_MetaData_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_MetaData_fieldAccessorTable
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_MetaData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.github.keenon.loglinear.GraphicalModelProto.MetaData.class, com.github.keenon.loglinear.GraphicalModelProto.MetaData.Builder.class);
       }
@@ -2511,7 +2873,7 @@ public final class GraphicalModelProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_MetaData_descriptor;
+        return com.github.keenon.loglinear.GraphicalModelProto.internal_static_com_github_keenon_loglinear_MetaData_descriptor;
       }
 
       public com.github.keenon.loglinear.GraphicalModelProto.MetaData getDefaultInstanceForType() {
@@ -2787,7 +3149,7 @@ public final class GraphicalModelProto {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:com.github.keenon.MetaData)
+      // @@protoc_insertion_point(builder_scope:com.github.keenon.loglinear.MetaData)
     }
 
     static {
@@ -2795,24 +3157,24 @@ public final class GraphicalModelProto {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:com.github.keenon.MetaData)
+    // @@protoc_insertion_point(class_scope:com.github.keenon.loglinear.MetaData)
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_github_keenon_GraphicalModel_descriptor;
+    internal_static_com_github_keenon_loglinear_GraphicalModel_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_com_github_keenon_GraphicalModel_fieldAccessorTable;
+      internal_static_com_github_keenon_loglinear_GraphicalModel_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_github_keenon_Factor_descriptor;
+    internal_static_com_github_keenon_loglinear_Factor_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_com_github_keenon_Factor_fieldAccessorTable;
+      internal_static_com_github_keenon_loglinear_Factor_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_com_github_keenon_MetaData_descriptor;
+    internal_static_com_github_keenon_loglinear_MetaData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_com_github_keenon_MetaData_fieldAccessorTable;
+      internal_static_com_github_keenon_loglinear_MetaData_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2822,18 +3184,23 @@ public final class GraphicalModelProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\024GraphicalModel.proto\022\021com.github.keeno" +
-      "n\032\027ConcatVectorTable.proto\"\241\001\n\016Graphical" +
-      "Model\022)\n\006factor\030\001 \003(\0132\031.com.github.keeno" +
-      "n.Factor\0225\n\020variableMetaData\030\002 \003(\0132\033.com" +
-      ".github.keenon.MetaData\022-\n\010metaData\030\003 \001(" +
-      "\0132\033.com.github.keenon.MetaData\"\206\001\n\006Facto" +
-      "r\022;\n\rfeaturesTable\030\001 \002(\0132$.com.github.ke" +
-      "enon.ConcatVectorTable\022\020\n\010neighbor\030\002 \003(\005" +
-      "\022-\n\010metaData\030\003 \001(\0132\033.com.github.keenon.M" +
-      "etaData\"&\n\010MetaData\022\013\n\003key\030\001 \003(\t\022\r\n\005valu",
-      "e\030\002 \003(\tB2\n\033com.github.keenon.loglinearB\023" +
-      "GraphicalModelProto"
+      "\n\024GraphicalModel.proto\022\033com.github.keeno" +
+      "n.loglinear\032\027ConcatVectorTable.proto\032\024ND" +
+      "ArrayDoubles.proto\"\277\001\n\016GraphicalModel\0223\n" +
+      "\006factor\030\001 \003(\0132#.com.github.keenon.loglin" +
+      "ear.Factor\022?\n\020variableMetaData\030\002 \003(\0132%.c" +
+      "om.github.keenon.loglinear.MetaData\0227\n\010m" +
+      "etaData\030\003 \001(\0132%.com.github.keenon.loglin" +
+      "ear.MetaData\"\373\001\n\006Factor\022;\n\nfactorType\030\001 " +
+      "\002(\0162\'.com.github.keenon.loglinear.Factor" +
+      "Type\022;\n\rfeaturesTable\030\002 \001(\0132$.com.github",
+      ".keenon.ConcatVectorTable\022,\n\023staticFeatu" +
+      "resTable\030\003 \001(\0132\017.NDArrayDoubles\022\020\n\010neigh" +
+      "bor\030\004 \003(\005\0227\n\010metaData\030\005 \001(\0132%.com.github" +
+      ".keenon.loglinear.MetaData\"&\n\010MetaData\022\013" +
+      "\n\003key\030\001 \003(\t\022\r\n\005value\030\002 \003(\t*$\n\nFactorType" +
+      "\022\n\n\006Vector\020\001\022\n\n\006Static\020\002B2\n\033com.github.k" +
+      "eenon.loglinearB\023GraphicalModelProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2847,26 +3214,28 @@ public final class GraphicalModelProto {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.github.keenon.loglinear.ConcatVectorTableProto.getDescriptor(),
+          com.github.keenon.loglinear.NDArrayDoublesProto.getDescriptor(),
         }, assigner);
-    internal_static_com_github_keenon_GraphicalModel_descriptor =
+    internal_static_com_github_keenon_loglinear_GraphicalModel_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_com_github_keenon_GraphicalModel_fieldAccessorTable = new
+    internal_static_com_github_keenon_loglinear_GraphicalModel_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_com_github_keenon_GraphicalModel_descriptor,
+        internal_static_com_github_keenon_loglinear_GraphicalModel_descriptor,
         new java.lang.String[] { "Factor", "VariableMetaData", "MetaData", });
-    internal_static_com_github_keenon_Factor_descriptor =
+    internal_static_com_github_keenon_loglinear_Factor_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_com_github_keenon_Factor_fieldAccessorTable = new
+    internal_static_com_github_keenon_loglinear_Factor_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_com_github_keenon_Factor_descriptor,
-        new java.lang.String[] { "FeaturesTable", "Neighbor", "MetaData", });
-    internal_static_com_github_keenon_MetaData_descriptor =
+        internal_static_com_github_keenon_loglinear_Factor_descriptor,
+        new java.lang.String[] { "FactorType", "FeaturesTable", "StaticFeaturesTable", "Neighbor", "MetaData", });
+    internal_static_com_github_keenon_loglinear_MetaData_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_com_github_keenon_MetaData_fieldAccessorTable = new
+    internal_static_com_github_keenon_loglinear_MetaData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_com_github_keenon_MetaData_descriptor,
+        internal_static_com_github_keenon_loglinear_MetaData_descriptor,
         new java.lang.String[] { "Key", "Value", });
     com.github.keenon.loglinear.ConcatVectorTableProto.getDescriptor();
+    com.github.keenon.loglinear.NDArrayDoublesProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
